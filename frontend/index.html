@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barber Registro — Registra tu Barbería</title>
+    <!-- Estilos: global + específico de esta página de registro -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- EmailJS: para enviar email de confirmación al registrar barbería -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+    <!-- Skip link: accesibilidad para navegación con teclado (C7) -->
+    <a href="#registroForm" class="skip-link">Saltar al formulario de registro</a>
+
+    <!-- Navbar fijo: links a beneficios, registro y login -->
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+        <div class="container navbar-inner">
+            <a href="index.html" class="navbar-brand"><i class="fas fa-cut"></i> Barber Registro</a>
+            <div class="navbar-links">
+                <a href="#features">Beneficios</a>
+                <a href="#registroForm">Registrar</a>
+                <a href="about.html">Acerca de</a>
+                <a href="login.html">Iniciar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO — padding-top incluye espacio para el navbar fijo -->
+    <div class="hero" style="padding-top:120px;">
+        <div class="hero-inner container">
+            <div class="hero-badge"><i class="fas fa-cut"></i> Sistema de Reservas</div>
+            <h1>Barber<br><em>Registro</em></h1>
+            <p class="hero-sub">Gestiona las citas de tu barbería de forma profesional. Configura en minutos.</p>
+            <a href="login.html" class="hero-cta"><i class="fas fa-sign-in-alt"></i> ¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </div>
+
+    <main class="container" id="main-content">
+
+        <!-- Grid de 4 beneficios: explica por qué usar la plataforma -->
+        <div class="features" id="features">
+            <div class="feature will-reveal" style="transition-delay:0.05s">
+                <div class="feature-icon"><i class="fas fa-link"></i></div>
+                <h3>Link Único</h3>
+                <p>Enlace personalizado para compartir en redes sociales y con clientes</p>
+            </div>
+            <div class="feature will-reveal" style="transition-delay:0.13s">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3>Reservas Online</h3>
+                <p>Tus clientes agendan citas 24/7 desde cualquier dispositivo</p>
+            </div>
+            <div class="feature will-reveal" style="transition-delay:0.21s">
+                <div class="feature-icon"><i class="fas fa-camera"></i></div>
+                <h3>Galería de Fotos</h3>
+                <p>Sube fotos de tus cortes y asígnalas a tus servicios</p>
+            </div>
+            <div class="feature will-reveal" style="transition-delay:0.29s">
+                <div class="feature-icon"><i class="fas fa-star"></i></div>
+                <h3>Reseñas</h3>
+                <p>Muestra los comentarios y calificaciones de tus clientes</p>
+            </div>
+        </div>
+
+        <!-- ══ DIRECTORIO + BUSCADOR ══════════════════════════════
+             Lista pública de barberías registradas. El filtro funciona
+             100% en el cliente — no hay petición al backend por cada
+             tecla, solo al cargar la página una vez.
+             ════════════════════════════════════════════════════════ -->
+        <div class="directorio-section" id="directorio">
+            <div class="directorio-header">
+                <h2><i class="fas fa-store"></i> Barberías Registradas</h2>
+                <p>Encuentra una barbería o comparte tu página con clientes</p>
+            </div>
+            <div class="busqueda-wrap">
+                <div class="busqueda-input-wrap">
+                    <i class="fas fa-search busqueda-icon" aria-hidden="true"></i>
+                    <input type="search" id="busquedaInput" class="busqueda-input"
+                           placeholder="Buscar por nombre o ciudad..."
+                           aria-label="Buscar barberías por nombre o ciudad"
+                           autocomplete="off">
+                </div>
+                <p id="busquedaCount" class="busqueda-count" aria-live="polite"></p>
+            </div>
+            <div id="barberiasGrid" class="barb-grid-pub" aria-label="Listado de barberías"></div>
+        </div>
+
+        <!-- Formulario de registro: datos del dueño + info de barbería + horarios -->
+        <div class="form-container">
+            <div class="form-card">
+                <h2><i class="fas fa-store" style="color:var(--gold);margin-right:10px;"></i>Registra tu Barbería</h2>
+                <p class="sub">Crea tu cuenta y obtén tu página pública en minutos</p>
+
+                <!-- Contenedor de mensajes de error -->
+                <div id="mensaje" role="alert"></div>
+                <form id="registroForm">
+                    <div class="section-title">Tu Cuenta</div>
+                    <div class="form-group"><label>Nombre Completo *</label><input type="text" id="dueno_nombre" class="form-control" required placeholder="Juan Pérez"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Email *</label><input type="email" id="dueno_email" class="form-control" required placeholder="juan@ejemplo.com"></div>
+                        <div class="form-group"><label>Teléfono</label><input type="tel" id="dueno_telefono" class="form-control" placeholder="+52 834 123 4567"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Contraseña *</label><input type="password" id="password" class="form-control" required placeholder="Mínimo 6 caracteres" minlength="6"></div>
+                        <div class="form-group"><label>Confirmar Contraseña *</label><input type="password" id="password_confirm" class="form-control" required placeholder="Repite tu contraseña" minlength="6"></div>
+                    </div>
+
+                    <div class="section-title">Información de la Barbería</div>
+                    <div class="form-group"><label>Nombre de la Barbería *</label><input type="text" id="nombre" class="form-control" required placeholder="Ej: Barbería El Clásico"></div>
+
+                    <!-- ══ DIRECCIÓN CON AUTOCOMPLETADO ═══════════════════
+                         Al escribir en el campo de dirección, se buscan
+                         sugerencias reales con Nominatim (OpenStreetMap).
+                         Al seleccionar una, se llena dirección + ciudad.
+                         ══════════════════════════════════════════════════ -->
+                    <div class="form-row">
+                        <div class="form-group" style="position:relative;">
+                            <label>Dirección *</label>
+                            <input type="text" id="direccion" class="form-control" required placeholder="Escribe para buscar..." autocomplete="off">
+                            <!-- Lista de sugerencias que aparece debajo del input -->
+                            <div id="sugerenciasDir" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink-3);border:1px solid var(--border);border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;"></div>
+                        </div>
+                        <div class="form-group"><label>Ciudad *</label><input type="text" id="ciudad" class="form-control" required placeholder="Se llena automáticamente"></div>
+                    </div>
+
+                    <div class="section-title">Horarios de Atención *</div>
+                    <div class="horarios-grid" id="horariosGrid"></div>
+
+                    <button type="submit" id="btnRegistro" class="btn btn-primary" style="width:100%;margin-top:32px;padding:15px;font-size:15px;border-radius:12px;">
+                        <i class="fas fa-rocket"></i> Crear mi Barbería
+                    </button>
+                    <p style="text-align:center;margin-top:20px;color:var(--text-3);font-size:13px;">
+                        ¿Ya tienes cuenta? <a href="login.html" style="color:var(--gold);font-weight:600;text-decoration:none;">Inicia sesión</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL ÉXITO -->
+    <div id="modalExito" class="modal-overlay">
+        <div class="success-modal">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h2>¡Barbería Creada!</h2>
+            <p style="text-align:center;color:var(--text-3);font-size:14px;margin-bottom:24px;">Tu cuenta y página pública están listas</p>
+            <div id="infoExito"></div>
+            <button onclick="window.location.href='usuario.html'" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;margin-top:8px;">
+                <i class="fas fa-cog"></i> Ir a mi Panel
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { config, auth } from './assets/js/config.js';
+        if (auth.estaLogueado() && auth.getRole()==='dueno') window.location.href='usuario.html';
+        emailjs.init({ publicKey: config.emailJS.publicKey });
+
+        const form=document.getElementById('registroForm'), btn=document.getElementById('btnRegistro');
+        const msg=document.getElementById('mensaje'), modal=document.getElementById('modalExito');
+        const dias=[{id:'lunes',nombre:'Lunes'},{id:'martes',nombre:'Martes'},{id:'miercoles',nombre:'Miercoles'},
+                    {id:'jueves',nombre:'Jueves'},{id:'viernes',nombre:'Viernes'},{id:'sabado',nombre:'Sabado'},{id:'domingo',nombre:'Domingo'}];
+        const hAp=['06:00','07:00','08:00','09:00','10:00','11:00'];
+        const hCi=['14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+        const grid=document.getElementById('horariosGrid');
+
+        dias.forEach((d,i)=>{
+            const act=i<6;
+            const div=document.createElement('div'); div.className='dia-horario'+(act?' activo':'');
+            div.innerHTML=`<label class="dia-checkbox"><input type="checkbox" id="ck-${d.id}" ${act?'checked':''}> ${d.nombre}</label>
+                <select class="time-select" id="ap-${d.id}" ${!act?'disabled':''}>${hAp.map(h=>`<option value="${h}" ${h==='09:00'?'selected':''}>${h}</option>`).join('')}</select>
+                <select class="time-select" id="ci-${d.id}" ${!act?'disabled':''}>${hCi.map(h=>`<option value="${h}" ${h==='18:00'?'selected':''}>${h}</option>`).join('')}</select>
+                <span class="cerrado-badge" id="bg-${d.id}" style="${act?'display:none':''}">Cerrado</span>`;
+            grid.appendChild(div);
+            div.querySelector(`#ck-${d.id}`).addEventListener('change', function(){
+                div.classList.toggle('activo',this.checked);
+                div.querySelector(`#ap-${d.id}`).disabled=!this.checked;
+                div.querySelector(`#ci-${d.id}`).disabled=!this.checked;
+                div.querySelector(`#bg-${d.id}`).style.display=this.checked?'none':'block';
+            });
+        });
+
+        function genHorarios(){ return dias.map(d=>{ const ck=document.getElementById(`ck-${d.id}`); return ck.checked?`${d.nombre}: ${document.getElementById(`ap-${d.id}`).value} - ${document.getElementById(`ci-${d.id}`).value}`:`${d.nombre}: Cerrado`; }).join('\n'); }
+
+        form.addEventListener('submit', async e=>{
+            e.preventDefault();
+            const pw=document.getElementById('password').value, pw2=document.getElementById('password_confirm').value;
+            if(pw!==pw2){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</div>'; return; }
+            if(pw.length<6){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Contraseña mínimo 6 caracteres</div>'; return; }
+            if(!dias.some(d=>document.getElementById(`ck-${d.id}`).checked)){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selecciona al menos un día</div>'; return; }
+            btn.disabled=true; btn.innerHTML='<span class="loading"></span> Creando...'; msg.innerHTML='';
+            const datos={nombre:document.getElementById('nombre').value.trim(),direccion:document.getElementById('direccion').value.trim(),ciudad:document.getElementById('ciudad').value.trim(),horarios:genHorarios(),dueno_nombre:document.getElementById('dueno_nombre').value.trim(),dueno_email:document.getElementById('dueno_email').value.trim(),dueno_telefono:document.getElementById('dueno_telefono').value.trim(),password:pw};
+            try {
+                const r=await fetch(`${config.apiURL}/auth/registro`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+                const d=await r.json(); if(!r.ok) throw new Error(d.error||'Error');
+                auth.guardarSesion(d.token, d.barberia, 'dueno');
+                try{ await emailjs.send(config.emailJS.serviceId,config.emailJS.templateRegistro,{to_email:datos.dueno_email,to_name:datos.dueno_nombre,barberia_nombre:datos.nombre,codigo_unico:d.barberia.codigo_unico,link_publico:`${location.origin}/barberia.html?codigo=${d.barberia.codigo_unico}`,link_admin:`${location.origin}/usuario.html`}); }catch{}
+                document.getElementById('infoExito').innerHTML=`
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i> ¡Tu barbería está lista!</div>
+                    <p style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Link para tus clientes:</p>
+                    <div class="link-box"><a href="barberia.html?codigo=${d.barberia.codigo_unico}" target="_blank">${location.origin}/barberia.html?codigo=${d.barberia.codigo_unico}</a></div>`;
+                modal.classList.add('open'); form.reset();
+            } catch(e){ msg.innerHTML=`<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`; }
+            finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket"></i> Crear mi Barbería'; }
+        });
+
+        /* ── AUTOCOMPLETADO DE DIRECCIÓN ──────────────────────────
+           Busca sugerencias reales con Nominatim (OpenStreetMap)
+           mientras el usuario escribe. Al seleccionar una sugerencia,
+           llena automáticamente dirección + ciudad.
+           
+           Usa un debounce de 400ms para no hacer demasiadas peticiones
+           mientras el usuario sigue escribiendo.
+           ────────────────────────────────────────────────────────── */
+        const inputDir = document.getElementById('direccion');
+        const inputCiudad = document.getElementById('ciudad');
+        const sugBox = document.getElementById('sugerenciasDir');
+        let debounceTimer = null;
+
+        // Escuchar cada tecla en el campo de dirección
+        inputDir.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+
+            // Mínimo 3 caracteres para buscar
+            if (query.length < 3) { sugBox.style.display = 'none'; return; }
+
+            // Esperar 400ms después de que deje de escribir para buscar
+            debounceTimer = setTimeout(async () => {
+                try {
+                    // Buscar en México para resultados más relevantes
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', México')}&limit=5&addressdetails=1`;
+                    const resp = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+                    const resultados = await resp.json();
+
+                    if (!resultados.length) { sugBox.style.display = 'none'; return; }
+
+                    // Mostrar sugerencias como lista clickeable
+                    sugBox.innerHTML = resultados.map((r, i) => `
+                        <div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--border-2);transition:background .15s;"
+                             onmouseover="this.style.background='var(--surface-2)'"
+                             onmouseout="this.style.background='transparent'"
+                             data-idx="${i}">
+                            <i class="fas fa-map-marker-alt" style="color:var(--gold);margin-right:6px;font-size:11px;"></i>
+                            ${r.display_name}
+                        </div>
+                    `).join('');
+                    sugBox.style.display = 'block';
+
+                    // Al hacer click en una sugerencia, llenar los campos
+                    sugBox.querySelectorAll('[data-idx]').forEach(el => {
+                        el.addEventListener('click', function() {
+                            const idx = parseInt(this.dataset.idx);
+                            const lugar = resultados[idx];
+                            const addr = lugar.address || {};
+
+                            // Construir dirección legible (calle + número si existe)
+                            const calle = addr.road || addr.pedestrian || addr.neighbourhood || '';
+                            const numero = addr.house_number || '';
+                            inputDir.value = numero ? `${calle} ${numero}` : calle || lugar.display_name.split(',')[0];
+
+                            // Llenar ciudad automáticamente
+                            const ciudad = addr.city || addr.town || addr.village || addr.municipality || addr.state || '';
+                            const estado = addr.state || '';
+                            inputCiudad.value = ciudad + (estado && estado !== ciudad ? ', ' + estado : '');
+
+                            sugBox.style.display = 'none';
+                        });
+                    });
+                } catch (e) {
+                    console.log('Error buscando direcciones:', e);
+                    sugBox.style.display = 'none';
+                }
+            }, 400);
+        });
+
+        // Cerrar sugerencias al hacer click fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#direccion') && !e.target.closest('#sugerenciasDir')) {
+                sugBox.style.display = 'none';
+            }
+        });
+
+
+        /* ── DIRECTORIO DE BARBERÍAS + BUSCADOR ──────────────────────
+           1. Carga todas las barberías activas desde GET /api/barberias.
+           2. Renderiza como cards con link a su página pública.
+           3. Filtra en tiempo real por nombre o ciudad al escribir.
+           El filtrado es 100% client-side — no hay petición por tecla.
+           ─────────────────────────────────────────────────────────── */
+        let todasBarberias = [];
+
+        async function cargarDirectorio() {
+            const grid = document.getElementById('barberiasGrid');
+            // Skeleton loading: 4 placeholders mientras carga
+            grid.innerHTML = Array(4).fill(`
+                <div class="barb-card-pub">
+                    <div class="skeleton" style="height:18px;width:65%;margin-bottom:10px;border-radius:6px;"></div>
+                    <div class="skeleton" style="height:13px;width:45%;margin-bottom:6px;border-radius:4px;"></div>
+                    <div class="skeleton" style="height:13px;width:70%;margin-bottom:14px;border-radius:4px;"></div>
+                    <div class="skeleton" style="height:34px;border-radius:8px;"></div>
+                </div>`).join('');
+            try {
+                const r = await fetch(`${config.apiURL}/barberias`);
+                todasBarberias = await r.json();
+                renderBarberias(todasBarberias);
+            } catch {
+                grid.innerHTML = '<p style="color:var(--text-3);font-size:13px;padding:12px 0;">No se pudo cargar el directorio.</p>';
+            }
+        }
+
+        function renderBarberias(lista) {
+            const grid = document.getElementById('barberiasGrid');
+            const countEl = document.getElementById('busquedaCount');
+            countEl.textContent = lista.length
+                ? `${lista.length} barbería${lista.length !== 1 ? 's' : ''} encontrada${lista.length !== 1 ? 's' : ''}`
+                : '';
+
+            if (!lista.length) {
+                grid.innerHTML = '<p style="color:var(--text-3);font-size:13px;text-align:center;padding:20px 0;grid-column:1/-1;">No se encontraron barberías con ese filtro.</p>';
+                return;
+            }
+
+            grid.innerHTML = lista.map((b, i) => `
+                <div class="barb-card-pub will-reveal" style="transition-delay:${i * 0.07}s">
+                    <div class="barb-card-nombre">${b.nombre}</div>
+                    ${b.ciudad ? `<div class="barb-card-ciudad"><i class="fas fa-location-dot" aria-hidden="true"></i> ${b.ciudad}</div>` : ''}
+                    ${b.direccion ? `<div class="barb-card-dir"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${b.direccion}</div>` : ''}
+                    <a href="barberia.html?codigo=${b.codigo_unico}" class="barb-card-btn">
+                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> Ver barbería
+                    </a>
+                </div>`).join('');
+
+            // IntersectionObserver: revelar tarjetas al entrar al viewport
+            const obs = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); } });
+            }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
+            grid.querySelectorAll('.will-reveal').forEach(el => obs.observe(el));
+        }
+
+        // Filtrar en tiempo real (por nombre o ciudad)
+        document.getElementById('busquedaInput').addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            if (!q) { renderBarberias(todasBarberias); return; }
+            renderBarberias(todasBarberias.filter(b =>
+                b.nombre.toLowerCase().includes(q) ||
+                (b.ciudad || '').toLowerCase().includes(q)
+            ));
+        });
+
+        cargarDirectorio();
+
+        // IntersectionObserver para las feature cards (elementos estáticos)
+        const featureObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); featureObs.unobserve(e.target); } });
+        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+        document.querySelectorAll('.feature.will-reveal').forEach(el => featureObs.observe(el));
+    </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+/* ================================================================
+   about.css — Página "Acerca de" de Barber Registro
+   Comparte design tokens y tipografía con styles.css (dark-luxury).
+   ================================================================ */
+
+
+/* ── NAVBAR ───────────────────────────────────────────────────── */
+.about-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 500;
+    padding: 12px 0;
+    background: var(--navbar-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-2);
+}
+.about-nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+.about-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+}
+.about-nav-brand i { color: var(--gold); font-size: 16px; }
+.about-nav-link {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: all var(--t);
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border-2);
+}
+.about-nav-link:hover { color: var(--gold); border-color: var(--border); }
+
+
+/* ── HERO ─────────────────────────────────────────────────────── */
+.about-hero {
+    padding: 160px 0 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.about-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,71,0.12) 0%, transparent 65%);
+    pointer-events: none;
+}
+.about-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201,168,71,0.1);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    font-family: 'DM Sans', sans-serif;
+}
+.about-hero h1 {
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+.about-hero h1 em {
+    font-style: italic;
+    color: var(--gold);
+}
+.about-hero-slogan {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: var(--text-3);
+    max-width: 540px;
+    margin: 0 auto 40px;
+    line-height: 1.75;
+}
+.about-hero-line {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto;
+}
+
+
+/* ── SECCIONES ─────────────────────────────────────────────────── */
+.about-section {
+    padding: 90px 0;
+    border-top: 1px solid var(--border-2);
+}
+.about-section:nth-child(even) {
+    background: var(--ink-2);
+}
+
+.about-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
+    font-family: 'DM Sans', sans-serif;
+}
+.about-section h2 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    color: var(--text);
+    margin-bottom: 16px;
+}
+.about-section-desc {
+    font-size: 16px;
+    color: var(--text-2);
+    line-height: 1.8;
+    max-width: 620px;
+}
+
+
+/* ── ¿QUÉ ES? ─────────────────────────────────────────────────── */
+.about-que-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+.about-que-visual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.about-que-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    padding: 24px 20px;
+    text-align: center;
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.about-que-card:hover {
+    border-color: var(--border);
+    box-shadow: var(--glow);
+    transform: translateY(-4px);
+}
+.about-que-card i {
+    font-size: 28px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: block;
+}
+.about-que-card span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-family: 'DM Sans', sans-serif;
+}
+
+
+/* ── ¿CÓMO FUNCIONA? ──────────────────────────────────────────── */
+.about-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-top: 50px;
+}
+.about-step {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    padding: 36px 28px;
+    position: relative;
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+    overflow: hidden;
+}
+.about-step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity var(--t);
+}
+.about-step:hover { border-color: var(--border); box-shadow: var(--glow); transform: translateY(-6px); }
+.about-step:hover::before { opacity: 1; }
+
+.about-step-num {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--gold);
+    opacity: 0.15;
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+    position: absolute;
+    top: 18px;
+    right: 22px;
+}
+.about-step-icon {
+    width: 52px;
+    height: 52px;
+    background: rgba(201,168,71,0.1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--gold);
+    margin-bottom: 20px;
+}
+.about-step h3 {
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+.about-step p {
+    font-size: 14px;
+    color: var(--text-3);
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+
+/* ── EQUIPO ───────────────────────────────────────────────────── */
+.about-team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 50px;
+}
+.about-member {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    text-align: center;
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.about-member:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+.about-member-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 0 auto 16px;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+}
+.about-member-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+    font-family: 'DM Sans', sans-serif;
+}
+.about-member-role {
+    font-size: 12px;
+    color: var(--gold);
+    margin-top: 6px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.03em;
+}
+
+
+/* ── FOOTER ───────────────────────────────────────────────────── */
+.about-footer {
+    background: var(--ink-3);
+    border-top: 1px solid var(--border-2);
+    padding: 40px 0;
+    text-align: center;
+}
+.about-footer p {
+    color: var(--text-3);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+.about-footer a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color var(--t);
+}
+.about-footer a:hover { color: var(--gold-light); }
+
+
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .about-que-wrap { grid-template-columns: 1fr; gap: 40px; }
+    .about-steps { grid-template-columns: 1fr; gap: 20px; }
+}
+
+@media (max-width: 640px) {
+    .about-hero { padding: 130px 0 70px; }
+    .about-que-visual { grid-template-columns: 1fr 1fr; }
+    .about-team-grid { grid-template-columns: repeat(2, 1fr); }
+    .about-section { padding: 60px 0; }
+}
+
+@media (max-width: 400px) {
+    .about-team-grid { grid-template-columns: 1fr; }
+    .about-que-visual { grid-template-columns: 1fr; }
+}

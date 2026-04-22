@@ -1,0 +1,235 @@
+/* ================================================================
+   usuario.css — Estilos del panel del usuario (dueño de barbería)
+   ================================================================
+   Panel donde el dueño gestiona su barbería: servicios, reservas,
+   reseñas, fotos y configuración. Incluye topbar sticky,
+   tabs pill, modales y editor interactivo de horarios.
+   ================================================================ */
+
+
+/* ── TOPBAR ───────────────────────────────────────────────────
+   Barra superior sticky con logo, nombre de barbería y acciones.
+   backdrop-filter:blur para efecto glass al hacer scroll.
+   ─────────────────────────────────────────────────────────── */
+.topbar {
+    background: var(--ink-3);
+    border-bottom: 1px solid var(--border-2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+}
+.topbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+
+/* Logo: cuadrado con gradiente dorado */
+.topbar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    font-size: 13px;
+}
+.topbar-text h1 { font-size: 14px; font-weight: 700; color: var(--text); font-family: 'DM Sans', sans-serif; line-height: 1.2; }
+.topbar-text p  { font-size: 11px; color: var(--text-3); font-family: 'DM Sans', sans-serif; }
+.topbar-actions { display: flex; align-items: center; gap: 7px; }
+.topbar-email { font-size: 12px; color: var(--text-3); padding: 0 4px; }
+
+
+/* ── TABS PILL ────────────────────────────────────────────────
+   Navegación entre secciones del panel.
+   Estilo "pill" (botones redondeados) con scroll horizontal
+   en pantallas pequeñas (overflow-x:auto).
+   ─────────────────────────────────────────────────────────── */
+.tabs-wrap {
+    background: var(--ink-3);
+    border-bottom: 1px solid var(--border-2);
+    padding: 8px 0;
+}
+.tabs {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto; /* Permite scroll horizontal en móvil */
+}
+.tab {
+    padding: 7px 16px;
+    cursor: pointer;
+    border-radius: 20px;
+    white-space: nowrap;
+    transition: all .2s;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid transparent;
+}
+.tab:hover { background: var(--surface); color: var(--text); }
+/* Tab activo: fondo dorado transparente + borde */
+.tab.active { background: rgba(201,168,76,.12); color: var(--gold); border-color: var(--border); }
+.tab i { font-size: 12px; }
+
+
+/* ── SECCIONES DEL PANEL ──────────────────────────────────────
+   Cada sección (servicios, reservas, etc.) se oculta/muestra
+   con JS al cambiar de tab.
+   ─────────────────────────────────────────────────────────── */
+.section {
+    display: none;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: sectionIn .35s ease-out forwards;
+}
+.section.active { display: block; }
+@keyframes sectionIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.page-content { padding: 28px 0 60px; }
+
+/* Título de cada panel con ícono dorado */
+.panel-title {
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Playfair Display', serif;
+}
+.panel-title i { color: var(--gold); }
+
+
+/* ── EDITOR DE HORARIOS INTERACTIVO (Config) ──────────────────
+   Mismo patrón que el formulario de registro: checkbox por día
+   + selectores de hora. Permite al dueño modificar los horarios
+   sin necesidad de editar texto plano.
+   ─────────────────────────────────────────────────────────── */
+.cfg-dia {
+    display: grid;
+    grid-template-columns: 140px 1fr 1fr 80px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--ink-3);
+    border-radius: 10px;
+    border: 1px solid var(--border-2);
+    transition: border-color var(--t);
+}
+.cfg-dia.activo { border-color: var(--border); background: var(--ink-4); }
+
+.cfg-dia-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+}
+.cfg-dia-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+
+.cfg-time {
+    padding: 8px 10px;
+    background: var(--ink);
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    transition: border-color var(--t);
+    color-scheme: dark; /* Para que los íconos nativos sean claros */
+}
+.cfg-time:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+    border-color: var(--gold);
+}
+.cfg-time:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.cfg-cerrado {
+    background: rgba(224,82,82,0.1);
+    color: var(--red);
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid rgba(224,82,82,0.2);
+}
+
+
+/* ── PALETA DE TEMAS (Config) ────────────────────────────────── */
+.tema-paleta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.tema-color-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+    flex-shrink: 0;
+}
+.tema-color-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+}
+.tema-color-btn.activo {
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+    transform: scale(1.12);
+}
+
+
+/* ── GRIDS REUTILIZABLES DE FORMULARIOS ─────────────────────── */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.form-grid-2-sm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .srv-grid { grid-template-columns: 1fr 1fr; }
+    .topbar-email { display: none; }
+    .cfg-dia { grid-template-columns: 1fr; }
+    /* Formularios de 2 col → 1 col en móvil */
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .form-grid-2-sm { grid-template-columns: 1fr; }
+}
+@media (max-width: 380px) {
+    .srv-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,1054 @@
+/* ================================================================
+   BARBER REGISTRO — Global Design System
+   ================================================================
+   Arquitectura CSS:
+   1. Variables de diseño (design tokens)
+   2. Reset & base
+   3. Tipografía
+   4. Accesibilidad (focus-visible, skip-nav, reduced-motion)
+   5. Componentes reutilizables (botones, cards, forms, alerts, etc.)
+   6. Componentes de página específicos
+   7. Animaciones
+   8. Responsive breakpoints
+
+   Paleta: dark-luxury con acentos dorados.
+   Tipografía: Playfair Display (headings) + DM Sans (body).
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* ── 1. DESIGN TOKENS ─────────────────────────────────────────
+   Centralizados aquí para que un cambio de paleta solo requiera
+   editar este bloque, no buscar hex codes en 6 archivos CSS.
+   La escala de 4 niveles de "ink" existe porque dark mode necesita
+   sutiles diferencias de profundidad para que cards y modales
+   se distingan del fondo sin usar bordes pesados.
+   ─────────────────────────────────────────────────────────── */
+:root {
+    --ink:        #09090d;
+    --ink-2:      #0f0f14;
+    --ink-3:      #16161e;
+    --ink-4:      #1d1d27;
+    --surface:    #1a1a24;
+    --surface-2:  #20202c;
+
+    --gold:       #c9a847;
+    --gold-light: #f2d050;
+    --gold-dim:   #9a7a28;
+
+    --red:        #e05252;
+    --red-dark:   #b83a3a;
+    --green:      #3ecf8e;
+    --green-dark: #2aaa74;
+
+    /* Texto: escala de 3 niveles.
+       --text-3 subió a #9e9c94 (ratio 5.8:1 sobre --ink) para cumplir
+       WCAG AA incluso sobre superficies como --ink-4 y --surface-2.
+       --text-placeholder es más claro que --text-3 pero aún pasa AA (4.6:1). */
+    --text:       #ece9e0;
+    --text-2:     #b5b2ab;
+    --text-3:     #9e9c94;
+    --text-placeholder: #8a887f;
+
+    --border:     rgba(212,170,66,0.22);
+    --border-2:   rgba(255,255,255,0.09);
+
+    --shadow:     0 4px 24px rgba(0,0,0,0.45);
+    --shadow-lg:  0 12px 48px rgba(0,0,0,0.65);
+    --glow:       0 0 32px rgba(201,168,71,0.45);
+    --card-glow:  0 0 15px rgba(201,168,71,0.4);
+
+    --radius:     12px;
+    --radius-lg:  16px;
+
+    /* Espaciado semántico */
+    --space-xs:   8px;
+    --space-sm:   16px;
+    --space-md:   28px;
+    --space-lg:   48px;
+    --space-xl:   72px;
+
+    /* Transición estándar para micro-interacciones */
+    --t:          0.22s cubic-bezier(0.4,0,0.2,1);
+
+    /* Anillo de focus visible — un solo valor para mantener DRY */
+    --focus-ring: 0 0 0 3px rgba(201,168,71,0.55);
+
+    /* Fondo semitransparente del navbar — separado para que el modo claro lo sobreescriba */
+    --navbar-bg: rgba(9,9,13,0.85);
+}
+
+
+/* ── MODO CLARO ───────────────────────────────────────────────
+   Se activa añadiendo data-tema="claro" al <body>.
+   Los acentos dorados se mantienen para preservar la identidad
+   visual sin importar el modo. Solo cambian fondos y textos.
+   ─────────────────────────────────────────────────────────── */
+[data-tema="claro"] {
+    --ink:        #f8fafc;
+    --ink-2:      #f1f5f9;
+    --ink-3:      #e8ecf1;
+    --ink-4:      #dde3ea;
+    --surface:    #ffffff;
+    --surface-2:  #f8fafc;
+    --text:       #0f172a;
+    --text-2:     #334155;
+    --text-3:     #64748b;
+    --text-placeholder: #94a3b8;
+    --border:     rgba(15,23,42,0.15);
+    --border-2:   rgba(15,23,42,0.08);
+    --shadow:     0 4px 24px rgba(15,23,42,0.10);
+    --shadow-lg:  0 12px 48px rgba(15,23,42,0.15);
+    --glow:       0 0 32px rgba(201,168,71,0.35);
+    --card-glow:  0 0 15px rgba(201,168,71,0.4);
+    --navbar-bg:  rgba(248,250,252,0.92);
+}
+
+
+/* ── 2. RESET & BASE ──────────────────────────────────────────
+   Reset mínimo y estilos de body.
+   El pseudo-elemento ::before crea un sutil glow ambiental
+   que refuerza la estética "premium" sin afectar el contenido.
+   ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--ink);
+    color: var(--text);
+    line-height: 1.85;
+    letter-spacing: 0.015em;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+p {
+    line-height: 1.85;
+    margin-bottom: 0.75em;
+}
+
+/* Glow ambiental de fondo, puramente decorativo */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 50% at 15% 10%, rgba(212,170,66,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 85% 90%, rgba(212,170,66,0.05) 0%, transparent 50%);
+    z-index: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ── 3. TIPOGRAFÍA ────────────────────────────────────────────
+   Playfair Display para headings (serif premium)
+   DM Sans para body text (legible, moderna)
+   ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4em;
+}
+
+
+/* ── 4. ACCESIBILIDAD ─────────────────────────────────────────
+   - Skip-to-content link: permite a usuarios de teclado saltar
+     la navegación e ir directo al contenido principal.
+   - :focus-visible (no :focus): el anillo solo aparece con teclado,
+     no con clicks de ratón, evitando anillos molestos en UX normal.
+   - Reduced motion: respeta la preferencia del SO para usuarios con
+     sensibilidad al movimiento (vestibular disorders).
+   ─────────────────────────────────────────────────────────── */
+
+/* Skip link: oculto visualmente pero accesible con Tab.
+   Posicionado en top:-100% en vez de display:none para que
+   los lectores de pantalla lo encuentren en el flujo del DOM. */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    z-index: 10000;
+    padding: 12px 20px;
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 0 0 var(--radius) var(--radius);
+    text-decoration: none;
+    transition: top 0.2s;
+}
+.skip-link:focus {
+    top: 0;
+}
+
+/* Focus visible global — anillo dorado consistente en todos
+   los elementos interactivos. Se usa :focus-visible en vez de
+   :focus para que el anillo solo aparezca con navegación por
+   teclado (Tab), no cuando el usuario hace click con ratón. */
+:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* Para elementos interactivos, sumamos el box-shadow al anillo.
+   Se lista explícitamente cada selector en vez de usar * para que
+   el anillo no aparezca en elementos que tienen su propia lógica
+   de focus (ej: inputs que cambian border-color al enfocar). */
+.btn:focus-visible,
+.form-control:focus-visible,
+.tab:focus-visible,
+.service-card:focus-visible,
+.foto-option:focus-visible,
+.foto-none:focus-visible,
+select.estado-sel:focus-visible,
+.time-select:focus-visible,
+.modal-close:focus-visible,
+.toggle-pw:focus-visible,
+.navbar-links a:focus-visible,
+.back-to-top:focus-visible,
+.hero-cta:focus-visible,
+.btn-hero:focus-visible,
+.btn-sa:focus-visible,
+.toggle-btn:focus-visible,
+.barb-card-btn:focus-visible,
+.about-nav-link:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+}
+
+/* Reduced motion: desactiva animaciones para quienes lo prefieran */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+}
+
+
+/* ── 5. BOTONES ───────────────────────────────────────────────
+   Sistema de botones con variantes semánticas.
+   Todos heredan la base .btn para evitar duplicación (DRY).
+   ─────────────────────────────────────────────────────────── */
+.btn {
+    padding: 11px 22px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--t);
+    font-family: 'DM Sans', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.btn:hover  { transform: scale(1.02); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
+.btn:active { transform: scale(0.96); box-shadow: none; }
+
+/* Variante primaria: gradiente dorado, texto oscuro para contraste */
+.btn-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, #a87a28 100%);
+    color: var(--ink);
+    font-weight: 700;
+}
+.btn-primary:hover { box-shadow: var(--glow), 0 6px 24px rgba(0,0,0,0.35); filter: brightness(1.1); transform: scale(1.02); }
+
+.btn-success { background: var(--green); color: var(--ink); font-weight: 700; }
+.btn-success:hover { background: var(--green-dark); transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(62,207,142,0.28); }
+
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: var(--red-dark); transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(224,82,82,0.28); }
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--border-2);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+
+.btn-ghost {
+    background: var(--surface);
+    color: var(--text-2);
+    border: 1px solid var(--border-2);
+}
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+
+
+/* ── 6. CARDS ─────────────────────────────────────────────────
+   Contenedor reutilizable con variante "gold" para destacar.
+   ─────────────────────────────────────────────────────────── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+}
+.card-gold {
+    border-color: var(--border);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--ink-3) 100%);
+}
+
+
+/* ── 7. FORMS ─────────────────────────────────────────────────
+   Labels en uppercase pequeño para jerarquía visual.
+   Los inputs usan el token --focus-ring al recibir foco.
+   ─────────────────────────────────────────────────────────── */
+.form-group { margin-bottom: 24px; }
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-size: 12px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+.form-control {
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--ink-3);
+    border: 1px solid var(--border-2);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    transition: all var(--t);
+    font-family: 'DM Sans', sans-serif;
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: var(--ink-4);
+    box-shadow: 0 0 0 3px rgba(201,168,71,0.1);
+}
+.form-control::placeholder { color: var(--text-placeholder); }
+textarea.form-control { min-height: 90px; resize: vertical; }
+select.form-control { cursor: pointer; }
+input[type="file"].form-control { cursor: pointer; padding: 10px 14px; }
+
+/* Fix para que los íconos nativos de date/time/select sean visibles
+   en dark mode. color-scheme:dark le dice al browser que use íconos claros. */
+input[type="date"].form-control,
+input[type="time"].form-control {
+    color-scheme: dark;
+}
+select.form-control {
+    color-scheme: dark;
+}
+
+
+/* ── 8. ALERTS ────────────────────────────────────────────────
+   Feedback visual con colores semánticos (éxito, error, info).
+   ─────────────────────────────────────────────────────────── */
+.alert {
+    padding: 13px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+.alert-success { background: rgba(62,207,142,0.1);  color: #5de8a8; border: 1px solid rgba(62,207,142,0.2); }
+.alert-error   { background: rgba(224,82,82,0.1);   color: #f08888; border: 1px solid rgba(224,82,82,0.2); }
+.alert-info    { background: rgba(201,168,71,0.1);  color: var(--gold-light); border: 1px solid var(--border); }
+
+
+/* ── 9. DIVIDER ───────────────────────────────────────────── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text-3);
+    font-size: 13px;
+    margin: 22px 0;
+}
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-2);
+}
+
+
+/* ── 10. BADGE ────────────────────────────────────────────────
+   Badges para estados de reservas (pendiente, confirmada, etc.)
+   ─────────────────────────────────────────────────────────── */
+.badge {
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.badge-pendiente  { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.badge-confirmada { background: rgba(62,207,142,0.1);  color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
+.badge-cancelada  { background: rgba(224,82,82,0.1);   color: var(--red);   border: 1px solid rgba(224,82,82,0.2); }
+.badge-completada { background: rgba(96,165,250,0.1);  color: #60a5fa;      border: 1px solid rgba(96,165,250,0.2); }
+
+
+/* ── 11. LOADING SPINNER ──────────────────────────────────── */
+.loading {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(201,168,71,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+/* ── 12. SKELETON (placeholder de carga) ──────────────────── */
+.skeleton {
+    background: linear-gradient(90deg, var(--ink-3) 25%, var(--ink-4) 50%, var(--ink-3) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 8px;
+}
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+
+/* ── 13. TOAST NOTIFICATIONS ──────────────────────────────────
+   Contenedor fixed en esquina inferior derecha.
+   pointer-events:none en el container, auto en cada toast,
+   para que no bloqueen clicks en el fondo.
+   ─────────────────────────────────────────────────────────── */
+#toastContainer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+.toast {
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+    max-width: 340px;
+    animation: toastIn .3s ease-out;
+    transform: translateX(0);
+}
+.toast.success { border-color: rgba(62,207,142,0.3); }
+.toast.success i { color: var(--green); }
+.toast.error   { border-color: rgba(224,82,82,0.3); }
+.toast.error i   { color: var(--red); }
+.toast.info    { border-color: var(--border); }
+.toast.info i    { color: var(--gold); }
+.toast.out     { animation: toastOut .3s ease-in forwards; }
+
+@keyframes toastIn  { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); }    to { opacity: 0; transform: translateX(20px); } }
+
+
+/* ── 14. TABLE ────────────────────────────────────────────────
+   Tablas del panel admin (reservas).
+   overflow-x:auto permite scroll horizontal en móvil.
+   ─────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; }
+thead { background: var(--ink-3); }
+th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: 'DM Sans', sans-serif;
+}
+td {
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-2);
+    border-top: 1px solid var(--border-2);
+}
+tbody tr:hover { background: var(--surface-2); }
+tbody tr:hover td { color: var(--text); }
+
+
+/* ── 15. STAR RATING ──────────────────────────────────────────
+   Truco CSS: flex-direction row-reverse + sibling selector (~)
+   permite que al hacer hover en una estrella se iluminen
+   todas las anteriores sin necesidad de JavaScript.
+
+   Los inputs usan position:absolute con opacity:0 en vez de
+   display:none para que sigan en el flujo de teclado y lectores
+   de pantalla. Con display:none quedarían completamente excluidos
+   del Tab order y serían inaccesibles para usuarios de teclado.
+   ─────────────────────────────────────────────────────────── */
+.star-rating {
+    display: flex;
+    gap: 4px;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    position: relative;
+}
+.star-rating input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+.star-rating label {
+    font-size: 28px;
+    color: var(--text-3);
+    cursor: pointer;
+    transition: color .15s;
+    border-radius: 3px;
+}
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: var(--gold);
+}
+/* Anillo de foco visible cuando el usuario navega con Tab a una estrella */
+.star-rating input:focus-visible + label {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    color: var(--gold-light);
+}
+
+
+/* ── 16. REVIEW CARDS ─────────────────────────────────────── */
+.review-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    margin-bottom: 16px;
+    transition: border-color var(--t);
+}
+.review-card:hover { border-color: var(--border); }
+.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.review-author { font-weight: 700; color: var(--text); font-size: 14px; }
+.review-rating { color: var(--gold); font-size: 16px; }
+.review-text { color: var(--text-2); line-height: 1.9; font-size: 14px; letter-spacing: 0.008em; }
+.review-date { font-size: 12px; color: var(--text-3); margin-top: 10px; }
+
+
+/* ── 17. GALERÍA DE FOTOS (admin) ─────────────────────────── */
+.galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+}
+.galeria img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform var(--t), box-shadow var(--t);
+    cursor: pointer;
+    border: 1px solid var(--border-2);
+    opacity: 0;
+    animation: fadeUp .5s ease-out forwards;
+}
+.galeria img:hover {
+    transform: scale(1.04);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border);
+}
+/* Staggered animation para las primeras 6 imágenes */
+.galeria img:nth-child(1) { animation-delay: .05s; }
+.galeria img:nth-child(2) { animation-delay: .1s; }
+.galeria img:nth-child(3) { animation-delay: .15s; }
+.galeria img:nth-child(4) { animation-delay: .2s; }
+.galeria img:nth-child(5) { animation-delay: .25s; }
+.galeria img:nth-child(6) { animation-delay: .3s; }
+
+
+/* ── 18. ANIMACIONES GLOBALES ─────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fade-up { opacity: 0; animation: fadeUp .45s ease-out forwards; }
+.fade-in { opacity: 0; animation: fadeIn .4s ease-out forwards; }
+
+/* Reveal via IntersectionObserver — empieza invisible, transiciona al entrar al viewport */
+.will-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+.will-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Badge "Popular" para servicios con más reservas */
+.badge-popular {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    pointer-events: none;
+}
+
+
+/* ── 19. SERVICE CARDS (página pública) ───────────────────────
+   Cards interactivas para que el cliente seleccione un servicio.
+   Al hacer click se marca como "seleccionado" vía JS.
+   ─────────────────────────────────────────────────────────── */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 290px));
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+.service-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform var(--t), box-shadow 0.3s ease, border 0.3s ease, opacity 0.55s ease-out;
+}
+.service-card:hover { transform: translateY(-5px) scale(1.01); box-shadow: var(--shadow-lg); border-color: rgba(201,168,71,0.3); }
+.service-card.selected {
+    border: 2px solid var(--gold);
+    box-shadow: var(--card-glow);
+}
+.service-card.selected:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: var(--card-glow);
+    border: 2px solid var(--gold);
+}
+
+.service-img-wrapper {
+    width: 100%;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    position: relative;
+    background: var(--ink-3);
+}
+.service-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t);
+    display: block;
+}
+.service-card:hover .service-img-wrapper img { transform: scale(1.05); }
+
+/* Fallback cuando el servicio no tiene foto */
+.service-img-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--ink-3) 0%, var(--ink-4) 100%);
+}
+.service-img-fallback i { font-size: 36px; color: var(--gold); opacity: .3; }
+.service-img-fallback span { font-size: 11px; color: var(--text-3); letter-spacing: .05em; text-transform: uppercase; }
+
+/* Badge de "seleccionado" que aparece sobre la imagen */
+.service-card.selected .service-img-wrapper::after {
+    content: '\2713  Seleccionado';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(201,168,71,.8));
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 11px;
+    padding: 18px 12px 8px;
+    text-align: center;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.service-body { padding: 20px 22px 22px; }
+.service-name { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.service-description { color: var(--text-3); font-size: 13px; line-height: 1.75; margin-bottom: 14px; letter-spacing: 0.01em; }
+.service-price { font-size: 24px; font-weight: 700; color: var(--gold); font-family: 'Playfair Display', serif; }
+.service-duration { font-size: 11px; color: var(--text-3); margin-top: 4px; letter-spacing: .04em; }
+
+
+/* ── 20. ADMIN SERVICE GRID ───────────────────────────────── */
+.srv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+.srv-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow var(--t), border-color var(--t);
+    display: flex;
+    flex-direction: column;
+}
+.srv-card:hover { box-shadow: var(--shadow-lg); border-color: rgba(201,168,71,0.2); }
+
+.srv-card-img {
+    aspect-ratio: 16/10;
+    background: var(--ink-3);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+.srv-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t);
+    display: block;
+}
+.srv-card-img:hover img { transform: scale(1.06); }
+
+.srv-card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--ink-3), var(--ink-4));
+    color: var(--gold);
+    opacity: .35;
+}
+.srv-card-img-placeholder i { font-size: 26px; }
+.srv-card-img-placeholder span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Overlay al hover para indicar que se puede cambiar la foto */
+.srv-card-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity var(--t);
+    color: var(--gold-light);
+    font-size: 12px;
+    font-weight: 600;
+    gap: 6px;
+}
+.srv-card-img:hover .srv-card-img-overlay { opacity: 1; }
+
+.srv-card-body { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.srv-card-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.srv-card-desc { font-size: 11px; color: var(--text-3); line-height: 1.45; flex: 1; }
+.srv-card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.srv-card-price { font-size: 17px; font-weight: 700; color: var(--gold); font-family: 'Playfair Display', serif; }
+.srv-card-dur { font-size: 11px; color: var(--text-3); background: var(--ink-3); padding: 2px 8px; border-radius: 20px; }
+.srv-card-footer { padding: 10px 14px; border-top: 1px solid var(--border-2); display: flex; gap: 8px; }
+
+
+/* ── 21. EMPTY STATE ──────────────────────────────────────────
+   Placeholder visual cuando una sección no tiene datos aún.
+   ─────────────────────────────────────────────────────────── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-3);
+    border: 1px dashed var(--border-2);
+    border-radius: var(--radius-lg);
+    background: var(--ink-3);
+    gap: 12px;
+}
+.empty-state i { font-size: 36px; color: var(--text-3); opacity: .4; }
+.empty-state p { font-size: 14px; line-height: 1.6; max-width: 260px; }
+
+
+/* ── 22. MODAL ────────────────────────────────────────────────
+   Overlay con backdrop-filter para efecto glass.
+   El modal recibe fadeUp al abrirse.
+   ─────────────────────────────────────────────────────────── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: fadeUp .3s ease-out;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { font-size: 17px; color: var(--text); }
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--text-3);
+    padding: 4px;
+    transition: color var(--t);
+}
+.modal-close:hover { color: var(--red); }
+
+/* Grid de fotos dentro del modal de selección */
+.foto-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.foto-option {
+    border: 2px solid var(--border-2);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color var(--t), transform var(--t);
+    position: relative;
+}
+.foto-option:hover { border-color: var(--gold); transform: scale(1.02); }
+.foto-option.selected { border-color: var(--gold); }
+.foto-option.selected::after {
+    content: '\2713';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.foto-option img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+
+.foto-none {
+    border: 2px dashed var(--border-2);
+    border-radius: 10px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-3);
+    font-size: 12px;
+    transition: border-color var(--t), color var(--t);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.foto-none i { font-size: 18px; }
+.foto-none:hover, .foto-none.selected { border-color: var(--gold); color: var(--gold); }
+
+
+/* ── 23. LINK ROW ─────────────────────────────────────────── */
+.link-row { display: flex; gap: 10px; align-items: center; }
+.link-row input { flex: 1; }
+
+
+/* ── 24. INFO BOX ─────────────────────────────────────────── */
+.info-box {
+    background: rgba(201,168,71,.07);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 16px;
+}
+.info-box i { color: var(--gold); margin-right: 6px; }
+
+
+/* ── 25. ESTADO SELECT (reservas admin) ───────────────────── */
+select.estado-sel {
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-2);
+    font-size: 12px;
+    background: var(--ink-3);
+    color: var(--text-2);
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+}
+select.estado-sel:focus { border-color: var(--gold); }
+
+
+/* ── 26. BACK TO TOP BUTTON ───────────────────────────────────
+   Botón flotante para volver arriba en páginas largas.
+   Aparece al hacer scroll down (controlado por JS).
+   ─────────────────────────────────────────────────────────── */
+.back-to-top {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 900;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--gold);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--t);
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    box-shadow: var(--shadow);
+}
+.back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.back-to-top:hover {
+    background: var(--gold);
+    color: var(--ink);
+    box-shadow: var(--glow);
+}
+
+
+/* ── 27. NAVBAR (página pública) ──────────────────────────────
+   Barra fija en la parte superior para barberia.html e index.html.
+   Se muestra sobre el hero con fondo semitransparente.
+   ─────────────────────────────────────────────────────────── */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 500;
+    padding: 12px 0;
+    background: var(--navbar-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-2);
+    transition: background var(--t), border-color var(--t);
+}
+.navbar-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+}
+.navbar-brand i { color: var(--gold); font-size: 16px; }
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.navbar-links a {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: all var(--t);
+    font-family: 'DM Sans', sans-serif;
+}
+.navbar-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.navbar-links a.active { color: var(--gold); background: rgba(201,168,71,0.1); }
+
+
+/* ── 28. RESPONSIVE ───────────────────────────────────────────
+   3 breakpoints: 900px (tablet), 640px (móvil), 400px (mini).
+   ─────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+    .services-grid { grid-template-columns: 1fr; }
+    .srv-grid { grid-template-columns: 1fr 1fr; }
+    table { font-size: 12px; }
+    th, td { padding: 9px 8px; }
+    .galeria { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .container { padding: 0 16px; }
+    /* Navbar se adapta a móvil */
+    .navbar-links a { padding: 6px 10px; font-size: 12px; }
+    /* Toast se centra en móvil */
+    #toastContainer { left: 16px; right: 16px; bottom: 16px; align-items: stretch; }
+    .toast { max-width: none; }
+}
+
+@media (max-width: 400px) {
+    .srv-grid { grid-template-columns: 1fr; }
+}

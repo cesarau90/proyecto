@@ -1,0 +1,179 @@
+/* ================================================================
+   login.css — Estilos de la página de inicio de sesión
+   ================================================================
+   Página centrada con card de login. Incluye decoración de fondo
+   con círculos difuminados y animaciones de entrada.
+   ================================================================ */
+
+
+/* ── LAYOUT ───────────────────────────────────────────────────
+   Body centrado verticalmente — el login ocupa toda la pantalla.
+   ─────────────────────────────────────────────────────────── */
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: var(--ink);
+}
+
+
+/* ── DECORACIÓN DE FONDO ──────────────────────────────────────
+   Dos círculos difuminados dorados en esquinas opuestas
+   para dar profundidad visual sin distraer del formulario.
+   ─────────────────────────────────────────────────────────── */
+.bg-deco {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.bg-deco span {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+}
+.bg-deco span:nth-child(1) { width: 600px; height: 600px; top: -200px; left: -200px; }
+.bg-deco span:nth-child(2) { width: 400px; height: 400px; bottom: -100px; right: -100px; }
+
+
+/* ── CONTENEDOR ───────────────────────────────────────────── */
+.login-wrap {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* ── ENCABEZADO (logo + título) ───────────────────────────────
+   Ícono de tijeras con gradiente dorado + nombre de la app.
+   ─────────────────────────────────────────────────────────── */
+.login-brand {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeUp 0.5s ease-out;
+}
+.login-brand .scissors {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+    color: var(--ink);
+    font-size: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+}
+.login-brand h1 {
+    font-size: 32px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+}
+.login-brand h1 span { color: var(--gold); }
+.login-brand p { color: var(--text-3); margin-top: 6px; font-size: 14px; }
+
+
+/* ── CARD DEL FORMULARIO ──────────────────────────────────────
+   Card con animación de entrada retrasada (0.1s) para que
+   aparezca justo después del encabezado.
+   ─────────────────────────────────────────────────────────── */
+.login-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: var(--shadow-lg);
+    animation: fadeUp 0.5s 0.1s ease-out both;
+}
+.login-card .form-group label { color: var(--text-2); }
+
+
+/* ── CAMPO DE CONTRASEÑA ──────────────────────────────────────
+   Wrapper relativo para posicionar el botón de mostrar/ocultar
+   contraseña dentro del input.
+   ─────────────────────────────────────────────────────────── */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 44px; } /* Espacio para el ícono */
+
+.toggle-pw {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color var(--t);
+}
+.toggle-pw:hover { color: var(--gold); }
+
+
+/* ── BOTÓN DE SUBMIT ──────────────────────────────────────── */
+.login-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    margin-top: 4px;
+    border-radius: 12px;
+    letter-spacing: 0.02em;
+}
+
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-3);
+    animation: fadeUp 0.5s 0.2s ease-out both;
+}
+.login-footer a {
+    color: var(--gold);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--t);
+}
+.login-footer a:hover { color: var(--gold-light); }
+
+
+/* ── RESPONSIVE ───────────────────────────────────────────────
+   En móvil reducimos padding y tamaños para que se vea
+   bien centrado sin que se desborde.
+   ─────────────────────────────────────────────────────────── */
+.login-register-hint {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13px;
+}
+.login-register-link {
+    color: var(--gold);
+    font-weight: 600;
+    text-decoration: none;
+}
+.login-register-link:hover { color: var(--gold-light); }
+
+@media (max-width: 480px) {
+    /* Card con menos padding en pantallas chicas */
+    .login-card { padding: 28px 20px; }
+
+    /* Logo un poco más chico */
+    .login-brand .scissors {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        border-radius: 14px;
+    }
+
+    /* Título más compacto */
+    .login-brand h1 { font-size: 26px; }
+
+    /* Botón submit respeta el ancho */
+    .login-submit { font-size: 14px; padding: 12px; }
+}

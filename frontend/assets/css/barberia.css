@@ -1,0 +1,372 @@
+/* ================================================================
+   barberia.css — Estilos de la página pública de la barbería
+   ================================================================
+   Esta página es lo que ven los clientes cuando entran al link
+   de una barbería. Incluye: hero, secciones de servicios, booking,
+   reseñas, info y mapa.
+   
+   Los estilos globales (botones, cards, forms, etc.) están en
+   styles.css — aquí solo va lo específico de esta página.
+   ================================================================ */
+
+
+/* ── BOTÓN TOGGLE TEMA (oscuro/claro) ────────────────────────
+   Vive en el navbar, junto a los links de navegación.
+   Usa ícono de sol (dark→light) o luna (light→dark).
+   ─────────────────────────────────────────────────────────── */
+.btn-tema {
+    background: rgba(255,255,255,.07);
+    border: 1px solid var(--border-2);
+    color: var(--text-2);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all var(--t);
+    flex-shrink: 0;
+}
+.btn-tema:hover {
+    background: rgba(255,255,255,.13);
+    color: var(--gold);
+    border-color: var(--border);
+}
+.btn-tema:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+
+/* ── HERO ─────────────────────────────────────────────────────
+   Sección principal con nombre de la barbería y CTAs.
+   El padding-top (110px) deja espacio para el navbar fijo.
+   El gradiente sutil y la línea dorada inferior refuerzan
+   la estética premium sin distraer del contenido.
+   ─────────────────────────────────────────────────────────── */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 110px 20px 60px;
+    background: linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 70%);
+    text-align: center;
+}
+
+/* Glow radial dorado sutil detrás del título */
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(201,168,76,.1) 0%, transparent 65%);
+}
+
+/* Línea dorada decorativa en el borde inferior */
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.hero-content { position: relative; z-index: 1; }
+
+/* Badge pequeño arriba del título ("Barber Registro") */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(201,168,76,.1);
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+    border-radius: 30px;
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+
+/* Nombre de la barbería: responsive con clamp() */
+.hero h1 {
+    font-size: clamp(34px, 6vw, 58px);
+    color: var(--text);
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+}
+
+/* Metadatos debajo del nombre (ciudad, dirección) */
+.hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    color: var(--text-3);
+    font-size: 13px;
+    margin-top: 14px;
+}
+.hero-meta span { display: flex; align-items: center; gap: 5px; }
+.hero-meta i { color: var(--gold); }
+
+/* Botones de acción rápida del hero (Agendar, Ver Servicios, WhatsApp) */
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 28px;
+}
+.btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all var(--t);
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+}
+.btn-hero-primary {
+    background: linear-gradient(135deg, var(--gold) 0%, #a87a28 100%);
+    color: var(--ink);
+    box-shadow: 0 4px 16px rgba(201,168,76,.3);
+}
+.btn-hero-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+.btn-hero-ghost {
+    background: rgba(255,255,255,.07);
+    color: var(--text-2);
+    border: 1px solid var(--border-2);
+}
+.btn-hero-ghost:hover {
+    background: rgba(255,255,255,.12);
+    color: var(--text);
+    border-color: rgba(255,255,255,.15);
+}
+
+
+/* ── SECTION HEADER ───────────────────────────────────────────
+   Encabezado reutilizado en cada sección (Servicios, Reseñas, Info).
+   Incluye un ícono dorado + título + línea decorativa.
+   ─────────────────────────────────────────────────────────── */
+.sec-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.sec-head h2 { font-size: 24px; color: var(--text); }
+
+/* Líneas decorativas a ambos lados para centrado */
+.sec-head::before,
+.sec-head::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,71,.25));
+}
+.sec-head::before {
+    background: linear-gradient(270deg, transparent, rgba(201,168,71,.25));
+}
+
+.sec-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(201,168,76,.1);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+
+/* ── INFO STRIP ───────────────────────────────────────────────
+   Grid de 3 columnas con horarios, ubicación y teléfono.
+   Cada item tiene un ícono dorado + texto descriptivo.
+   ─────────────────────────────────────────────────────────── */
+.info-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 0 0 20px;
+}
+.info-strip-item {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color var(--t);
+}
+.info-strip-item:hover { border-color: var(--border); }
+
+.info-strip-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(201,168,76,.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Primera línea: label (HORARIOS, UBICACIÓN, etc.) */
+.info-strip-text p:first-child {
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 2px;
+}
+/* Segunda línea: contenido */
+.info-strip-text p:last-child {
+    font-size: 13px;
+    color: var(--text-2);
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: pre-line; /* Permite saltos de línea en los horarios */
+}
+
+
+/* ── BOOKING CARD ─────────────────────────────────────────────
+   Formulario de reserva de cita. Usa grid de 2 columnas
+   en desktop y 1 en móvil para los campos.
+   ─────────────────────────────────────────────────────────── */
+.booking-card {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: var(--shadow-lg);
+    max-width: 680px;
+    margin: 0 auto;
+}
+.booking-card h2 {
+    font-size: 22px;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+/* 2 columnas en desktop para los campos del formulario */
+.form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.form-2col .form-group { margin-bottom: 18px; }
+.form-full { grid-column: 1 / -1; } /* Ocupa todo el ancho */
+
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+.footer {
+    background: var(--ink-3);
+    border-top: 1px solid var(--border-2);
+    text-align: center;
+    padding: 22px;
+    margin-top: 70px;
+}
+.footer p { color: var(--text-3); font-size: 13px; }
+.footer strong { color: var(--gold); }
+
+
+/* ── LOADING SCREEN ───────────────────────────────────────────
+   Pantalla de carga que se muestra mientras se obtienen
+   los datos de la barbería desde la API.
+   ─────────────────────────────────────────────────────────── */
+.loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
+}
+.loading-screen .loading { width: 38px; height: 38px; border-width: 3px; }
+.loading-screen p { color: var(--text-3); font-size: 14px; }
+
+
+/* ── AVISO DE DÍA CERRADO ────────────────────────────────────
+   Aparece debajo del campo de fecha cuando el cliente
+   selecciona un día en que la barbería está cerrada.
+   ─────────────────────────────────────────────────────────── */
+.aviso-dia .alert-info {
+    background: rgba(201,168,76,.08);
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+    /* Secciones principales: menos margen vertical en tablet */
+    #servicios, #booking, #seccionResenaForm, #info-section { margin: 44px 0 !important; }
+}
+
+@media (max-width: 640px) {
+    /* Hero: menos padding */
+    .hero { padding: 98px 16px 36px; }
+
+    /* Nombre de barbería más compacto en móvil */
+    .hero h1 { font-size: clamp(26px, 8vw, 38px); margin-bottom: 8px; }
+
+    /* Meta (ciudad, dirección) apilado verticalmente */
+    .hero-meta { flex-direction: column; gap: 6px; font-size: 12px; }
+
+    /* Secciones con margen reducido */
+    #servicios, #booking, #seccionResenaForm, #info-section { margin: 36px 0 !important; }
+
+    /* Info strip pasa a 1 columna */
+    .info-strip { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Formulario de reserva en 1 columna */
+    .form-2col { grid-template-columns: 1fr; }
+    .form-2col .form-group { margin-bottom: 14px; }
+
+    /* Booking card con menos padding lateral */
+    .booking-card { padding: 22px 16px; }
+    .booking-card h2 { font-size: 19px; margin-bottom: 18px; }
+
+    /* Section headers más compactos */
+    .sec-head { margin-bottom: 20px; }
+    .sec-head h2 { font-size: 19px; }
+    .sec-icon { width: 32px; height: 32px; font-size: 12px; }
+
+    /* Hero buttons se apilan */
+    .hero-actions { flex-direction: column; align-items: center; margin-top: 20px; }
+    .btn-hero { width: 100%; max-width: 280px; justify-content: center; }
+
+    /* Reseñas: full width en móvil */
+    #resenasContainer { max-width: 100% !important; }
+}
+
+@media (max-width: 400px) {
+    /* En pantallas muy chicas */
+    .hero h1 { font-size: 26px; }
+    .hero-badge { font-size: 10px; padding: 4px 12px; }
+    .booking-card { padding: 18px 12px; border-radius: 14px; }
+}

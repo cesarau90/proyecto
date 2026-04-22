@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Barbería — Barber Registro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/barberia.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- Leaflet.js — librería gratis para mapas interactivos (sin API key) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+<!-- Skip link para navegación por teclado (accesibilidad) -->
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+<div id="toastContainer" aria-live="polite"></div>
+
+<div id="loading" class="loading-screen" role="status" aria-label="Cargando barbería">
+    <div class="loading"></div>
+    <p>Cargando barbería...</p>
+</div>
+
+<div id="content" style="display:none;">
+
+    <!-- NAVBAR: navegación fija para acceso rápido a secciones (C4) -->
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+        <div class="container navbar-inner">
+            <a href="#" class="navbar-brand"><i class="fas fa-cut"></i> <span id="navBrandName">Barber Registro</span></a>
+            <div class="navbar-links">
+                <a href="#servicios">Servicios</a>
+                <a href="#booking">Reservar</a>
+                <a href="#info-section">Info</a>
+                <!-- Botón toggle oscuro/claro — guarda preferencia en localStorage -->
+                <button id="btnTema" class="btn-tema" aria-label="Cambiar a modo claro" title="Cambiar tema">
+                    <i class="fas fa-sun" id="iconTema"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content container">
+            <div class="hero-badge"><i class="fas fa-cut"></i> Barber Registro</div>
+            <h1 id="nombreBarberia"></h1>
+            <div class="hero-meta">
+                <!-- Ciudad y dirección son links que llevan directo al mapa -->
+                <a href="#mapaContainer" id="ciudadWrap" style="display:none;text-decoration:none;color:var(--text-3);cursor:pointer;transition:color .2s;align-items:center;gap:5px;" onmouseover="this.style.color='var(--gold-light)'" onmouseout="this.style.color='var(--text-3)'"><i class="fas fa-location-dot" style="color:var(--gold);font-size:12px;line-height:1;"></i> <span id="ciudadBarberia"></span></a>
+                <a href="#mapaContainer" style="text-decoration:none;color:var(--text-3);cursor:pointer;display:flex;align-items:center;gap:5px;transition:color .2s;" onmouseover="this.style.color='var(--gold-light)'" onmouseout="this.style.color='var(--text-3)'"><i class="fas fa-map-marker-alt" style="color:var(--gold)"></i> <span id="direccionBarberia"></span></a>
+            </div>
+            <div class="hero-actions">
+                <a href="#booking" class="btn-hero btn-hero-primary"><i class="fas fa-calendar-plus"></i> Agendar Cita</a>
+                <a href="#servicios" class="btn-hero btn-hero-ghost"><i class="fas fa-cut"></i> Ver Servicios</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="container">
+
+        <!-- SERVICIOS -->
+        <section id="servicios" style="margin:60px 0;" aria-label="Servicios disponibles">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-cut"></i></div>
+                <h2>Nuestros Servicios</h2>
+            </div>
+            <div id="serviciosContainer" class="services-grid"></div>
+        </section>
+
+        <!-- BOOKING -->
+        <section id="booking" style="margin:60px 0;" aria-label="Formulario de reserva">
+            <div class="booking-card fade-up">
+                <h2><i class="fas fa-calendar-plus" style="color:var(--gold);margin-right:10px;"></i>Agenda tu Cita</h2>
+                <div id="mensaje" role="alert"></div>
+                <form id="reservaForm" class="form-2col">
+                    <div class="form-group"><label for="nombre">Tu Nombre *</label><input type="text" id="nombre" class="form-control" required placeholder="Juan Pérez"></div>
+                    <div class="form-group"><label for="email">Tu Email *</label><input type="email" id="email" class="form-control" required placeholder="tu@email.com"></div>
+                    <div class="form-group"><label for="telefono">Tu Teléfono *</label><input type="tel" id="telefono" class="form-control" required placeholder="+52 834 123 4567"></div>
+                    <div class="form-group"><label for="servicio">Servicio *</label><select id="servicio" class="form-control" required><option value="">Selecciona un servicio</option></select></div>
+                    <div class="form-group">
+                        <label for="fecha">Fecha *</label>
+                        <input type="date" id="fecha" class="form-control" required>
+                        <div id="avisoDia" class="aviso-dia" style="display:none;" role="alert"></div>
+                    </div>
+                    <div class="form-group"><label for="hora">Hora *</label><input type="time" id="hora" class="form-control" required></div>
+                    <div class="form-group form-full">
+                        <label style="display:flex;align-items:center;gap:9px;text-transform:none;font-size:14px;color:var(--text-2);cursor:pointer;letter-spacing:0;">
+                            <input type="checkbox" id="clienteRecurrente" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;">
+                            Ya he visitado esta barbería antes
+                        </label>
+                    </div>
+                    <div class="form-group form-full"><label for="comentarios">Comentarios (opcional)</label><textarea id="comentarios" class="form-control" placeholder="¿Algún detalle especial?"></textarea></div>
+                    <div class="form-full">
+                        <button type="submit" id="btnReservar" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;justify-content:center;box-shadow:0 4px 20px rgba(201,168,76,.25);">
+                            <i class="fas fa-check"></i> Confirmar Reserva
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- RESEÑA FORM -->
+        <section id="seccionResenaForm" style="margin:40px 0;" aria-label="Dejar una reseña">
+            <div class="booking-card" style="max-width:580px;">
+                <h2><i class="fas fa-pen" style="color:var(--gold);margin-right:10px;"></i>Deja tu Reseña</h2>
+                <div id="mensajeResena" role="alert"></div>
+                <form id="resenaForm">
+                    <div class="form-group"><label for="resena_cliente">Tu Nombre</label><input type="text" id="resena_cliente" class="form-control" required></div>
+                    <div class="form-group">
+                        <label>Calificación *</label>
+                        <div class="star-rating" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas">
+                            <input type="radio" id="s5" name="cal" value="5"><label for="s5" aria-label="5 estrellas">&#9733;</label>
+                            <input type="radio" id="s4" name="cal" value="4"><label for="s4" aria-label="4 estrellas">&#9733;</label>
+                            <input type="radio" id="s3" name="cal" value="3" checked><label for="s3" aria-label="3 estrellas">&#9733;</label>
+                            <input type="radio" id="s2" name="cal" value="2"><label for="s2" aria-label="2 estrellas">&#9733;</label>
+                            <input type="radio" id="s1" name="cal" value="1"><label for="s1" aria-label="1 estrella">&#9733;</label>
+                        </div>
+                    </div>
+                    <div class="form-group"><label for="resena_comentario">Comentario *</label><textarea id="resena_comentario" class="form-control" required placeholder="¿Cómo fue tu experiencia?" style="min-height:80px;"></textarea></div>
+                    <button type="submit" id="btnResena" class="btn btn-success" style="width:100%;padding:13px;font-size:14px;border-radius:12px;justify-content:center;">
+                        <i class="fas fa-paper-plane"></i> Enviar Reseña
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- RESEÑAS -->
+        <section style="margin:60px 0;" aria-label="Reseñas de clientes">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-star"></i></div>
+                <h2>Lo que dicen nuestros clientes</h2>
+            </div>
+            <div id="resenasContainer" style="max-width:680px;margin:0 auto;"></div>
+        </section>
+
+        <!-- INFO BARBERÍA -->
+        <section id="info-section" style="margin:60px 0;" aria-label="Información de la barbería">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-info-circle"></i></div>
+                <h2>Información</h2>
+            </div>
+            <div class="info-strip fade-up">
+                <div class="info-strip-item">
+                    <div class="info-strip-icon"><i class="fas fa-clock"></i></div>
+                    <div class="info-strip-text">
+                        <p>Horarios</p>
+                        <p id="horariosInfo"></p>
+                    </div>
+                </div>
+                <div class="info-strip-item">
+                    <div class="info-strip-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="info-strip-text">
+                        <p>Ubicación</p>
+                        <p id="ubicacionInfo"></p>
+                    </div>
+                </div>
+                <div class="info-strip-item" id="contactoItem">
+                    <div class="info-strip-icon"><i class="fas fa-phone"></i></div>
+                    <div class="info-strip-text">
+                        <p>Teléfono</p>
+                        <p id="telefonoInfo"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ MAPA DE UBICACIÓN ══════════════════════════════════════
+                 Muestra un mapa interactivo con la ubicación de la barbería.
+                 Usa Leaflet.js (librería gratis, sin API key) + OpenStreetMap.
+                 También incluye un botón para abrir la dirección en Google Maps.
+                 ═══════════════════════════════════════════════════════════ -->
+            <div id="mapaContainer" style="margin-top:20px;display:none;">
+                <!-- Mapa embebido de Leaflet -->
+                <div id="mapa" style="width:100%;height:300px;border-radius:var(--radius-lg);border:1px solid var(--border-2);overflow:hidden;"></div>
+                <!-- Botón para abrir en Google Maps -->
+                <div style="margin-top:12px;text-align:center;">
+                    <a id="btnGoogleMaps" href="#" target="_blank" class="btn btn-ghost" style="font-size:13px;">
+                        <i class="fas fa-external-link-alt"></i> Abrir en Google Maps
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>Powered by <a href="index.html" style="color:var(--gold-light);text-decoration:none;font-weight:600;">Barber Registro</a></p>
+    </footer>
+
+</div>
+
+<!-- Invisible holders que el JS necesita -->
+<div id="seccionFotos" style="display:none;"><div id="galeriaFotos"></div></div>
+
+<!-- Botón "volver arriba" para mejorar navegación (C4) -->
+<button class="back-to-top" id="backToTop" aria-label="Volver arriba">
+    <i class="fas fa-chevron-up"></i>
+</button>
+
+<script type="module" src="assets/js/barberia.js"></script>
+
+<!-- Script para el botón back-to-top y highlight de navbar -->
+<script>
+    // ── TOGGLE MODO OSCURO / CLARO ──────────────────────────────
+    // Aplica/quita data-tema="claro" en el body y guarda preferencia.
+    const btnTema = document.getElementById('btnTema');
+    const iconTema = document.getElementById('iconTema');
+
+    function aplicarTema(modo) {
+        if (modo === 'claro') {
+            document.body.setAttribute('data-tema', 'claro');
+            iconTema.className = 'fas fa-moon';
+            btnTema.setAttribute('aria-label', 'Cambiar a modo oscuro');
+        } else {
+            document.body.removeAttribute('data-tema');
+            iconTema.className = 'fas fa-sun';
+            btnTema.setAttribute('aria-label', 'Cambiar a modo claro');
+        }
+    }
+
+    // Cargar preferencia guardada (o default oscuro)
+    const temaGuardado = localStorage.getItem('barber-tema') || 'oscuro';
+    aplicarTema(temaGuardado);
+
+    if (btnTema) {
+        btnTema.addEventListener('click', () => {
+            const actual = document.body.getAttribute('data-tema') === 'claro' ? 'claro' : 'oscuro';
+            const nuevo = actual === 'claro' ? 'oscuro' : 'claro';
+            aplicarTema(nuevo);
+            localStorage.setItem('barber-tema', nuevo);
+        });
+    }
+
+    // Back to top: mostrar/ocultar según scroll
+    const btt = document.getElementById('backToTop');
+    if (btt) {
+        window.addEventListener('scroll', () => {
+            btt.classList.toggle('visible', window.scrollY > 400);
+        }, { passive: true });
+        btt.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    // Highlight link activo en el navbar según la sección visible
+    const navLinks = document.querySelectorAll('.navbar-links a');
+    if (navLinks.length) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navLinks.forEach(l => {
+                        l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+                    });
+                }
+            });
+        }, { rootMargin: '-40% 0px -55% 0px' });
+
+        // Observar las secciones principales
+        ['servicios', 'booking', 'info-section'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+    }
+</script>
+</body>
+</html>

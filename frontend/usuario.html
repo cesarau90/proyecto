@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel — Barber Registro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/usuario.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Skip link para navegación por teclado -->
+<a href="#servicios" class="skip-link">Saltar al contenido</a>
+<div id="toastContainer" aria-live="polite"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="container topbar-inner">
+        <div class="topbar-brand">
+            <div class="topbar-logo"><i class="fas fa-cut"></i></div>
+            <div class="topbar-text">
+                <h1>Barber Registro</h1>
+                <p id="nombreBarberia"></p>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <a id="linkVerPagina" href="#" target="_blank" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;"><i class="fas fa-external-link-alt"></i> Ver página</a>
+            <span id="emailUsuario" class="topbar-email"></span>
+            <button onclick="cerrarSesion()" class="btn btn-outline" style="padding:7px 12px;font-size:12px;"><i class="fas fa-sign-out-alt"></i> Salir</button>
+        </div>
+    </div>
+</div>
+
+<!-- TABS pill — WAI-ARIA tablist pattern: solo el tab activo es tabulable,
+     flechas izq/der mueven el foco entre tabs, Enter/Space activan.
+     Esto evita que el usuario tenga que pulsar Tab 5 veces para pasar los tabs. -->
+<div class="tabs-wrap">
+    <div class="tabs" role="tablist" aria-label="Secciones del panel">
+        <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="servicios" id="tab-servicios"><i class="fas fa-cut"></i> Servicios</div>
+        <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="reservas" id="tab-reservas"><i class="fas fa-calendar"></i> Reservas</div>
+        <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="resenas" id="tab-resenas"><i class="fas fa-star"></i> Reseñas</div>
+        <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="fotos" id="tab-fotos"><i class="fas fa-camera"></i> Fotos</div>
+        <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="configuracion" id="tab-configuracion"><i class="fas fa-cog"></i> Config</div>
+    </div>
+</div>
+
+<div class="container page-content">
+
+    <!-- SERVICIOS -->
+    <div id="servicios" class="section active" role="tabpanel" aria-labelledby="tab-servicios">
+        <div class="card">
+            <p class="panel-title"><i class="fas fa-plus-circle"></i> Agregar Servicio</p>
+            <form id="servicioForm" class="form-grid-2-sm">
+                <div class="form-group" style="margin:0;"><input type="text" id="nombreServicio" class="form-control" placeholder="Nombre del servicio *" required></div>
+                <div class="form-group" style="margin:0;"><input type="number" id="precioServicio" class="form-control" placeholder="Precio ($) *" required min="1"></div>
+                <div class="form-group" style="margin:0;grid-column:1/-1;"><textarea id="descripcionServicio" class="form-control" placeholder="Descripción (opcional)" style="min-height:44px;"></textarea></div>
+                <div class="form-group" style="margin:0;"><input type="number" id="duracionServicio" class="form-control" placeholder="Duración (min)" value="30" min="5"></div>
+                <button type="submit" class="btn btn-success" style="grid-column:1/-1;justify-content:center;"><i class="fas fa-plus"></i> Agregar Servicio</button>
+            </form>
+        </div>
+        <div class="info-box"><i class="fas fa-lightbulb"></i>Haz clic en la imagen de un servicio para asignarle una foto de tu galería.</div>
+        <div id="listaServicios" class="srv-grid"></div>
+    </div>
+
+    <!-- RESERVAS -->
+    <div id="reservas" class="section" role="tabpanel" aria-labelledby="tab-reservas">
+        <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+                <p class="panel-title" style="margin-bottom:0;"><i class="fas fa-calendar-alt"></i> Reservas</p>
+                <button onclick="exportarCSV()" class="btn btn-ghost" style="font-size:12px;padding:7px 12px;" aria-label="Exportar todas las reservas a CSV">
+                    <i class="fas fa-download"></i> Exportar CSV
+                </button>
+            </div>
+            <div id="listaReservas"></div>
+        </div>
+    </div>
+
+    <!-- RESEÑAS -->
+    <div id="resenas" class="section" role="tabpanel" aria-labelledby="tab-resenas">
+        <div class="card"><p class="panel-title"><i class="fas fa-star"></i> Reseñas de clientes</p><div id="listaResenas"></div></div>
+    </div>
+
+    <!-- FOTOS -->
+    <div id="fotos" class="section" role="tabpanel" aria-labelledby="tab-fotos">
+        <div class="card">
+            <p class="panel-title"><i class="fas fa-camera"></i> Galería de Fotos</p>
+            <p style="color:var(--text-3);margin-bottom:16px;font-size:13px;">Sube fotos de tu barbería y cortes (JPG, PNG, WEBP — máx. 5MB). Luego asígnalas a tus servicios.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+                <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="file" id="fotoInput" accept="image/jpeg,image/png,image/webp" class="form-control"></div>
+                <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="text" id="fotoDesc" class="form-control" placeholder="Descripción (opcional)"></div>
+                <button onclick="subirFoto()" id="btnFoto" class="btn btn-success" style="white-space:nowrap;"><i class="fas fa-upload"></i> Subir</button>
+            </div>
+            <div id="msgFoto"></div>
+        </div>
+        <div id="galeriaAdmin" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:4px;"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="configuracion" class="section" role="tabpanel" aria-labelledby="tab-configuracion">
+        <div class="card" style="max-width:720px;">
+            <p class="panel-title"><i class="fas fa-store"></i> Info de la Barbería</p>
+            <form id="configForm">
+                <div class="form-grid-2">
+                    <div class="form-group" style="margin:0;"><label>Nombre</label><input type="text" id="cfgNombre" class="form-control" required></div>
+                    <div class="form-group" style="margin:0;"><label>Teléfono</label><input type="tel" id="cfgTelefono" class="form-control"></div>
+                    <div class="form-group" style="margin:0;"><label>Dirección</label><input type="text" id="cfgDireccion" class="form-control" required></div>
+                    <div class="form-group" style="margin:0;"><label>Ciudad</label><input type="text" id="cfgCiudad" class="form-control"></div>
+                </div>
+
+                <div style="margin-top:24px;">
+                    <label style="display:block;margin-bottom:10px;font-weight:600;color:var(--text-2);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Horarios de Atención</label>
+                    <div id="cfgHorariosGrid" style="display:grid;gap:8px;"></div>
+                </div>
+
+                <!-- ── COLOR DE TEMA ──────────────────────────────────────
+                     Personaliza el color de acento de la página pública.
+                     Cada barbería puede tener su propia identidad visual.
+                     ──────────────────────────────────────────────────── -->
+                <div style="margin-top:28px;">
+                    <label style="display:block;margin-bottom:12px;font-weight:600;color:var(--text-2);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">
+                        <i class="fas fa-palette" style="color:var(--gold);margin-right:6px;"></i>Color de Identidad
+                    </label>
+                    <p style="font-size:12px;color:var(--text-3);margin-bottom:14px;margin-top:0;">Elige el color principal de tu página pública para diferenciarte.</p>
+                    <div class="tema-paleta" id="temaPaleta">
+                        <button type="button" class="tema-color-btn" data-color="#c9a847" title="Dorado" style="background:#c9a847;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#e05252" title="Rojo" style="background:#e05252;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#60a5fa" title="Azul" style="background:#60a5fa;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#3ecf8e" title="Verde" style="background:#3ecf8e;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#a78bfa" title="Violeta" style="background:#a78bfa;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#fb923c" title="Naranja" style="background:#fb923c;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#f472b6" title="Rosa" style="background:#f472b6;"></button>
+                        <button type="button" class="tema-color-btn" data-color="#94a3b8" title="Plata" style="background:#94a3b8;"></button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+                        <label style="font-size:12px;color:var(--text-3);letter-spacing:0;text-transform:none;font-weight:500;">Personalizado:</label>
+                        <input type="color" id="cfgTemaCustom" style="width:38px;height:32px;border:1px solid var(--border-2);border-radius:6px;background:transparent;cursor:pointer;padding:2px;">
+                        <input type="text" id="cfgTemaColor" class="form-control" style="max-width:110px;font-size:13px;" placeholder="#c9a847" maxlength="20">
+                    </div>
+                </div>
+
+                <!-- Textarea oculto que guarda el valor final para el backend -->
+                <textarea id="cfgHorarios" style="display:none;"></textarea>
+
+                <button type="submit" class="btn btn-primary" style="justify-content:center;padding:12px 24px;margin-top:28px;"><i class="fas fa-save"></i> Guardar Cambios</button>
+            </form>
+        </div>
+        <div class="card card-gold" style="max-width:720px;margin-top:0;">
+            <p class="panel-title"><i class="fas fa-link"></i> Link para Clientes</p>
+            <div class="link-row">
+                <input type="text" id="linkPublico" class="form-control" readonly>
+                <button onclick="copiarLink('linkPublico')" class="btn btn-primary" style="padding:12px 14px;"><i class="fas fa-copy"></i> Copiar</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL FOTO -->
+<div id="modalFoto" class="modal-overlay" onclick="cerrarModal(event)">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-image" style="color:var(--gold);margin-right:8px;"></i>Elige foto para el servicio</h3>
+            <button class="modal-close" onclick="document.getElementById('modalFoto').classList.remove('open')">&times;</button>
+        </div>
+        <div id="modalFotoGrid" class="foto-grid"></div>
+        <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px;">
+            <button onclick="document.getElementById('modalFoto').classList.remove('open')" class="btn btn-outline">Cancelar</button>
+            <button onclick="confirmarFoto()" class="btn btn-primary"><i class="fas fa-check"></i> Asignar foto</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="assets/js/usuario.js"></script>
+</body>
+</html>

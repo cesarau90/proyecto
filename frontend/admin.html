@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Barber Registro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- ══════════════════════════════════════════════════════════
+         ADMIN — Panel de control de la plataforma.
+         Tiene dos vistas:
+         1. loginView: formulario de login exclusivo del admin
+         2. panelView: dashboard con estadísticas + listado de barberías
+         Solo se muestra una a la vez (controlado por JS).
+         ═══════════════════════════════════════════════════════ -->
+
+    <!-- ── VISTA 1: LOGIN DEL ADMIN ──────────────────────────
+         Credenciales por defecto: admin@barberregistro.com / admin123
+         (se crean con npm run seed en el backend)
+         ──────────────────────────────────────────────────────── -->
+    <div id="loginView" class="login-wrap">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-shield-alt"></i> Admin</h1>
+                <p style="opacity:0.6;margin-top:6px;">Barber Registro - Panel de Control</p>
+            </div>
+            <div class="card">
+                <!-- Mensajes de error del login -->
+                <div id="loginMsg" role="alert"></div>
+                <div class="form-group"><label for="saEmail">Email</label><input type="email" id="saEmail" class="form-control" placeholder="admin@barberregistro.com" autofocus></div>
+                <div class="form-group"><label for="saPw">Contraseña</label><input type="password" id="saPw" class="form-control" placeholder="Contraseña"></div>
+                <button id="btnSaLogin" onclick="saLogin()" class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;justify-content:center;">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── VISTA 2: PANEL DEL ADMIN ──────────────────────
+         Se muestra después del login exitoso.
+         Contiene: topbar, stats grid y listado de barberías.
+         ──────────────────────────────────────────────────────── -->
+    <div id="panelView" class="panel-wrap">
+
+        <!-- Topbar con nombre y botón de salir -->
+        <div class="sa-topbar">
+            <div class="container sa-topbar-inner">
+                <div><h1><i class="fas fa-cut"></i> Barber Registro <span class="badge-sa">ADMIN</span></h1></div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span id="saName" style="font-size:13px;opacity:0.7;"></span>
+                    <button onclick="saLogout()" class="btn-sa"><i class="fas fa-sign-out-alt"></i> Salir</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" style="margin-top:32px;padding-bottom:60px;">
+
+            <!-- Stats -->
+            <p class="admin-section-title"><i class="fas fa-chart-bar"></i> Resumen de la plataforma</p>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="num" id="statTotal">0</div><div class="label">Barberías Registradas</div></div>
+                <div class="stat-card"><div class="num" id="statActivas">0</div><div class="label">Activas</div></div>
+                <div class="stat-card"><div class="num" id="statReservas">0</div><div class="label">Total Reservas</div></div>
+            </div>
+
+            <!-- Listado de barberías -->
+            <p class="admin-section-title" style="margin-top:36px;"><i class="fas fa-store"></i> Barberías registradas</p>
+            <div id="listaBarberias"></div>
+        </div>
+    </div>
+
+    <!-- ══ LÓGICA DEL ADMIN ═══════════════════════════════
+         - Login con credenciales de admin
+         - Dashboard de estadísticas (total barberías, activas, reservas)
+         - Listado de barberías con acciones: activar/desactivar, editar, ver reservas
+         - Cada barbería tiene un panel desplegable de detalles
+         ═══════════════════════════════════════════════════════ -->
+    <script type="module">
+        import { config, auth } from './assets/js/config.js';
+
+        // Si ya tiene sesión como admin, mostrar panel directamente
+        if (auth.estaLogueado() && auth.getRole() === 'admin') { showPanel(); }
+
+        // Enter en contraseña → ejecutar login
+        document.getElementById('saPw').addEventListener('keydown', e => { if(e.key==='Enter') window.saLogin(); });
+
+        // Función de login del admin
+        window.saLogin = async function() {
+            const email = document.getElementById('saEmail').value.trim();
+            const pw = document.getElementById('saPw').value;
+            const btn = document.getElementById('btnSaLogin');
+            const msg = document.getElementById('loginMsg');
+            if (!email||!pw) { msg.innerHTML='<div class="alert alert-error">Completa los campos</div>'; return; }
+            btn.disabled=true; btn.innerHTML='<span class="loading"></span> Entrando...'; msg.innerHTML='';
+            try {
+                const r = await fetch(`${config.apiURL}/auth/admin/login`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error||'Error');
+                auth.guardarSesion(d.token, d.admin, 'admin');
+                showPanel();
+            } catch(e) { msg.innerHTML=`<div class="alert alert-error">${e.message}</div>`; }
+            finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Entrar'; }
+        };
+
+        // Cerrar sesión: limpiar sessionStorage y recargar
+        window.saLogout = function() { if(confirm('Cerrar sesion?')) { sessionStorage.clear(); location.reload(); } };
+
+        // Mostrar el panel después de login exitoso: oculta login, muestra dashboard
+        async function showPanel() {
+            document.getElementById('loginView').style.display='none';
+            document.getElementById('panelView').style.display='block';
+            const sa = auth.getUserData();
+            if (sa) document.getElementById('saName').textContent = sa.nombre || sa.email;
+            await loadStats();
+            await loadBarberias();
+        }
+
+        // Cargar estadísticas generales (total barberías, activas, reservas)
+        async function loadStats() {
+            try {
+                const s = await (await fetch(`${config.apiURL}/admin/stats`,{headers:auth.headers()})).json();
+                document.getElementById('statTotal').textContent = s.barberias;
+                document.getElementById('statActivas').textContent = s.activas;
+                document.getElementById('statReservas').textContent = s.reservas;
+            } catch(e) { console.error(e); }
+        }
+
+        // Cargar listado de todas las barberías con sus estadísticas
+        async function loadBarberias() {
+            try {
+                const bs = await (await fetch(`${config.apiURL}/admin/barberias`,{headers:auth.headers()})).json();
+                const cont = document.getElementById('listaBarberias');
+                if (!bs.length) { cont.innerHTML='<p style="color:var(--text-3);text-align:center;padding:30px;">No hay barberias registradas</p>'; return; }
+                cont.innerHTML = bs.map(b => `
+                    <div class="barb-card" id="barb-${b.id}" data-horarios="${(b.horarios||'').replace(/"/g,'&quot;')}">
+                        <div class="barb-header">
+                            <div class="barb-info">
+                                <h3>${b.nombre} <span style="font-size:12px;color:var(--text-3);font-weight:400;">(${b.codigo_unico})</span></h3>
+                                <p style="font-size:13px;color:var(--text-3);">${b.dueno_nombre} - ${b.dueno_email}</p>
+                                <div class="barb-meta">
+                                    <span class="barb-meta-item"><i class="fas fa-map-marker-alt"></i> ${b.ciudad||'Sin ciudad'}</span>
+                                    <span class="barb-meta-item"><i class="fas fa-calendar"></i> ${b.total_reservas} reservas</span>
+                                    <span class="barb-meta-item"><i class="fas fa-cut"></i> ${b.total_servicios} servicios</span>
+                                    <span class="barb-meta-item"><i class="fas fa-star" style="color:#f59e0b;"></i> ${b.calificacion_promedio}</span>
+                                    <span class="barb-meta-item"><i class="fas fa-comment"></i> ${b.total_resenas} reseñas</span>
+                                </div>
+                            </div>
+                            <div class="barb-actions">
+                                <button class="toggle-btn ${b.activa?'toggle-activa':'toggle-inactiva'}" onclick="toggleActiva(${b.id},${!b.activa})">
+                                    ${b.activa?'<i class="fas fa-check-circle"></i> Activa':'<i class="fas fa-ban"></i> Inactiva'}
+                                </button>
+                                <button class="btn btn-outline btn-detail-toggle" style="padding:6px 12px;font-size:12px;width:auto;" onclick="toggleDetail(${b.id})">
+                                    <i class="fas fa-eye"></i> Detalles
+                                </button>
+                            </div>
+                        </div>
+                        <div class="detail-panel" id="detail-${b.id}">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                                <div class="form-group" style="margin:0;"><label>Nombre</label><input type="text" class="form-control" id="ed-nombre-${b.id}" value="${b.nombre||''}"></div>
+                                <div class="form-group" style="margin:0;"><label>Teléfono dueño</label><input type="tel" class="form-control" id="ed-tel-${b.id}" value="${b.dueno_telefono||''}"></div>
+                                <div class="form-group" style="margin:0;"><label>Dirección</label><input type="text" class="form-control" id="ed-dir-${b.id}" value="${b.direccion||''}"></div>
+                                <div class="form-group" style="margin:0;"><label>Ciudad</label><input type="text" class="form-control" id="ed-ciudad-${b.id}" value="${b.ciudad||''}"></div>
+                            </div>
+                            <div style="margin-top:16px;">
+                                <label style="display:block;margin-bottom:10px;font-weight:600;color:var(--text-2);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Horarios de Atención</label>
+                                <div id="ed-horarios-grid-${b.id}" class="ed-horarios-grid" style="display:grid;gap:8px;"></div>
+                            </div>
+                            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                                <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;width:auto;" onclick="guardarEdicion(${b.id})"><i class="fas fa-save"></i> Guardar</button>
+                                <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarReservas(${b.id})"><i class="fas fa-calendar-alt"></i> Historial de Reservas</button>
+                                <a href="barberia.html?codigo=${b.codigo_unico}" target="_blank" class="btn btn-outline" style="padding:8px 18px;font-size:13px;width:auto;text-decoration:none;"><i class="fas fa-external-link-alt"></i> Ver página pública</a>
+                            </div>
+                            <div id="ed-msg-${b.id}" style="margin-top:8px;"></div>
+                            <div id="reservas-${b.id}" style="margin-top:14px;"></div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+
+        // Expandir/colapsar panel de detalles de una barbería.
+        // Cierra cualquier otro panel abierto antes de abrir el nuevo (acordeón).
+        window.toggleDetail = function(id) {
+            const panel = document.getElementById(`detail-${id}`);
+            const wasOpen = panel.classList.contains('open');
+
+            // Cerrar todos los paneles abiertos
+            document.querySelectorAll('.detail-panel.open').forEach(p => {
+                p.classList.remove('open');
+                const barbCard = p.closest('.barb-card');
+                barbCard?.classList.remove('is-open');
+                // Actualizar el botón correspondiente
+                const btn = barbCard?.querySelector('.btn-detail-toggle');
+                if (btn) { btn.innerHTML = '<i class="fas fa-eye"></i> Detalles'; }
+            });
+
+            // Si no estaba abierto, abrirlo ahora
+            if (!wasOpen) {
+                panel.classList.add('open');
+                // Actualizar botón activo
+                const card = document.getElementById(`barb-${id}`);
+                card?.classList.add('is-open');
+                const btn = card?.querySelector('.btn-detail-toggle');
+                if (btn) { btn.innerHTML = '<i class="fas fa-chevron-up"></i> Cerrar'; }
+                // Construir grid de horarios la primera vez que se abre
+                const grid = document.getElementById(`ed-horarios-grid-${id}`);
+                if (grid && grid.children.length === 0) {
+                    buildEdHorariosGrid(id);
+                }
+                // Desplazar suavemente al panel
+                panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        };
+
+        /* ── GRID INTERACTIVO DE HORARIOS (igual que index.html) ──────
+           Checkboxes por día + selectores de hora de apertura/cierre.
+           Más intuitivo que el textarea que había antes, donde el admin
+           tenía que escribir el formato exacto a mano. */
+        const edDias = [
+            { id: 'lunes', nombre: 'Lunes' }, { id: 'martes', nombre: 'Martes' },
+            { id: 'miercoles', nombre: 'Miércoles' }, { id: 'jueves', nombre: 'Jueves' },
+            { id: 'viernes', nombre: 'Viernes' }, { id: 'sabado', nombre: 'Sábado' },
+            { id: 'domingo', nombre: 'Domingo' }
+        ];
+        const edHorasAp = ['06:00','07:00','08:00','09:00','10:00','11:00'];
+        const edHorasCi = ['14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
+
+        function buildEdHorariosGrid(barbId) {
+            const grid = document.getElementById(`ed-horarios-grid-${barbId}`);
+            if (!grid) return;
+
+            // Obtener los horarios actuales del textarea oculto o del DOM
+            const barbCard = document.getElementById(`barb-${barbId}`);
+            const barbData = barbCard ? barbCard.dataset.horarios || '' : '';
+
+            edDias.forEach(d => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:grid;grid-template-columns:140px 1fr 1fr 80px;gap:10px;align-items:center;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);';
+                row.id = `ed-row-${barbId}-${d.id}`;
+
+                row.innerHTML = `
+                    <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;font-size:13px;color:var(--text-2);">
+                        <input type="checkbox" id="ed-ck-${barbId}-${d.id}" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;"> ${d.nombre}
+                    </label>
+                    <select id="ed-ap-${barbId}-${d.id}" disabled style="padding:8px 10px;background:var(--ink);border:1px solid var(--border-2);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);color-scheme:dark;">
+                        ${edHorasAp.map(h => `<option value="${h}" ${h==='09:00'?'selected':''}>${h}</option>`).join('')}
+                    </select>
+                    <select id="ed-ci-${barbId}-${d.id}" disabled style="padding:8px 10px;background:var(--ink);border:1px solid var(--border-2);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);color-scheme:dark;">
+                        ${edHorasCi.map(h => `<option value="${h}" ${h==='18:00'?'selected':''}>${h}</option>`).join('')}
+                    </select>
+                    <span id="ed-bg-${barbId}-${d.id}" style="background:rgba(224,82,82,0.1);color:var(--red);padding:4px 10px;border-radius:16px;font-size:11px;font-weight:700;text-align:center;border:1px solid rgba(224,82,82,0.2);">Cerrado</span>`;
+                grid.appendChild(row);
+
+                const ck = row.querySelector(`#ed-ck-${barbId}-${d.id}`);
+                ck.addEventListener('change', function() {
+                    const ap = row.querySelector(`#ed-ap-${barbId}-${d.id}`);
+                    const ci = row.querySelector(`#ed-ci-${barbId}-${d.id}`);
+                    const bg = row.querySelector(`#ed-bg-${barbId}-${d.id}`);
+                    row.style.borderColor = this.checked ? 'rgba(201,168,76,0.18)' : 'rgba(255,255,255,0.07)';
+                    row.style.background = this.checked ? 'var(--ink-4)' : 'var(--ink-3)';
+                    ap.disabled = !this.checked;
+                    ci.disabled = !this.checked;
+                    bg.style.display = this.checked ? 'none' : 'block';
+                });
+            });
+
+            // Rellenar con los horarios guardados de esta barbería
+            rellenarEdHorarios(barbId, barbData);
+        }
+
+        /* Parsea el string "Lunes: 09:00 - 18:00\nMartes: Cerrado\n..."
+           y rellena los checkboxes y selects del grid de edición */
+        function rellenarEdHorarios(barbId, horariosStr) {
+            if (!horariosStr) return;
+            const lineas = horariosStr.split('\n');
+
+            edDias.forEach(d => {
+                const linea = lineas.find(l =>
+                    l.split(':')[0].trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === d.id
+                );
+                const ck = document.getElementById(`ed-ck-${barbId}-${d.id}`);
+                const ap = document.getElementById(`ed-ap-${barbId}-${d.id}`);
+                const ci = document.getElementById(`ed-ci-${barbId}-${d.id}`);
+                const bg = document.getElementById(`ed-bg-${barbId}-${d.id}`);
+                const row = document.getElementById(`ed-row-${barbId}-${d.id}`);
+                if (!ck || !ap || !ci || !bg || !row) return;
+
+                if (linea) {
+                    const contenido = linea.substring(linea.indexOf(':') + 1).trim().toLowerCase();
+                    if (contenido === 'cerrado') {
+                        ck.checked = false;
+                        ap.disabled = true; ci.disabled = true;
+                        bg.style.display = 'block';
+                    } else {
+                        const m = contenido.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+                        ck.checked = true;
+                        ap.disabled = false; ci.disabled = false;
+                        bg.style.display = 'none';
+                        row.style.borderColor = 'rgba(201,168,76,0.18)';
+                        row.style.background = 'var(--ink-4)';
+                        if (m) { ap.value = m[1]; ci.value = m[2]; }
+                    }
+                }
+            });
+        }
+
+        /* Lee el grid de edición y genera el string de horarios */
+        function generarEdHorarios(barbId) {
+            return edDias.map(d => {
+                const ck = document.getElementById(`ed-ck-${barbId}-${d.id}`);
+                if (ck && ck.checked) {
+                    const ap = document.getElementById(`ed-ap-${barbId}-${d.id}`).value;
+                    const ci = document.getElementById(`ed-ci-${barbId}-${d.id}`).value;
+                    return `${d.nombre}: ${ap} - ${ci}`;
+                }
+                return `${d.nombre}: Cerrado`;
+            }).join('\n');
+        }
+
+        // Activar o desactivar una barbería
+        window.toggleActiva = async function(id, nuevoEstado) {
+            if(!confirm(nuevoEstado?'¿Activar esta barbería?':'¿Desactivar esta barbería?')) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/barberias/${id}`,{method:'PUT',headers:auth.headers(),body:JSON.stringify({activa:nuevoEstado})});
+                if (!r.ok) throw new Error();
+                await loadBarberias();
+                await loadStats();
+            } catch { alert('Error al cambiar estado'); }
+        };
+
+        // Guardar cambios — ahora lee horarios del grid interactivo
+        window.guardarEdicion = async function(id) {
+            const datos = {
+                nombre: document.getElementById(`ed-nombre-${id}`).value.trim(),
+                dueno_telefono: document.getElementById(`ed-tel-${id}`).value.trim(),
+                direccion: document.getElementById(`ed-dir-${id}`).value.trim(),
+                ciudad: document.getElementById(`ed-ciudad-${id}`).value.trim(),
+                horarios: generarEdHorarios(id)
+            };
+            const msg = document.getElementById(`ed-msg-${id}`);
+            try {
+                const r = await fetch(`${config.apiURL}/admin/barberias/${id}`,{method:'PUT',headers:auth.headers(),body:JSON.stringify(datos)});
+                if (!r.ok) throw new Error();
+                msg.innerHTML='<div class="alert alert-success" style="padding:8px;font-size:13px;"><i class="fas fa-check-circle"></i> ¡Cambios guardados!</div>';
+                setTimeout(() => { msg.innerHTML = ''; }, 3000);
+                await loadBarberias();
+            } catch { msg.innerHTML='<div class="alert alert-error" style="padding:8px;font-size:13px;"><i class="fas fa-exclamation-circle"></i> Error al guardar</div>'; }
+        };
+
+        // Historial de reservas con resumen de estadísticas por estado
+        window.cargarReservas = async function(id) {
+            const cont = document.getElementById(`reservas-${id}`);
+            if (cont.innerHTML.trim()) { cont.innerHTML = ''; return; }
+            cont.innerHTML = '<p style="color:var(--text-3);padding:10px;"><span class="loading"></span> Cargando historial...</p>';
+            try {
+                const rs = await (await fetch(`${config.apiURL}/admin/barberias/${id}/reservas`, { headers: auth.headers() })).json();
+                if (!rs.length) {
+                    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);border:1px dashed var(--border-2);border-radius:var(--radius);"><i class="fas fa-calendar" style="font-size:24px;opacity:.3;display:block;margin-bottom:8px;"></i>Esta barbería aún no tiene reservas.</div>';
+                    return;
+                }
+
+                // Calcular resumen por estado
+                const stats = { pendiente: 0, confirmada: 0, completada: 0, cancelada: 0 };
+                rs.forEach(r => { if (stats[r.estado] !== undefined) stats[r.estado]++; });
+
+                const thStyle = 'padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;';
+                const estadoColors = { pendiente:'#f59e0b', confirmada:'var(--green)', completada:'#60a5fa', cancelada:'var(--red)' };
+
+                cont.innerHTML = `
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                        <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);text-align:center;">
+                            <div style="font-size:20px;font-weight:700;color:#f59e0b;">${stats.pendiente}</div>
+                            <div style="font-size:11px;color:var(--text-3);">Pendientes</div>
+                        </div>
+                        <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);text-align:center;">
+                            <div style="font-size:20px;font-weight:700;color:var(--green);">${stats.confirmada}</div>
+                            <div style="font-size:11px;color:var(--text-3);">Confirmadas</div>
+                        </div>
+                        <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);text-align:center;">
+                            <div style="font-size:20px;font-weight:700;color:#60a5fa;">${stats.completada}</div>
+                            <div style="font-size:11px;color:var(--text-3);">Completadas</div>
+                        </div>
+                        <div style="flex:1;min-width:100px;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);text-align:center;">
+                            <div style="font-size:20px;font-weight:700;color:var(--red);">${stats.cancelada}</div>
+                            <div style="font-size:11px;color:var(--text-3);">Canceladas</div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;border-radius:var(--radius);">
+                        <table style="width:100%;border-collapse:collapse;background:var(--ink-3);border-radius:var(--radius);overflow:hidden;font-size:13px;">
+                            <thead style="background:var(--ink-4);">
+                                <tr>
+                                    <th style="${thStyle}">Cliente</th>
+                                    <th style="${thStyle}">Contacto</th>
+                                    <th style="${thStyle}">Servicio</th>
+                                    <th style="${thStyle}">Fecha</th>
+                                    <th style="${thStyle}">Hora</th>
+                                    <th style="${thStyle}">Estado</th>
+                                    <th style="${thStyle}"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rs.map(r => {
+                                    let fecha = '-';
+                                    try { const p = r.fecha.substring(0,10).split('-'); fecha = new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}); } catch {}
+                                    const color = estadoColors[r.estado] || 'var(--text-3)';
+                                    return `<tr style="border-top:1px solid var(--border-2);">
+                                        <td style="padding:9px 12px;color:var(--text);font-weight:600;">${r.nombre}</td>
+                                        <td style="padding:9px 12px;color:var(--text-2);font-size:12px;">${r.email}<br>${r.telefono}</td>
+                                        <td style="padding:9px 12px;color:var(--text-2);">${r.servicio}</td>
+                                        <td style="padding:9px 12px;color:var(--text-2);">${fecha}</td>
+                                        <td style="padding:9px 12px;color:var(--text-2);">${(r.hora||'').substring(0,5)}</td>
+                                        <td style="padding:9px 12px;">
+                                            <select onchange="cambiarEstadoAdmin(${r.id},this.value,${id})" style="padding:5px 8px;border-radius:6px;border:1px solid var(--border-2);font-size:12px;background:var(--ink-4);color:var(--text-2);font-family:'DM Sans',sans-serif;cursor:pointer;color-scheme:dark;">
+                                                <option value="pendiente" ${r.estado==='pendiente'?'selected':''}>⏳ Pendiente</option>
+                                                <option value="confirmada" ${r.estado==='confirmada'?'selected':''}>✅ Confirmada</option>
+                                                <option value="completada" ${r.estado==='completada'?'selected':''}>🎉 Completada</option>
+                                                <option value="cancelada" ${r.estado==='cancelada'?'selected':''}>❌ Cancelada</option>
+                                            </select>
+                                        </td>
+                                        <td style="padding:9px 12px;">
+                                            <button onclick="eliminarReservaAdmin(${r.id},${id})" style="background:var(--red);color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Eliminar reserva"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>${r.comentarios ? `<tr><td colspan="7" style="background:var(--ink-4);font-size:12px;color:var(--text-3);padding:6px 14px;font-style:italic;"><i class="fas fa-comment" style="margin-right:6px;opacity:.5;"></i>"${r.comentarios}"</td></tr>` : ''}`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style="text-align:right;color:var(--text-3);font-size:11px;margin-top:6px;">${rs.length} reserva${rs.length!==1?'s':''} en total</p>`;
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<p style="color:var(--red);padding:10px;font-size:13px;">Error al cargar reservas</p>';
+            }
+        };
+
+        // Cambiar estado de una reserva desde el panel admin
+        window.cambiarEstadoAdmin = async function(reservaId, nuevoEstado, barberiaId) {
+            try {
+                const r = await fetch(`${config.apiURL}/admin/reservas/${reservaId}/estado`, {
+                    method: 'PATCH', headers: auth.headers(), body: JSON.stringify({ estado: nuevoEstado })
+                });
+                if (!r.ok) throw new Error();
+            } catch {
+                alert('Error al cambiar estado');
+                // Recargar para revertir el select al estado real
+                document.getElementById(`reservas-${barberiaId}`).innerHTML = '';
+                cargarReservas(barberiaId);
+            }
+        };
+
+        // Eliminar una reserva desde el panel admin
+        window.eliminarReservaAdmin = async function(reservaId, barberiaId) {
+            if (!confirm('¿Eliminar esta reserva?')) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/reservas/${reservaId}`, {
+                    method: 'DELETE', headers: auth.headers()
+                });
+                if (!r.ok) throw new Error();
+                // Recargar la tabla de reservas y las stats globales
+                document.getElementById(`reservas-${barberiaId}`).innerHTML = '';
+                cargarReservas(barberiaId);
+                await loadStats();
+            } catch { alert('Error al eliminar reserva'); }
+        };
+    </script>
+</body>
+</html>
