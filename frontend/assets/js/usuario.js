@@ -21,7 +21,7 @@
  */
 
 import { config, auth } from './config.js';
-import { toast, fmtFecha } from './utils.js';
+import { toast, fmtFecha, confirmar } from './utils.js';
 
 // IIFE para bloquear la página antes de que el DOM termine de renderizar;
 // un guard en DOMContentLoaded llegaría demasiado tarde y el usuario vería contenido protegido.
@@ -124,6 +124,14 @@ window.cambiarTab = function (tabId, tabEl) {
             nextIdx = 0;
         } else if (e.key === 'End') {
             nextIdx = tabs.length - 1;
+        } else if (e.key === 'Tab') {
+            // Tab avanza al siguiente tab; en el último, sale del tablist (comportamiento normal)
+            // Shift+Tab retrocede al anterior; en el primero, sale del tablist
+            if (!e.shiftKey && idx < tabs.length - 1) {
+                nextIdx = idx + 1;
+            } else if (e.shiftKey && idx > 0) {
+                nextIdx = idx - 1;
+            }
         } else if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             const panelId = currentTab.getAttribute('aria-controls');
@@ -259,7 +267,7 @@ document.getElementById('servicioForm').addEventListener('submit', async e => {
  *  Se usa soft-delete en vez de DELETE real para preservar el historial
  *  de reservas anteriores que referencian este servicio por nombre. */
 window.eliminarServicio = async id => {
-    if (!confirm('¿Eliminar este servicio?')) return;
+    if (!await confirmar('Eliminar servicio', '¿Estás seguro de que quieres eliminar este servicio? Esta acción no se puede deshacer.', 'Eliminar')) return;
     try {
         await fetch(`${config.apiURL}/mi-barberia/servicios/${id}`, { method: 'DELETE', headers: auth.headers() });
         toast('Servicio eliminado', 'info');
@@ -375,7 +383,7 @@ async function cargarReservas() {
                     <option value="completada" ${r.estado === 'completada' ? 'selected' : ''}>🎉 Completada</option>
                     <option value="cancelada"  ${r.estado === 'cancelada' ? 'selected' : ''}>❌ Cancelada</option>
                 </select></td>
-                <td><button onclick="eliminarReserva(${r.id})" class="btn btn-danger" style="padding:5px 9px;font-size:12px;width:auto;" aria-label="Eliminar reserva de ${r.nombre}"><i class="fas fa-trash"></i></button></td>
+                <td><button onclick="eliminarReserva(${r.id}, '${r.nombre.replace(/'/g, "\\'")}')" class="btn btn-danger" style="padding:5px 9px;font-size:12px;width:auto;" aria-label="Eliminar reserva de ${r.nombre}"><i class="fas fa-trash"></i></button></td>
             </tr>${r.comentarios ? `<tr><td colspan="7" style="background:var(--ink-3);font-size:12px;color:var(--text-3);padding:6px 14px;font-style:italic;">"${r.comentarios}"</td></tr>` : ''}`).join('')}
         </tbody></table></div>
         <p style="text-align:right;color:var(--text-3);font-size:12px;margin-top:10px;">${rs.length} reserva${rs.length !== 1 ? 's' : ''}</p>`;
@@ -427,8 +435,8 @@ window.cambiarEstado = async (id, e) => {
     }
 };
 
-window.eliminarReserva = async id => {
-    if (!confirm('¿Eliminar esta reserva?')) return;
+window.eliminarReserva = async (id, nombre) => {
+    if (!await confirmar('Eliminar reserva', `¿Eliminar la reserva de <strong>${nombre}</strong>? Esta acción no se puede deshacer.`, 'Eliminar')) return;
     try {
         await fetch(`${config.apiURL}/mi-barberia/reservas/${id}`, { method: 'DELETE', headers: auth.headers() });
         toast('Reserva eliminada', 'info');
@@ -528,7 +536,7 @@ window.subirFoto = async () => {
 };
 
 window.eliminarFoto = async id => {
-    if (!confirm('¿Eliminar esta foto?')) return;
+    if (!await confirmar('Eliminar foto', '¿Estás seguro de que quieres eliminar esta foto? Esta acción no se puede deshacer.', 'Eliminar')) return;
     try {
         await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, { method: 'DELETE', headers: auth.headers() });
         toast('Foto eliminada', 'info');
@@ -764,6 +772,6 @@ window.copiarLink = id => {
         .then(() => toast('¡Link copiado!', 'success'));
 };
 
-window.cerrarSesion = () => {
-    if (confirm('¿Cerrar sesión?')) auth.logout();
+window.cerrarSesion = async () => {
+    if (await confirmar('Cerrar sesión', '¿Deseas cerrar tu sesión?', 'Cerrar sesión', 'warning')) auth.logout();
 };

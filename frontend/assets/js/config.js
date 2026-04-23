@@ -55,11 +55,10 @@ export const auth = {
     getUserData() { const d = sessionStorage.getItem('userData'); return d ? JSON.parse(d) : null; },
     estaLogueado(){ return !!this.getToken(); },
 
-    /** Cierra sesión y redirige según el rol: admin va a admin.html, dueño va a login */
+    /** Cierra sesión y redirige al login unificado */
     logout() {
-        const role = this.getRole();
         sessionStorage.clear();
-        window.location.href = role === 'admin' ? 'admin.html' : 'login.html';
+        window.location.href = 'login.html';
     },
 
     /** Headers estándar para peticiones autenticadas a la API */

@@ -240,6 +240,13 @@ app.post('/api/barberias/:codigo/reservas', async (req, res) => {
     const dup = await pool.query("SELECT id FROM reservas WHERE barberia_id=$1 AND fecha=$2 AND hora=$3 AND estado!='cancelada'", [barberia.id, fecha, hora]);
     if (dup.rows.length) return res.status(400).json({ error: 'Ya hay reserva en esa fecha y hora' });
 
+    // Máximo 5 citas en la misma hora (ej: todas las de las 09:xx cuentan juntas)
+    const porHora = await pool.query(
+      "SELECT COUNT(*) FROM reservas WHERE barberia_id=$1 AND fecha=$2 AND EXTRACT(HOUR FROM hora)=EXTRACT(HOUR FROM $3::time) AND estado!='cancelada'",
+      [barberia.id, fecha, hora]
+    );
+    if (parseInt(porHora.rows[0].count) >= 5) return res.status(400).json({ error: 'Ya hay 5 citas agendadas en esa hora. Elige otra hora.' });
+
     const r = await pool.query(
       'INSERT INTO reservas (barberia_id,nombre,email,telefono,fecha,hora,servicio,comentarios,es_cliente_recurrente) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
       [barberia.id, nombre.trim(), email.trim(), telefono.trim(), fecha, hora, servicio, comentarios||'', es_cliente_recurrente||false]

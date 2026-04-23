@@ -11,35 +11,11 @@
 <body>
     <!-- ══════════════════════════════════════════════════════════
          ADMIN — Panel de control de la plataforma.
-         Tiene dos vistas:
-         1. loginView: formulario de login exclusivo del admin
-         2. panelView: dashboard con estadísticas + listado de barberías
-         Solo se muestra una a la vez (controlado por JS).
+         El login es compartido con login.html — si no hay sesión
+         de admin activa, JS redirige a login.html automáticamente.
          ═══════════════════════════════════════════════════════ -->
 
-    <!-- ── VISTA 1: LOGIN DEL ADMIN ──────────────────────────
-         Credenciales por defecto: admin@barberregistro.com / admin123
-         (se crean con npm run seed en el backend)
-         ──────────────────────────────────────────────────────── -->
-    <div id="loginView" class="login-wrap">
-        <div class="login-box">
-            <div class="login-header">
-                <h1><i class="fas fa-shield-alt"></i> Admin</h1>
-                <p style="opacity:0.6;margin-top:6px;">Barber Registro - Panel de Control</p>
-            </div>
-            <div class="card">
-                <!-- Mensajes de error del login -->
-                <div id="loginMsg" role="alert"></div>
-                <div class="form-group"><label for="saEmail">Email</label><input type="email" id="saEmail" class="form-control" placeholder="admin@barberregistro.com" autofocus></div>
-                <div class="form-group"><label for="saPw">Contraseña</label><input type="password" id="saPw" class="form-control" placeholder="Contraseña"></div>
-                <button id="btnSaLogin" onclick="saLogin()" class="btn btn-primary" style="width:100%;padding:14px;font-size:16px;justify-content:center;">
-                    <i class="fas fa-sign-in-alt"></i> Entrar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ── VISTA 2: PANEL DEL ADMIN ──────────────────────
+    <!-- ── PANEL DEL ADMIN ──────────────────────
          Se muestra después del login exitoso.
          Contiene: topbar, stats grid y listado de barberías.
          ──────────────────────────────────────────────────────── -->
@@ -80,37 +56,20 @@
          ═══════════════════════════════════════════════════════ -->
     <script type="module">
         import { config, auth } from './assets/js/config.js';
+        import { confirmar } from './assets/js/utils.js';
 
-        // Si ya tiene sesión como admin, mostrar panel directamente
-        if (auth.estaLogueado() && auth.getRole() === 'admin') { showPanel(); }
+        // Si no hay sesión de admin activa, redirigir al login unificado
+        if (!auth.estaLogueado() || auth.getRole() !== 'admin') {
+            window.location.href = 'login.html';
+        } else {
+            showPanel();
+        }
 
-        // Enter en contraseña → ejecutar login
-        document.getElementById('saPw').addEventListener('keydown', e => { if(e.key==='Enter') window.saLogin(); });
+        // Cerrar sesión: ir al login unificado
+        window.saLogout = async function() { if(await confirmar('Cerrar sesión', '¿Deseas cerrar tu sesión de administrador?', 'Cerrar sesión', 'warning')) { sessionStorage.clear(); window.location.href = 'login.html'; } };
 
-        // Función de login del admin
-        window.saLogin = async function() {
-            const email = document.getElementById('saEmail').value.trim();
-            const pw = document.getElementById('saPw').value;
-            const btn = document.getElementById('btnSaLogin');
-            const msg = document.getElementById('loginMsg');
-            if (!email||!pw) { msg.innerHTML='<div class="alert alert-error">Completa los campos</div>'; return; }
-            btn.disabled=true; btn.innerHTML='<span class="loading"></span> Entrando...'; msg.innerHTML='';
-            try {
-                const r = await fetch(`${config.apiURL}/auth/admin/login`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.error||'Error');
-                auth.guardarSesion(d.token, d.admin, 'admin');
-                showPanel();
-            } catch(e) { msg.innerHTML=`<div class="alert alert-error">${e.message}</div>`; }
-            finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Entrar'; }
-        };
-
-        // Cerrar sesión: limpiar sessionStorage y recargar
-        window.saLogout = function() { if(confirm('Cerrar sesion?')) { sessionStorage.clear(); location.reload(); } };
-
-        // Mostrar el panel después de login exitoso: oculta login, muestra dashboard
+        // Inicializar panel
         async function showPanel() {
-            document.getElementById('loginView').style.display='none';
             document.getElementById('panelView').style.display='block';
             const sa = auth.getUserData();
             if (sa) document.getElementById('saName').textContent = sa.nombre || sa.email;
@@ -238,20 +197,20 @@
 
             edDias.forEach(d => {
                 const row = document.createElement('div');
-                row.style.cssText = 'display:grid;grid-template-columns:140px 1fr 1fr 80px;gap:10px;align-items:center;padding:10px 14px;background:var(--ink-3);border-radius:10px;border:1px solid var(--border-2);';
+                row.className = 'ed-horario-row';
                 row.id = `ed-row-${barbId}-${d.id}`;
 
                 row.innerHTML = `
-                    <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;font-size:13px;color:var(--text-2);">
+                    <label class="ed-horario-label" style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;font-size:13px;color:var(--text-2);">
                         <input type="checkbox" id="ed-ck-${barbId}-${d.id}" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;"> ${d.nombre}
                     </label>
-                    <select id="ed-ap-${barbId}-${d.id}" disabled style="padding:8px 10px;background:var(--ink);border:1px solid var(--border-2);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);color-scheme:dark;">
+                    <select id="ed-ap-${barbId}-${d.id}" disabled class="ed-horario-select">
                         ${edHorasAp.map(h => `<option value="${h}" ${h==='09:00'?'selected':''}>${h}</option>`).join('')}
                     </select>
-                    <select id="ed-ci-${barbId}-${d.id}" disabled style="padding:8px 10px;background:var(--ink);border:1px solid var(--border-2);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);color-scheme:dark;">
+                    <select id="ed-ci-${barbId}-${d.id}" disabled class="ed-horario-select">
                         ${edHorasCi.map(h => `<option value="${h}" ${h==='18:00'?'selected':''}>${h}</option>`).join('')}
                     </select>
-                    <span id="ed-bg-${barbId}-${d.id}" style="background:rgba(224,82,82,0.1);color:var(--red);padding:4px 10px;border-radius:16px;font-size:11px;font-weight:700;text-align:center;border:1px solid rgba(224,82,82,0.2);">Cerrado</span>`;
+                    <span id="ed-bg-${barbId}-${d.id}" class="ed-horario-badge" style="background:rgba(224,82,82,0.1);color:var(--red);padding:4px 10px;border-radius:16px;font-size:11px;font-weight:700;text-align:center;border:1px solid rgba(224,82,82,0.2);">Cerrado</span>`;
                 grid.appendChild(row);
 
                 const ck = row.querySelector(`#ed-ck-${barbId}-${d.id}`);
@@ -322,13 +281,19 @@
 
         // Activar o desactivar una barbería
         window.toggleActiva = async function(id, nuevoEstado) {
-            if(!confirm(nuevoEstado?'¿Activar esta barbería?':'¿Desactivar esta barbería?')) return;
+            const txt = nuevoEstado ? 'activar' : 'desactivar';
+            if(!await confirmar(
+                nuevoEstado ? 'Activar barbería' : 'Desactivar barbería',
+                `¿Estás seguro de que deseas <strong>${txt}</strong> esta barbería?`,
+                nuevoEstado ? 'Activar' : 'Desactivar',
+                nuevoEstado ? 'warning' : 'danger'
+            )) return;
             try {
                 const r = await fetch(`${config.apiURL}/admin/barberias/${id}`,{method:'PUT',headers:auth.headers(),body:JSON.stringify({activa:nuevoEstado})});
                 if (!r.ok) throw new Error();
                 await loadBarberias();
                 await loadStats();
-            } catch { alert('Error al cambiar estado'); }
+            } catch { await confirmar('Error', 'No se pudo cambiar el estado de la barbería.', 'Cerrar', 'warning'); }
         };
 
         // Guardar cambios — ahora lee horarios del grid interactivo
@@ -452,17 +417,16 @@
 
         // Eliminar una reserva desde el panel admin
         window.eliminarReservaAdmin = async function(reservaId, barberiaId) {
-            if (!confirm('¿Eliminar esta reserva?')) return;
+            if (!await confirmar('Eliminar reserva', '¿Estás seguro de que quieres eliminar esta reserva? Esta acción no se puede deshacer.', 'Eliminar')) return;
             try {
                 const r = await fetch(`${config.apiURL}/admin/reservas/${reservaId}`, {
                     method: 'DELETE', headers: auth.headers()
                 });
                 if (!r.ok) throw new Error();
-                // Recargar la tabla de reservas y las stats globales
                 document.getElementById(`reservas-${barberiaId}`).innerHTML = '';
                 cargarReservas(barberiaId);
                 await loadStats();
-            } catch { alert('Error al eliminar reserva'); }
+            } catch { await confirmar('Error', 'No se pudo eliminar la reserva.', 'Cerrar', 'warning'); }
         };
     </script>
 </body>

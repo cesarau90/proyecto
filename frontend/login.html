@@ -77,32 +77,46 @@
     <script type="module">
         import { config, auth } from './assets/js/config.js';
 
-        // Si ya tiene sesión como dueño, redirigir directo al panel
-        if (auth.estaLogueado() && auth.getRole() === 'dueno') window.location.href = 'usuario.html';
+        // Redirigir si ya tiene sesión activa
+        if (auth.estaLogueado()) {
+            window.location.href = auth.getRole() === 'admin' ? 'admin.html' : 'usuario.html';
+        }
 
         // Atajos de teclado: Enter para navegar entre campos
         document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') window.login(); });
         document.getElementById('email').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
 
-        // Función de login: envía credenciales al backend
+        // Intenta login como dueño; si falla, intenta como admin
         window.login = async function() {
             const email = document.getElementById('email').value.trim();
             const pw = document.getElementById('password').value;
             const btn = document.getElementById('btnLogin');
             const msg = document.getElementById('mensaje');
 
-            // Evitar una petición al backend con campos vacíos que siempre fallaría
             if (!email || !pw) { msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Completa todos los campos</div>'; return; }
 
             btn.disabled=true; btn.innerHTML='<span class="loading"></span> Entrando...'; msg.innerHTML='';
             try {
-                const r = await fetch(`${config.apiURL}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password:pw}) });
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.error||'Error');
+                // 1. Intentar como dueño de barbería
+                const r1 = await fetch(`${config.apiURL}/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password:pw}) });
+                if (r1.ok) {
+                    const d1 = await r1.json();
+                    auth.guardarSesion(d1.token, d1.barberia, 'dueno');
+                    window.location.href = 'usuario.html';
+                    return;
+                }
 
-                // Guardar sesión y redirigir al panel
-                auth.guardarSesion(d.token, d.barberia, 'dueno');
-                window.location.href = 'usuario.html';
+                // 2. Si no es dueño, intentar como administrador
+                const r2 = await fetch(`${config.apiURL}/auth/admin/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password:pw}) });
+                if (r2.ok) {
+                    const d2 = await r2.json();
+                    auth.guardarSesion(d2.token, d2.admin, 'admin');
+                    window.location.href = 'admin.html';
+                    return;
+                }
+
+                // Ambos fallaron
+                throw new Error('Credenciales incorrectas');
             } catch(e) { msg.innerHTML=`<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`; }
             finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Iniciar Sesión'; }
         };

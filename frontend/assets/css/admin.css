@@ -269,6 +269,33 @@
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Fila de horario por día en el editor del admin */
+.ed-horario-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 1fr 80px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--ink-3);
+    border-radius: 10px;
+    border: 1px solid var(--border-2);
+}
+.ed-horario-select {
+    padding: 8px 10px;
+    background: var(--ink);
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    color-scheme: dark;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 640px) {
     .stats-grid { grid-template-columns: 1fr; }
     .sa-topbar-inner { flex-direction: column; align-items: flex-start; }
@@ -278,4 +305,19 @@
     .detail-panel .form-2col-admin { grid-template-columns: 1fr !important; }
     .login-box { max-width: 100%; }
     .login-header h1 { font-size: 24px; }
+
+    /* En móvil: checkbox+nombre arriba, selects abajo en fila, badge al final */
+    .ed-horario-row {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+    .ed-horario-label {
+        grid-column: 1 / -1;
+    }
+    .ed-horario-badge {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
 }

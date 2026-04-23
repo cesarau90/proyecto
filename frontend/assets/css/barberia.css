@@ -39,6 +39,28 @@
     box-shadow: var(--focus-ring);
 }
 
+/* Modo claro: los hovers rgba(blanco) son invisibles sobre fondo claro,
+   se reemplazan por un tinte oscuro sutil */
+[data-tema="claro"] .navbar-links a:hover {
+    background: rgba(15,23,42,0.09);
+}
+[data-tema="claro"] .btn-tema:hover {
+    background: rgba(15,23,42,0.09);
+}
+[data-tema="claro"] .btn-hero-ghost:hover {
+    background: rgba(15,23,42,0.08);
+    color: var(--text);
+    border-color: rgba(15,23,42,0.18);
+}
+
+/* Modo claro: color-scheme ajusta los íconos nativos del picker
+   (calendario, reloj, flecha de select) para que sean visibles */
+[data-tema="claro"] input[type="date"].form-control,
+[data-tema="claro"] input[type="time"].form-control,
+[data-tema="claro"] select.form-control {
+    color-scheme: light;
+}
+
 
 /* ── HERO ─────────────────────────────────────────────────────
    Sección principal con nombre de la barbería y CTAs.

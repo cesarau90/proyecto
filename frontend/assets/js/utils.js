@@ -33,6 +33,66 @@ export function toast(msg, type = 'info', duration = 3000) {
 
 
 /**
+ * Modal de confirmación personalizado — reemplaza el confirm() nativo del navegador
+ * que muestra la URL fea ("127.0.0.1:5500 dice...").
+ *
+ * @param {string} titulo    Título del modal
+ * @param {string} mensaje   Cuerpo del mensaje (acepta HTML básico)
+ * @param {string} btnTexto  Texto del botón de confirmación (default 'Confirmar')
+ * @param {'danger'|'warning'} tipo  Color del botón principal
+ * @returns {Promise<boolean>} true si el usuario confirma, false si cancela
+ */
+export function confirmar(titulo, mensaje, btnTexto = 'Confirmar', tipo = 'danger') {
+    return new Promise(resolve => {
+        const btnBg = tipo === 'danger' ? 'var(--red,#e05252)' : 'var(--gold,#c9a847)';
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = [
+            'position:fixed;inset:0;z-index:9999',
+            'background:rgba(0,0,0,0.55)',
+            'backdrop-filter:blur(3px)',
+            'display:flex;align-items:center;justify-content:center;padding:20px',
+        ].join(';');
+
+        overlay.innerHTML = `
+            <div style="background:var(--surface,#1a1a24);border:1px solid var(--border-2,rgba(255,255,255,0.09));
+                        border-radius:16px;padding:28px 24px;max-width:380px;width:100%;
+                        box-shadow:0 24px 60px rgba(0,0,0,0.55);
+                        animation:conf-in 0.18s cubic-bezier(0.34,1.56,0.64,1);">
+                <p style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;
+                           color:var(--text,#ece9e0);margin-bottom:8px;">${titulo}</p>
+                <p style="font-size:13px;color:var(--text-2,#b5b2ab);line-height:1.65;margin-bottom:24px;">${mensaje}</p>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button id="_conf-no" style="padding:9px 20px;border-radius:9px;border:1px solid var(--border-2,rgba(255,255,255,0.09));
+                            background:transparent;color:var(--text-2,#b5b2ab);font-size:13px;font-weight:600;
+                            cursor:pointer;font-family:'DM Sans',sans-serif;">Cancelar</button>
+                    <button id="_conf-si" style="padding:9px 20px;border-radius:9px;border:none;
+                            background:${btnBg};color:#fff;font-size:13px;font-weight:700;
+                            cursor:pointer;font-family:'DM Sans',sans-serif;">${btnTexto}</button>
+                </div>
+            </div>`;
+
+        // Animación keyframe (se inyecta una sola vez)
+        if (!document.getElementById('_conf-style')) {
+            const s = document.createElement('style');
+            s.id = '_conf-style';
+            s.textContent = '@keyframes conf-in{from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}';
+            document.head.appendChild(s);
+        }
+
+        document.body.appendChild(overlay);
+        overlay.querySelector('#_conf-no').focus();
+
+        const cerrar = val => { overlay.remove(); resolve(val); };
+        overlay.querySelector('#_conf-no').addEventListener('click', () => cerrar(false));
+        overlay.querySelector('#_conf-si').addEventListener('click', () => cerrar(true));
+        overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(false); });
+        overlay.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(false); });
+    });
+}
+
+
+/**
  * Formatea una fecha ISO (YYYY-MM-DD o ISO completo) a texto legible en español.
  *
  * Construye la fecha con componentes separados (año, mes, día) en vez de
