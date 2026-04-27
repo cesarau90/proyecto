@@ -104,6 +104,11 @@
     --navbar-bg:  rgba(248,250,252,0.92);
 }
 
+[data-tema="claro"] .navbar-links a:hover {
+    color: var(--text);
+    background: rgba(15,23,42,0.15);
+}
+
 
 /* ── 2. RESET & BASE ──────────────────────────────────────────
    Reset mínimo y estilos de body.
@@ -829,6 +834,7 @@ tbody tr:hover td { color: var(--text); }
     align-items: center;
     justify-content: center;
     padding: 20px;
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
 }
 .modal-overlay.open { display: flex; }
@@ -989,6 +995,7 @@ select.estado-sel:focus { border-color: var(--gold); }
     z-index: 500;
     padding: 12px 0;
     background: var(--navbar-bg);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-2);
     transition: background var(--t), border-color var(--t);

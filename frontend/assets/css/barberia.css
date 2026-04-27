@@ -42,7 +42,8 @@
 /* Modo claro: los hovers rgba(blanco) son invisibles sobre fondo claro,
    se reemplazan por un tinte oscuro sutil */
 [data-tema="claro"] .navbar-links a:hover {
-    background: rgba(15,23,42,0.09);
+    color: var(--text);
+    background: rgba(15,23,42,0.15);
 }
 [data-tema="claro"] .btn-tema:hover {
     background: rgba(15,23,42,0.09);
