@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Admin - Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/admin.css">
@@ -27,6 +28,7 @@
                 <div><h1><i class="fas fa-cut"></i> Barber Registro <span class="badge-sa">ADMIN</span></h1></div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <span id="saName" style="font-size:13px;opacity:0.7;"></span>
+                    <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
                     <button onclick="saLogout()" class="btn-sa"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </div>
             </div>
@@ -56,7 +58,8 @@
          ═══════════════════════════════════════════════════════ -->
     <script type="module">
         import { config, auth } from './assets/js/config.js';
-        import { confirmar } from './assets/js/utils.js';
+        import { confirmar, initTema } from './assets/js/utils.js';
+        initTema();
 
         // Si no hay sesión de admin activa, redirigir al login unificado
         if (!auth.estaLogueado() || auth.getRole() !== 'admin') {

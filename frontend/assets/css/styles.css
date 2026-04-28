@@ -35,6 +35,7 @@
     --gold:       #c9a847;
     --gold-light: #f2d050;
     --gold-dim:   #9a7a28;
+    --gold-rgb:   201,168,71; /* componentes RGB de --gold para uso en rgba() */
 
     --red:        #e05252;
     --red-dark:   #b83a3a;
@@ -55,8 +56,8 @@
 
     --shadow:     0 4px 24px rgba(0,0,0,0.45);
     --shadow-lg:  0 12px 48px rgba(0,0,0,0.65);
-    --glow:       0 0 32px rgba(201,168,71,0.45);
-    --card-glow:  0 0 15px rgba(201,168,71,0.4);
+    --glow:       0 0 32px rgba(var(--gold-rgb),0.45);
+    --card-glow:  0 0 15px rgba(var(--gold-rgb),0.4);
 
     --radius:     12px;
     --radius-lg:  16px;
@@ -72,7 +73,7 @@
     --t:          0.22s cubic-bezier(0.4,0,0.2,1);
 
     /* Anillo de focus visible — un solo valor para mantener DRY */
-    --focus-ring: 0 0 0 3px rgba(201,168,71,0.55);
+    --focus-ring: 0 0 0 3px rgba(var(--gold-rgb),0.55);
 
     /* Fondo semitransparente del navbar — separado para que el modo claro lo sobreescriba */
     --navbar-bg: rgba(9,9,13,0.85);
@@ -80,9 +81,9 @@
 
 
 /* ── MODO CLARO ───────────────────────────────────────────────
-   Se activa añadiendo data-tema="claro" al <body>.
-   Los acentos dorados se mantienen para preservar la identidad
-   visual sin importar el modo. Solo cambian fondos y textos.
+   Se activa añadiendo data-tema="claro" al <html>.
+   Un script inline en <head> lo aplica antes de que el CSS cargue
+   para evitar el flash oscuro. Las variables CSS cascadean a body.
    ─────────────────────────────────────────────────────────── */
 [data-tema="claro"] {
     --ink:        #f8fafc;
@@ -99,8 +100,8 @@
     --border-2:   rgba(15,23,42,0.08);
     --shadow:     0 4px 24px rgba(15,23,42,0.10);
     --shadow-lg:  0 12px 48px rgba(15,23,42,0.15);
-    --glow:       0 0 32px rgba(201,168,71,0.35);
-    --card-glow:  0 0 15px rgba(201,168,71,0.4);
+    --glow:       0 0 32px rgba(var(--gold-rgb),0.35);
+    --card-glow:  0 0 15px rgba(var(--gold-rgb),0.4);
     --navbar-bg:  rgba(248,250,252,0.92);
 }
 
@@ -222,7 +223,11 @@ select.estado-sel:focus-visible,
 .btn-sa:focus-visible,
 .toggle-btn:focus-visible,
 .barb-card-btn:focus-visible,
-.about-nav-link:focus-visible {
+.about-nav-link:focus-visible,
+.btn-ver-fotos:focus-visible,
+.tema-color-btn:focus-visible,
+.ed-horario-select:focus-visible,
+.cfg-time:focus-visible {
     outline: 2px solid var(--gold);
     outline-offset: 2px;
     box-shadow: var(--focus-ring);
@@ -260,16 +265,16 @@ select.estado-sel:focus-visible,
     overflow: hidden;
     white-space: nowrap;
 }
-.btn:hover  { transform: scale(1.02); box-shadow: 0 6px 24px rgba(0,0,0,0.35); }
-.btn:active { transform: scale(0.96); box-shadow: none; }
+.btn:hover  { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,0.28); }
+.btn:active { transform: translateY(0) scale(0.98); box-shadow: none; }
 
-/* Variante primaria: gradiente dorado, texto oscuro para contraste */
+/* Variante primaria: gradiente del color de la barbería */
 .btn-primary {
-    background: linear-gradient(135deg, var(--gold) 0%, #a87a28 100%);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
     color: var(--ink);
     font-weight: 700;
 }
-.btn-primary:hover { box-shadow: var(--glow), 0 6px 24px rgba(0,0,0,0.35); filter: brightness(1.1); transform: scale(1.02); }
+.btn-primary:hover { box-shadow: var(--glow), 0 12px 28px rgba(0,0,0,0.28); filter: brightness(1.08); transform: translateY(-2px); }
 
 .btn-success { background: var(--green); color: var(--ink); font-weight: 700; }
 .btn-success:hover { background: var(--green-dark); transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(62,207,142,0.28); }
@@ -339,12 +344,28 @@ select.estado-sel:focus-visible,
     outline: none;
     border-color: var(--gold);
     background: var(--ink-4);
-    box-shadow: 0 0 0 3px rgba(201,168,71,0.1);
+    box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.12), 0 10px 24px rgba(0,0,0,0.16);
 }
 .form-control::placeholder { color: var(--text-placeholder); }
 textarea.form-control { min-height: 90px; resize: vertical; }
 select.form-control { cursor: pointer; }
 input[type="file"].form-control { cursor: pointer; padding: 10px 14px; }
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.checkbox-inline input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gold);
+    cursor: pointer;
+}
 
 /* Fix para que los íconos nativos de date/time/select sean visibles
    en dark mode. color-scheme:dark le dice al browser que use íconos claros. */
@@ -372,7 +393,7 @@ select.form-control {
 }
 .alert-success { background: rgba(62,207,142,0.1);  color: #5de8a8; border: 1px solid rgba(62,207,142,0.2); }
 .alert-error   { background: rgba(224,82,82,0.1);   color: #f08888; border: 1px solid rgba(224,82,82,0.2); }
-.alert-info    { background: rgba(201,168,71,0.1);  color: var(--gold-light); border: 1px solid var(--border); }
+.alert-info    { background: rgba(var(--gold-rgb),0.1);  color: var(--gold-light); border: 1px solid var(--border); }
 
 
 /* ── 9. DIVIDER ───────────────────────────────────────────── */
@@ -414,7 +435,7 @@ select.form-control {
     display: inline-block;
     width: 18px;
     height: 18px;
-    border: 2px solid rgba(201,168,71,0.2);
+    border: 2px solid rgba(var(--gold-rgb),0.2);
     border-top-color: var(--gold);
     border-radius: 50%;
     animation: spin .7s linear infinite;
@@ -558,9 +579,17 @@ tbody tr:hover td { color: var(--text); }
     border-radius: var(--radius);
     padding: 26px 28px;
     margin-bottom: 16px;
-    transition: border-color var(--t);
+    transition: transform var(--t), border-color var(--t), box-shadow var(--t);
 }
-.review-card:hover { border-color: var(--border); }
+.review-card:hover,
+.review-card:focus-within {
+    transform: translateY(-3px);
+    border-color: rgba(var(--gold-rgb),0.58);
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.20),
+        0 0 0 1px rgba(var(--gold-rgb),0.28),
+        0 0 22px rgba(var(--gold-rgb),0.14);
+}
 .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .review-author { font-weight: 700; color: var(--text); font-size: 14px; }
 .review-rating { color: var(--gold); font-size: 16px; }
@@ -656,14 +685,23 @@ tbody tr:hover td { color: var(--text); }
     position: relative;
     transition: transform var(--t), box-shadow 0.3s ease, border 0.3s ease, opacity 0.55s ease-out;
 }
-.service-card:hover { transform: translateY(-5px) scale(1.01); box-shadow: var(--shadow-lg); border-color: rgba(201,168,71,0.3); }
+.service-card:hover,
+.service-card:focus-visible {
+    transform: translateY(-5px) scale(1.01);
+    border-color: rgba(var(--gold-rgb),0.78);
+    box-shadow:
+        var(--shadow-lg),
+        0 0 0 1px rgba(var(--gold-rgb),0.46),
+        0 0 34px rgba(var(--gold-rgb),0.24);
+}
 .service-card.selected {
     border: 2px solid var(--gold);
-    box-shadow: var(--card-glow);
+    /* sombra doble: glow del tema + contorno sutil oscuro para contraste en modo claro */
+    box-shadow: var(--card-glow), 0 0 0 1px rgba(0,0,0,0.08);
 }
 .service-card.selected:hover {
     transform: translateY(-3px) scale(1.01);
-    box-shadow: var(--card-glow);
+    box-shadow: var(--card-glow), 0 0 0 1px rgba(0,0,0,0.08);
     border: 2px solid var(--gold);
 }
 
@@ -697,21 +735,24 @@ tbody tr:hover td { color: var(--text); }
 .service-img-fallback i { font-size: 36px; color: var(--gold); opacity: .3; }
 .service-img-fallback span { font-size: 11px; color: var(--text-3); letter-spacing: .05em; text-transform: uppercase; }
 
-/* Badge de "seleccionado" que aparece sobre la imagen */
+/* Badge de "seleccionado" que aparece sobre la imagen.
+   Texto blanco + sombra garantiza legibilidad con cualquier tema_color,
+   incluyendo grises claros en modo claro donde el texto oscuro fallaría. */
 .service-card.selected .service-img-wrapper::after {
     content: '\2713  Seleccionado';
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(201,168,71,.8));
-    color: var(--ink);
+    background: linear-gradient(transparent, rgba(0,0,0,0.45) 40%, rgba(var(--gold-rgb),.85));
+    color: #fff;
     font-weight: 700;
     font-size: 11px;
     padding: 18px 12px 8px;
     text-align: center;
     letter-spacing: .04em;
     text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
 
 .service-body { padding: 20px 22px 22px; }
@@ -733,11 +774,19 @@ tbody tr:hover td { color: var(--text); }
     border: 1px solid var(--border-2);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    transition: box-shadow var(--t), border-color var(--t);
+    transition: transform var(--t), box-shadow var(--t), border-color var(--t);
     display: flex;
     flex-direction: column;
 }
-.srv-card:hover { box-shadow: var(--shadow-lg); border-color: rgba(201,168,71,0.2); }
+.srv-card:hover,
+.srv-card:focus-within {
+    transform: translateY(-3px);
+    border-color: rgba(var(--gold-rgb),0.64);
+    box-shadow:
+        var(--shadow-lg),
+        0 0 0 1px rgba(var(--gold-rgb),0.34),
+        0 0 26px rgba(var(--gold-rgb),0.16);
+}
 
 .srv-card-img {
     aspect-ratio: 16/10;
@@ -885,6 +934,7 @@ tbody tr:hover td { color: var(--text); }
     justify-content: center;
     font-size: 11px;
     font-weight: 800;
+    z-index: 2;
 }
 .foto-option img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
 
@@ -906,6 +956,41 @@ tbody tr:hover td { color: var(--text); }
 .foto-none i { font-size: 18px; }
 .foto-none:hover, .foto-none.selected { border-color: var(--gold); color: var(--gold); }
 
+/* Foto ya asignada a otro servicio — no seleccionable */
+.foto-option.foto-blocked {
+    cursor: not-allowed;
+    opacity: 0.45;
+    border-color: var(--border-2);
+}
+.foto-option.foto-blocked:hover { border-color: var(--border-2); transform: none; }
+.foto-blocked-badge {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(9,9,13,0.78);
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Aviso inline en el tab Fotos cuando la foto ya es portada de un servicio */
+.foto-cover-notice {
+    font-size: 11px;
+    color: var(--gold);
+    background: rgba(var(--gold-rgb),0.08);
+    border: 1px solid rgba(var(--gold-rgb),0.25);
+    border-radius: 6px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 
 /* ── 23. LINK ROW ─────────────────────────────────────────── */
 .link-row { display: flex; gap: 10px; align-items: center; }
@@ -914,7 +999,7 @@ tbody tr:hover td { color: var(--text); }
 
 /* ── 24. INFO BOX ─────────────────────────────────────────── */
 .info-box {
-    background: rgba(201,168,71,.07);
+    background: rgba(var(--gold-rgb),.07);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 13px 16px;
@@ -1025,7 +1110,35 @@ select.estado-sel:focus { border-color: var(--gold); }
     font-family: 'DM Sans', sans-serif;
 }
 .navbar-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
-.navbar-links a.active { color: var(--gold); background: rgba(201,168,71,0.1); }
+.navbar-links a.active { color: var(--gold); background: rgba(var(--gold-rgb),0.1); }
+
+/* Botón toggle tema oscuro/claro — disponible en todas las páginas */
+.btn-tema {
+    background: rgba(255,255,255,.07);
+    border: 1px solid var(--border-2);
+    color: var(--text-2);
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all var(--t);
+    flex-shrink: 0;
+}
+.btn-tema:hover { background: rgba(255,255,255,.13); color: var(--gold); border-color: var(--border); }
+.btn-tema:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Modo claro: hovers rgba(blanco) son invisibles sobre fondo claro */
+[data-tema="claro"] .navbar-links a:hover { background: rgba(15,23,42,0.09); }
+[data-tema="claro"] .btn-tema:hover { background: rgba(15,23,42,0.09); }
+
+/* Modo claro: íconos nativos de date/time/select visibles */
+[data-tema="claro"] input[type="date"].form-control,
+[data-tema="claro"] input[type="time"].form-control,
+[data-tema="claro"] select.form-control { color-scheme: light; }
 
 
 /* ── 28. RESPONSIVE ───────────────────────────────────────────

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Acerca de — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/about.css">
@@ -18,9 +19,12 @@
         <a href="index.html" class="about-nav-brand">
             <i class="fas fa-cut"></i> Barber Registro
         </a>
-        <a href="index.html" class="about-nav-link">
-            <i class="fas fa-arrow-left"></i> Volver al inicio
-        </a>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <a href="index.html" class="about-nav-link">
+                <i class="fas fa-arrow-left"></i> Volver al inicio
+            </a>
+            <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
+        </div>
     </div>
 </nav>
 
@@ -164,6 +168,10 @@
     <p>Powered by <strong style="color:var(--text-2);">Barber Registro</strong> — Grupo 7</p>
 </footer>
 
+<script type="module">
+    import { initTema } from './assets/js/utils.js';
+    initTema();
+</script>
 <script>
     // IntersectionObserver para todas las animaciones de la página
     const obs = new IntersectionObserver((entries) => {

@@ -11,10 +11,11 @@
  */
 
 import { config } from './config.js';
-import { toast } from './utils.js';
+import { toast, openModal, closeModal, initGlobalModalEscape } from './utils.js';
 
-// Inicializar EmailJS para enviar confirmación de reserva al cliente
-emailjs.init({ publicKey: config.emailJS.publicKey });
+initGlobalModalEscape();
+
+// EmailJS se inicializa en usuario.js (el email se envía al confirmar la cita, no al crear la reserva)
 
 // Extraer el código único de la barbería de los query params.
 // Cada barbería tiene un código corto que identifica su página pública.
@@ -24,6 +25,10 @@ const codigo = params.get('codigo');
 // Variable global para almacenar los horarios en texto.
 // Se usa en validarDia() para verificar si un día seleccionado es laborable.
 let horarios = '';
+
+// Mapeo servicioId → array de fotos de galería asignadas a ese servicio.
+// Se puebla en cargarServicios() con los datos que ya vienen del endpoint.
+const _galeriasPorServicio = {};
 
 /**
  * Convierte un color hex (#rrggbb) a "r,g,b" para usar en rgba().
@@ -36,6 +41,35 @@ function hexToRgb(hex) {
         : clean;
     const n = parseInt(full, 16);
     return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+}
+
+function hexToHsl(hex) {
+    const clean = hex.replace('#', '');
+    const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+    const n = parseInt(full, 16);
+    let r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (d) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        switch (max) {
+            case r: h = ((g - b) / d % 6) * 60; break;
+            case g: h = ((b - r) / d + 2) * 60; break;
+            case b: h = ((r - g) / d + 4) * 60; break;
+        }
+        if (h < 0) h += 360;
+    }
+    return [h, s, l];
+}
+
+function hslToHex(h, s, l) {
+    const a = s * (l < 0.5 ? l : 1 - l);
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const c = a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * (l + c)).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
 }
 
 
@@ -89,11 +123,19 @@ async function cargarTodo() {
         // se aplica como variable CSS en el body. Esto reemplaza el
         // dorado por defecto y da personalidad única a cada página.
         if (b.tema_color && /^#[0-9a-fA-F]{3,8}$/.test(b.tema_color)) {
-            document.body.style.setProperty('--gold', b.tema_color);
-            document.body.style.setProperty('--gold-light', b.tema_color);
-            document.body.style.setProperty('--border', `rgba(${hexToRgb(b.tema_color)},0.25)`);
-            document.body.style.setProperty('--glow', `0 0 32px rgba(${hexToRgb(b.tema_color)},0.4)`);
-            document.body.style.setProperty('--card-glow', `0 0 15px rgba(${hexToRgb(b.tema_color)},0.4)`);
+            const rgb = hexToRgb(b.tema_color);
+            const [h, s, l] = hexToHsl(b.tema_color);
+            // Variante clara para acentos en modo oscuro (textos, precios)
+            const goldLight = hslToHex(h, s, Math.min(l + 0.12, 0.88));
+            // Variante oscura para modo claro (necesita contraste sobre fondo blanco)
+            const goldDim   = hslToHex(h, s, Math.min(Math.max(l - 0.28, 0.18), 0.32));
+            document.body.style.setProperty('--gold',       b.tema_color);
+            document.body.style.setProperty('--gold-light', goldLight);
+            document.body.style.setProperty('--gold-dim',   goldDim);
+            document.body.style.setProperty('--gold-rgb',   rgb);
+            document.body.style.setProperty('--border',     `rgba(${rgb},0.25)`);
+            document.body.style.setProperty('--glow',       `0 0 32px rgba(${rgb},0.4)`);
+            document.body.style.setProperty('--card-glow',  `0 0 15px rgba(${rgb},0.4)`);
         }
         // ──────────────────────────────────────────────────────────
 
@@ -117,7 +159,7 @@ async function cargarTodo() {
         const tel = b.dueno_telefono || '';
         document.getElementById('telefonoInfo').textContent = tel || 'No disponible';
 
-        // Cargar servicios y reseñas en paralelo para velocidad
+        // Cargar servicios y reseñas en paralelo
         await Promise.all([cargarServicios(), cargarResenas()]);
 
         // Configurar el campo de fecha: mínimo hoy, valor default hoy
@@ -257,7 +299,7 @@ function validarDia() {
         // Extraer rango de horas (ej: "09:00 - 18:00")
         const m = c.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
         if (m) {
-            av.innerHTML = `<div class="alert-info" style="padding:8px 12px;font-size:13px;background:rgba(201,168,76,.08);border-radius:8px;border:1px solid rgba(201,168,76,.2);color:var(--gold-light);margin-top:8px;"><i class="fas fa-clock"></i> Horario: ${m[1]} – ${m[2]}</div>`;
+            av.innerHTML = `<div class="alert-info"><i class="fas fa-clock"></i> Horario: ${m[1]} – ${m[2]}</div>`;
             av.style.display = 'block';
             return;
         }
@@ -298,6 +340,17 @@ async function cargarServicios() {
         const maxReservas = Math.max(...servicios.map(s => parseInt(s.reservas_count) || 0));
 
         const base = config.apiURL.replace('/api', '');
+
+        // Guardar galerías por servicio para abrirlas al hacer click
+        servicios.forEach(s => {
+            if (s.galeria_fotos && s.galeria_fotos.length) {
+                _galeriasPorServicio[s.id] = s.galeria_fotos.map(f => ({
+                    url: `${base}${f.url}`,
+                    desc: f.desc || ''
+                }));
+            }
+        });
+
         cont.innerHTML = servicios.map((s, i) => {
             // Si el servicio tiene foto asignada, mostrarla; sino mostrar un placeholder
             const imgHTML = s.imagen_url
@@ -306,6 +359,12 @@ async function cargarServicios() {
             const descHTML = s.descripcion ? `<div class="service-description">${s.descripcion}</div>` : '';
             const isPopular = maxReservas > 0 && (parseInt(s.reservas_count) || 0) === maxReservas;
             const badgeHTML = isPopular ? `<div class="badge-popular">⭐ Popular</div>` : '';
+            const hasGaleria = s.galeria_fotos && s.galeria_fotos.length > 0;
+            const btnFotosHTML = hasGaleria
+                ? `<button class="btn-ver-fotos" onclick="event.stopPropagation();abrirGaleria(${s.id})" style="display:flex;margin-top:14px;width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;gap:6px;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:all var(--t);">
+                        <i class="fas fa-images"></i> Ver más fotos
+                    </button>`
+                : '';
             return `
             <div class="service-card will-reveal" style="transition-delay:${i * 0.08}s" data-n="${s.nombre}" data-p="${s.precio}" tabindex="0" role="button" aria-label="Seleccionar servicio ${s.nombre} por $${s.precio}">
                 <div class="service-img-wrapper">${badgeHTML}${imgHTML}</div>
@@ -314,6 +373,7 @@ async function cargarServicios() {
                     ${descHTML}
                     <div class="service-price">$${s.precio}</div>
                     <div class="service-duration"><i class="fas fa-clock" style="font-size:10px;"></i> ${s.duracion || 30} min</div>
+                    ${btnFotosHTML}
                 </div>
             </div>`;
         }).join('');
@@ -389,6 +449,29 @@ async function cargarResenas() {
 }
 
 
+/* ── GALERÍA POR SERVICIO ─────────────────────────────────────
+   _galeriasPorServicio se declara al inicio del módulo.
+   ────────────────────────────────────────────────────────────── */
+window.abrirGaleria = (servicioId) => {
+    const fotos = _galeriasPorServicio[servicioId] || [];
+    const grid = document.getElementById('modalGaleriaGrid');
+    if (!fotos.length) return;
+
+    grid.innerHTML = fotos.map(f => `
+        <div class="galeria-modal-item">
+            <img src="${f.url}" alt="${f.desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
+            ${f.desc ? `<div class="galeria-modal-caption">${f.desc}</div>` : ''}
+        </div>`).join('');
+
+    openModal(document.getElementById('modalGaleria'));
+};
+
+window.cerrarModalGaleria = (e) => {
+    const modal = document.getElementById('modalGaleria');
+    if (!e || e.target === modal) closeModal(modal);
+};
+
+
 /* ── FORMULARIO DE RESERVA ────────────────────────────────────
    Envía la reserva a la API y muestra feedback al usuario.
    Pre-llena el nombre en el formulario de reseña para
@@ -410,8 +493,7 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
         fecha: document.getElementById('fecha').value,
         hora: document.getElementById('hora').value,
         servicio: document.getElementById('servicio').value,
-        comentarios: document.getElementById('comentarios').value.trim(),
-        es_cliente_recurrente: document.getElementById('clienteRecurrente').checked
+        comentarios: document.getElementById('comentarios').value.trim()
     };
 
     try {
@@ -435,18 +517,7 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
         msg.scrollIntoView({ behavior: 'smooth' });
         toast('¡Reserva confirmada!', 'success');
 
-        // Enviar email de confirmación al cliente (no bloquea la UI si falla)
-        try {
-            await emailjs.send(config.emailJS.serviceId, config.emailJS.templateReserva, {
-                to_email: datos.email,
-                to_name: datos.nombre,
-                servicio: datos.servicio,
-                fecha: fFmt,
-                hora: datos.hora,
-                telefono: datos.telefono,
-                comentarios: datos.comentarios || 'Ninguno'
-            });
-        } catch { /* El email es secundario, no afecta la reserva */ }
+        // El email de confirmación se envía desde el panel del dueño al cambiar el estado a "Confirmada"
     } catch (e) {
         msg.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`;
         msg.scrollIntoView({ behavior: 'smooth' });

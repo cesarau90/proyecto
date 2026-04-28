@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Iniciar Sesión — Barber Registro</title>
     <!-- Estilos: global + específico de esta página -->
     <link rel="stylesheet" href="assets/css/styles.css">
@@ -12,6 +13,9 @@
 <body>
     <!-- Skip link: accesibilidad para navegación con teclado (C7) -->
     <a href="#email" class="skip-link">Saltar al formulario</a>
+
+    <!-- Toggle tema: esquina superior derecha -->
+    <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema" style="position:fixed;top:16px;right:16px;z-index:50;"><i class="fas fa-sun" id="iconTema"></i></button>
 
     <!-- Decoración de fondo: círculos difuminados dorados en las esquinas -->
     <div class="bg-deco"><span></span><span></span></div>
@@ -76,6 +80,8 @@
          ═══════════════════════════════════════════════════════ -->
     <script type="module">
         import { config, auth } from './assets/js/config.js';
+        import { initTema } from './assets/js/utils.js';
+        initTema();
 
         // Redirigir si ya tiene sesión activa
         if (auth.estaLogueado()) {

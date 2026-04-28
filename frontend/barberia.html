@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title id="pageTitle">Barbería — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/barberia.css">
@@ -187,6 +188,17 @@
 <!-- Invisible holders que el JS necesita -->
 <div id="seccionFotos" style="display:none;"><div id="galeriaFotos"></div></div>
 
+<!-- Modal galería de fotos del servicio -->
+<div id="modalGaleria" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Galería de trabajos" onclick="cerrarModalGaleria(event)">
+    <div class="modal" style="max-width:860px;width:95%;">
+        <div class="modal-header">
+            <h3><i class="fas fa-images"></i> Galería de trabajos</h3>
+            <button class="modal-close" onclick="cerrarModalGaleria()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="modalGaleriaGrid" class="galeria-modal-grid"></div>
+    </div>
+</div>
+
 <!-- Botón "volver arriba" para mejorar navegación (C4) -->
 <button class="back-to-top" id="backToTop" aria-label="Volver arriba">
     <i class="fas fa-chevron-up"></i>
@@ -201,28 +213,25 @@
     const btnTema = document.getElementById('btnTema');
     const iconTema = document.getElementById('iconTema');
 
+    const _root = document.documentElement;
     function aplicarTema(modo) {
         if (modo === 'claro') {
-            document.body.setAttribute('data-tema', 'claro');
+            _root.setAttribute('data-tema', 'claro');
             iconTema.className = 'fas fa-moon';
             btnTema.setAttribute('aria-label', 'Cambiar a modo oscuro');
         } else {
-            document.body.removeAttribute('data-tema');
+            _root.removeAttribute('data-tema');
             iconTema.className = 'fas fa-sun';
             btnTema.setAttribute('aria-label', 'Cambiar a modo claro');
         }
     }
 
-    // Cargar preferencia guardada (o default oscuro)
-    const temaGuardado = localStorage.getItem('barber-tema') || 'oscuro';
-    aplicarTema(temaGuardado);
+    aplicarTema(localStorage.getItem('barber-tema') || 'oscuro');
 
     if (btnTema) {
         btnTema.addEventListener('click', () => {
-            const actual = document.body.getAttribute('data-tema') === 'claro' ? 'claro' : 'oscuro';
-            const nuevo = actual === 'claro' ? 'oscuro' : 'claro';
-            aplicarTema(nuevo);
-            localStorage.setItem('barber-tema', nuevo);
+            aplicarTema(_root.getAttribute('data-tema') === 'claro' ? 'oscuro' : 'claro');
+            localStorage.setItem('barber-tema', _root.getAttribute('data-tema') || 'oscuro');
         });
     }
 

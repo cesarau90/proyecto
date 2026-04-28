@@ -18,21 +18,47 @@
     padding: 100px 20px 80px;
     text-align: center;
     background: var(--ink);
+    isolation: isolate;
 }
 .hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 65%);
+    background:
+        radial-gradient(ellipse 70% 42% at 50% 0%, rgba(var(--gold-rgb),0.14) 0%, transparent 68%),
+        radial-gradient(ellipse 34% 24% at 72% 42%, rgba(var(--gold-rgb),0.07) 0%, transparent 72%);
+    opacity: .95;
+    animation: heroGlow 9s ease-in-out infinite alternate;
+    z-index: -2;
+}
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 72% 58% at 50% 20%, #000 0%, transparent 72%);
+    opacity: .55;
+    z-index: -1;
 }
 .hero-inner { position: relative; z-index: 1; }
+.hero-enter {
+    opacity: 0;
+    transform: translateY(16px);
+}
+.hero.revealed .hero-enter {
+    animation: heroEnter .7s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay: var(--enter-delay, 0s);
+}
 
 /* Badge "Sistema de Reservas" */
 .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(201,168,76,0.08);
+    background: rgba(var(--gold-rgb),0.08);
     border: 1px solid var(--border);
     color: var(--gold);
     border-radius: 30px;
@@ -76,9 +102,16 @@
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    transition: all var(--t);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    transition: transform var(--t), box-shadow var(--t), background var(--t), border-color var(--t), color var(--t);
 }
-.hero-cta:hover { background: var(--surface-2); transform: translateY(-1px); }
+.hero-cta:hover {
+    background: var(--surface-2);
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: var(--glow), 0 16px 34px rgba(0,0,0,0.22);
+}
+.hero-cta:active { transform: translateY(-1px) scale(.99); }
 
 
 /* ── FEATURES GRID ────────────────────────────────────────────
@@ -97,16 +130,35 @@
     border-radius: var(--radius-lg);
     padding: 28px 22px;
     text-align: center;
-    transition: transform var(--t), border-color var(--t), box-shadow var(--t);
+    position: relative;
+    overflow: hidden;
+    transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease, background .28s ease;
     /* Sin animación hardcodeada: el IntersectionObserver en index.html
        controla la entrada de cada card vía .will-reveal/.revealed,
        lo que permite revelarlas solo cuando el usuario llega a esa sección. */
 }
-.feature:hover {
-    transform: translateY(-4px);
-    border-color: var(--border);
-    box-shadow: var(--glow);
+.feature::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(var(--gold-rgb),0.13), transparent 48%),
+        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.12), transparent 58%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .28s ease;
 }
+.feature:hover,
+.feature:focus-within {
+    transform: translateY(-6px);
+    border-color: rgba(var(--gold-rgb),0.76);
+    box-shadow:
+        0 18px 46px rgba(0,0,0,0.28),
+        0 0 0 1px rgba(var(--gold-rgb),0.46),
+        0 0 34px rgba(var(--gold-rgb),0.24);
+}
+.feature:hover::before,
+.feature:focus-within::before { opacity: 1; }
 
 /* Ícono circular dorado de cada feature */
 .feature-icon {
@@ -114,13 +166,21 @@
     height: 52px;
     border-radius: 14px;
     margin: 0 auto 16px;
-    background: rgba(201,168,76,0.1);
+    background: rgba(var(--gold-rgb),0.1);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     color: var(--gold);
+    transition: transform .28s ease, box-shadow .28s ease, background .28s ease, border-color .28s ease;
+}
+.feature:hover .feature-icon,
+.feature:focus-within .feature-icon {
+    transform: translateY(-3px) scale(1.06);
+    background: rgba(var(--gold-rgb),0.14);
+    border-color: rgba(var(--gold-rgb),0.48);
+    box-shadow: 0 0 26px rgba(var(--gold-rgb),0.30);
 }
 .feature h3 { font-size: 15px; color: var(--text); margin-bottom: 8px; }
 .feature p  { color: var(--text-3); font-size: 13px; line-height: 1.6; }
@@ -136,6 +196,15 @@
     border-radius: 20px;
     padding: 40px;
     box-shadow: var(--shadow-lg);
+    transition: border-color .28s ease, box-shadow .28s ease, transform .28s ease;
+}
+.form-card.revealed:hover,
+.form-card:focus-within {
+    border-color: rgba(var(--gold-rgb),0.46);
+    box-shadow:
+        var(--shadow-lg),
+        0 0 0 1px rgba(var(--gold-rgb),0.24),
+        0 0 28px rgba(var(--gold-rgb),0.14);
 }
 .form-card h2 { font-size: 26px; text-align: center; margin-bottom: 6px; }
 .form-card .sub { text-align: center; color: var(--text-3); font-size: 14px; margin-bottom: 36px; }
@@ -176,6 +245,20 @@
 #sugerenciasDir > div:last-child {
     border-bottom: none;
     border-radius: 0 0 10px 10px;
+}
+.sugerencia-dir {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border-2);
+    transition: background var(--t), color var(--t);
+}
+.sugerencia-dir:hover,
+.sugerencia-dir.active,
+.sugerencia-dir[aria-selected="true"] {
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 
@@ -224,9 +307,9 @@
     font-size: 13px;
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
-    transition: border-color var(--t);
+    transition: border-color var(--t), box-shadow var(--t), background var(--t);
 }
-.time-select:focus { outline: none; border-color: var(--gold); }
+.time-select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.12); }
 .time-select:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Badge rojo que aparece cuando el día está cerrado */
@@ -342,13 +425,14 @@
     font-size: 14px;
     font-family: 'DM Sans', sans-serif;
     color: var(--text);
-    transition: border-color var(--t), box-shadow var(--t);
+    transition: border-color var(--t), box-shadow var(--t), background var(--t), transform var(--t);
 }
 .busqueda-input::placeholder { color: var(--text-placeholder); }
 .busqueda-input:focus {
     outline: none;
     border-color: var(--gold);
     box-shadow: var(--focus-ring);
+    background: var(--ink-3);
 }
 
 /* Contador de resultados */
@@ -378,13 +462,32 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    transition: border-color var(--t), transform var(--t), box-shadow var(--t);
+    position: relative;
+    overflow: hidden;
+    transition: border-color .28s ease, transform .28s ease, box-shadow .28s ease, background .28s ease;
 }
-.barb-card-pub:hover {
-    border-color: var(--border);
-    transform: translateY(-3px);
-    box-shadow: var(--glow);
+.barb-card-pub::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(var(--gold-rgb),0.12), transparent 52%),
+        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.10), transparent 58%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .28s ease;
 }
+.barb-card-pub:hover,
+.barb-card-pub:focus-within {
+    border-color: rgba(var(--gold-rgb),0.74);
+    transform: translateY(-5px);
+    box-shadow:
+        0 18px 40px rgba(0,0,0,0.24),
+        0 0 0 1px rgba(var(--gold-rgb),0.42),
+        0 0 30px rgba(var(--gold-rgb),0.20);
+}
+.barb-card-pub:hover::before,
+.barb-card-pub:focus-within::before { opacity: 1; }
 
 /* Nombre de la barbería */
 .barb-card-nombre {
@@ -414,23 +517,64 @@
     gap: 7px;
     margin-top: 10px;
     padding: 9px 14px;
-    background: rgba(201,168,71,0.08);
+    background: rgba(var(--gold-rgb),0.08);
     border: 1px solid var(--border);
     border-radius: 9px;
     color: var(--gold-light);
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
-    transition: all var(--t);
+    position: relative;
+    transition: transform var(--t), background var(--t), border-color var(--t), box-shadow var(--t), color var(--t);
     font-family: 'DM Sans', sans-serif;
 }
 .barb-card-btn:hover {
-    background: rgba(201,168,71,0.15);
-    transform: translateY(-1px);
+    background: rgba(var(--gold-rgb),0.15);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(var(--gold-rgb),0.12);
 }
+.barb-card-btn:active { transform: translateY(0) scale(.99); }
 .barb-card-btn:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+}
+
+/* ── MOTION SYSTEM ──────────────────────────────────────────── */
+@keyframes heroEnter {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroGlow {
+    from { transform: translate3d(-1%, -1%, 0) scale(1); }
+    to { transform: translate3d(1%, 1%, 0) scale(1.04); }
+}
+
+.reveal-section,
+.reveal-group {
+    transition-duration: .68s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero::before,
+    .hero.revealed .hero-enter {
+        animation: none !important;
+    }
+    .hero-enter,
+    .will-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    .feature:hover,
+    .feature:focus-within,
+    .feature:hover .feature-icon,
+    .feature:focus-within .feature-icon,
+    .barb-card-pub:hover,
+    .barb-card-pub:focus-within,
+    .barb-card-btn:hover,
+    .hero-cta:hover {
+        transform: none !important;
+    }
 }
 
 
