@@ -51,7 +51,9 @@ const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5500,http:
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
     return callback(new Error('Origen no permitido por CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -60,10 +62,12 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(uploadsDir));
 
-const pool = new Pool({
-  user: process.env.DB_USER, host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE, password: process.env.DB_PASSWORD, port: process.env.DB_PORT
-});
+const pool = process.env.DATABASE_URL
+  ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
+  : new Pool({
+      user: process.env.DB_USER, host: process.env.DB_HOST,
+      database: process.env.DB_DATABASE, password: process.env.DB_PASSWORD, port: process.env.DB_PORT
+    });
 
 pool.connect(async (err, client, release) => {
   if (err) { console.error('Error DB:', err.message); return; }
