@@ -7,6 +7,18 @@
     <title>Deja tu Reseña — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .anim { animation: fadeUp .4s ease both; }
+        .error-icon {
+            width: 72px; height: 72px; background: #e53e3e; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; font-size: 28px; color: #fff;
+        }
+    </style>
 </head>
 <body>
 
@@ -22,14 +34,14 @@
         </div>
 
         <!-- Error -->
-        <div id="estadoError" style="display:none;text-align:center;padding:40px 0;">
-            <div style="font-size:48px;margin-bottom:16px;">❌</div>
+        <div id="estadoError" style="display:none;text-align:center;padding:40px 0;" class="anim">
+            <div class="error-icon"><i class="fas fa-times"></i></div>
             <h2>Link inválido</h2>
             <p style="color:var(--text-3);">Este link de reseña no es válido o ya expiró.</p>
         </div>
 
         <!-- Formulario -->
-        <div id="estadoForm" style="display:none;">
+        <div id="estadoForm" style="display:none;" class="anim">
             <div style="text-align:center;margin-bottom:24px;">
                 <div style="width:64px;height:64px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;">
                     <i class="fas fa-star" style="color:#000;"></i>
@@ -67,7 +79,7 @@
         </div>
 
         <!-- Éxito -->
-        <div id="estadoExito" style="display:none;text-align:center;padding:40px 0;">
+        <div id="estadoExito" style="display:none;text-align:center;padding:40px 0;" class="anim">
             <div style="width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;">
                 <i class="fas fa-check" style="color:#fff;"></i>
             </div>
@@ -89,11 +101,14 @@
     const codigo = params.get('codigo');
     const nombre = params.get('nombre') || '';
 
-    const show = id => ['estadoCargando','estadoError','estadoForm','estadoExito']
-        .forEach(s => document.getElementById(s).style.display = s === id ? '' : 'none');
+    const show = id => ['estadoCargando','estadoError','estadoForm','estadoExito'].forEach(s => {
+        const el = document.getElementById(s);
+        el.style.display = 'none';
+        if (s === id) { el.style.display = ''; el.style.animation = 'none'; el.offsetHeight; el.style.animation = ''; }
+    });
 
     if (!codigo) { show('estadoError'); } else {
-        fetch(`${config.apiURL}/barberias/${codigo}/info`)
+        fetch(`${config.apiURL}/barberias/${codigo}`)
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(d => {
                 document.getElementById('tituloBarberia').textContent = d.nombre;
