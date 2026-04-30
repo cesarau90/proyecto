@@ -507,20 +507,13 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
 
         // Formato de fecha legible para el mensaje de confirmación
         const fFmt = new Date(datos.fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        msg.innerHTML = `<div class="alert alert-success"><div><strong><i class="fas fa-check-circle"></i> ¡Reserva confirmada!</strong><br><span style="font-size:13px;opacity:.85;">${datos.servicio} · ${fFmt} · ${datos.hora}</span></div></div>`;
-
         document.getElementById('reservaForm').reset();
         document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
-
-        // Pre-llenar nombre en el formulario de reseña por conveniencia
-        document.getElementById('resena_cliente').value = datos.nombre;
-        msg.scrollIntoView({ behavior: 'smooth' });
-        toast('¡Reserva confirmada!', 'success');
+        toast(`¡Reserva confirmada! ${datos.servicio} · ${fFmt} · ${datos.hora}`, 'success', 5000);
 
         // El email de confirmación se envía desde el panel del dueño al cambiar el estado a "Confirmada"
     } catch (e) {
-        msg.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`;
-        msg.scrollIntoView({ behavior: 'smooth' });
+        toast(e.message, 'error');
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-check"></i> Confirmar Reserva';

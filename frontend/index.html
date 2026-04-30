@@ -14,6 +14,8 @@
 </head>
 <body>
 
+    <div id="toastContainer" aria-live="polite"></div>
+
     <!-- Skip link: accesibilidad para navegación con teclado (C7) -->
     <a href="#registroForm" class="skip-link">Saltar al formulario de registro</a>
 
@@ -157,7 +159,7 @@
 
     <script type="module">
         import { config, auth } from './assets/js/config.js';
-        import { initTema, openModal, initGlobalModalEscape } from './assets/js/utils.js';
+        import { initTema, openModal, initGlobalModalEscape, toast } from './assets/js/utils.js';
         initTema();
         initGlobalModalEscape();
         if (auth.estaLogueado() && auth.getRole()==='dueno') window.location.href='usuario.html';
@@ -212,9 +214,9 @@
         form.addEventListener('submit', async e=>{
             e.preventDefault();
             const pw=document.getElementById('password').value, pw2=document.getElementById('password_confirm').value;
-            if(pw!==pw2){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</div>'; return; }
-            if(pw.length<6){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Contraseña mínimo 6 caracteres</div>'; return; }
-            if(!dias.some(d=>document.getElementById(`ck-${d.id}`).checked)){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selecciona al menos un día</div>'; return; }
+            if(pw!==pw2){ toast('Las contraseñas no coinciden','error'); return; }
+            if(pw.length<6){ toast('Contraseña mínimo 6 caracteres','error'); return; }
+            if(!dias.some(d=>document.getElementById(`ck-${d.id}`).checked)){ toast('Selecciona al menos un día de trabajo','error'); return; }
             btn.disabled=true; btn.innerHTML='<span class="loading"></span> Creando...'; msg.innerHTML='';
             const datos={nombre:document.getElementById('nombre').value.trim(),direccion:document.getElementById('direccion').value.trim(),ciudad:document.getElementById('ciudad').value.trim(),horarios:genHorarios(),dueno_nombre:document.getElementById('dueno_nombre').value.trim(),dueno_email:document.getElementById('dueno_email').value.trim(),dueno_telefono:document.getElementById('dueno_telefono').value.trim(),password:pw};
             try {
@@ -227,7 +229,7 @@
                     <p style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Link para tus clientes:</p>
                     <div class="link-box"><a href="barberia.html?codigo=${d.barberia.codigo_unico}" target="_blank">${location.origin}/barberia.html?codigo=${d.barberia.codigo_unico}</a></div>`;
                 openModal(modal, btn); form.reset();
-            } catch(e){ msg.innerHTML=`<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`; }
+            } catch(e){ toast(e.message,'error'); }
             finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket"></i> Crear mi Barbería'; }
         });
 
