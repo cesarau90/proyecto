@@ -511,7 +511,7 @@ window.cambiarEstado = async (id, e) => {
             const barberia = auth.getUserData();
             const barberaNombre = barberia?.nombre || 'Barber Registro';
             const codigoUnico = barberia?.codigo_unico || '';
-            const linkResena = `${location.origin}/barberia.html?codigo=${codigoUnico}`;
+            const linkResena = `${location.origin}/resena.html?codigo=${codigoUnico}&nombre=${encodeURIComponent(reserva.nombre)}`;
             const params = {
                 to_email: reserva.email,
                 to_name: reserva.nombre,

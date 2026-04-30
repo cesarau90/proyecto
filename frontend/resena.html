@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
+    <title>Deja tu Reseña — Barber Registro</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="toastContainer" aria-live="polite"></div>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div class="booking-card" style="max-width:520px;width:100%;">
+
+        <!-- Cargando -->
+        <div id="estadoCargando" style="text-align:center;padding:40px 0;">
+            <span class="loading" style="width:32px;height:32px;"></span>
+            <p style="color:var(--text-3);margin-top:12px;">Cargando...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="estadoError" style="display:none;text-align:center;padding:40px 0;">
+            <div style="font-size:48px;margin-bottom:16px;">❌</div>
+            <h2>Link inválido</h2>
+            <p style="color:var(--text-3);">Este link de reseña no es válido o ya expiró.</p>
+        </div>
+
+        <!-- Formulario -->
+        <div id="estadoForm" style="display:none;">
+            <div style="text-align:center;margin-bottom:24px;">
+                <div style="width:64px;height:64px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;">
+                    <i class="fas fa-star" style="color:#000;"></i>
+                </div>
+                <h2 id="tituloBarberia" style="margin-bottom:4px;"></h2>
+                <p style="color:var(--text-3);font-size:14px;">¿Cómo fue tu experiencia?</p>
+            </div>
+
+            <form id="resenaForm">
+                <div class="form-group">
+                    <label for="cliente_nombre">Tu Nombre *</label>
+                    <input type="text" id="cliente_nombre" class="form-control" required placeholder="Tu nombre">
+                </div>
+
+                <div class="form-group">
+                    <label>Calificación *</label>
+                    <div class="star-rating" role="radiogroup" aria-label="Calificación de 1 a 5 estrellas" style="justify-content:center;font-size:32px;gap:8px;margin:8px 0;">
+                        <input type="radio" id="s5" name="cal" value="5"><label for="s5" aria-label="5 estrellas">&#9733;</label>
+                        <input type="radio" id="s4" name="cal" value="4"><label for="s4" aria-label="4 estrellas">&#9733;</label>
+                        <input type="radio" id="s3" name="cal" value="3"><label for="s3" aria-label="3 estrellas">&#9733;</label>
+                        <input type="radio" id="s2" name="cal" value="2"><label for="s2" aria-label="2 estrellas">&#9733;</label>
+                        <input type="radio" id="s1" name="cal" value="1"><label for="s1" aria-label="1 estrella">&#9733;</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comentario">Comentario *</label>
+                    <textarea id="comentario" class="form-control" required placeholder="Cuéntanos cómo fue tu visita..." style="min-height:100px;"></textarea>
+                </div>
+
+                <button type="submit" id="btnEnviar" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;justify-content:center;">
+                    <i class="fas fa-paper-plane"></i> Enviar Reseña
+                </button>
+            </form>
+        </div>
+
+        <!-- Éxito -->
+        <div id="estadoExito" style="display:none;text-align:center;padding:40px 0;">
+            <div style="width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;">
+                <i class="fas fa-check" style="color:#fff;"></i>
+            </div>
+            <h2 style="margin-bottom:8px;">¡Gracias por tu reseña!</h2>
+            <p style="color:var(--text-3);margin-bottom:24px;">Tu opinión ayuda a otros clientes a encontrarnos.</p>
+            <a id="linkBarberia" href="#" class="btn btn-primary" style="display:inline-flex;padding:12px 24px;border-radius:12px;">
+                <i class="fas fa-cut"></i> Ver la Barbería
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { config } from './assets/js/config.js';
+    import { toast } from './assets/js/utils.js';
+
+    const params = new URLSearchParams(location.search);
+    const codigo = params.get('codigo');
+    const nombre = params.get('nombre') || '';
+
+    const show = id => ['estadoCargando','estadoError','estadoForm','estadoExito']
+        .forEach(s => document.getElementById(s).style.display = s === id ? '' : 'none');
+
+    if (!codigo) { show('estadoError'); } else {
+        fetch(`${config.apiURL}/barberias/${codigo}/info`)
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(d => {
+                document.getElementById('tituloBarberia').textContent = d.nombre;
+                document.getElementById('cliente_nombre').value = nombre;
+                document.getElementById('linkBarberia').href = `barberia.html?codigo=${codigo}`;
+                show('estadoForm');
+            })
+            .catch(() => show('estadoError'));
+    }
+
+    document.getElementById('resenaForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const cal = document.querySelector('input[name="cal"]:checked');
+        if (!cal) { toast('Selecciona una calificación', 'error'); return; }
+        const btn = document.getElementById('btnEnviar');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Enviando...';
+        try {
+            const r = await fetch(`${config.apiURL}/barberias/${codigo}/resenas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cliente_nombre: document.getElementById('cliente_nombre').value.trim(),
+                    comentario: document.getElementById('comentario').value.trim(),
+                    calificacion: parseInt(cal.value)
+                })
+            });
+            const d = await r.json();
+            if (!r.ok) throw new Error(d.error || 'Error');
+            show('estadoExito');
+        } catch (err) {
+            toast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reseña';
+        }
+    });
+</script>
+</body>
+</html>
