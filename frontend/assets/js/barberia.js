@@ -340,12 +340,13 @@ async function cargarServicios() {
         const maxReservas = Math.max(...servicios.map(s => parseInt(s.reservas_count) || 0));
 
         const base = config.apiURL.replace('/api', '');
+        const assetUrl = (url) => /^https?:\/\//i.test(url || '') ? url : `${base}${url}`;
 
         // Guardar galerías por servicio para abrirlas al hacer click
         servicios.forEach(s => {
             if (s.galeria_fotos && s.galeria_fotos.length) {
                 _galeriasPorServicio[s.id] = s.galeria_fotos.map(f => ({
-                    url: `${base}${f.url}`,
+                    url: assetUrl(f.url),
                     desc: f.desc || ''
                 }));
             }
@@ -354,7 +355,7 @@ async function cargarServicios() {
         cont.innerHTML = servicios.map((s, i) => {
             // Si el servicio tiene foto asignada, mostrarla; sino mostrar un placeholder
             const imgHTML = s.imagen_url
-                ? `<img src="${base}${s.imagen_url}" alt="${s.nombre}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
+                ? `<img src="${assetUrl(s.imagen_url)}" alt="${s.nombre}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
                 : `<div class="service-img-fallback"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
             const descHTML = s.descripcion ? `<div class="service-description">${s.descripcion}</div>` : '';
             const isPopular = maxReservas > 0 && (parseInt(s.reservas_count) || 0) === maxReservas;

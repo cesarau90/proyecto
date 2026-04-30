@@ -27,6 +27,7 @@ import dotenv from 'dotenv';
 import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -71,6 +72,10 @@ pool.connect(async (err, client, release) => {
   try {
     await client.query(`ALTER TABLE fotos ADD COLUMN IF NOT EXISTS servicio_galeria_id INTEGER REFERENCES servicios(id) ON DELETE SET NULL`);
   } catch (e) { /* ignorar */ }
+  try {
+    await client.query(`ALTER TABLE fotos ADD COLUMN IF NOT EXISTS image_url TEXT`);
+    await client.query(`ALTER TABLE fotos ADD COLUMN IF NOT EXISTS cloudinary_public_id TEXT`);
+  } catch (e) { /* ignorar */ }
   release();
 });
 
@@ -103,6 +108,74 @@ function enteroPositivo(valor, min = 1, max = 999999) {
 
 function colorHexValido(color) {
   return color === undefined || color === null || color === '' || /^#[0-9a-fA-F]{6}$/.test(String(color));
+}
+
+function getCloudinaryConfig() {
+  if (process.env.CLOUDINARY_URL) {
+    const match = process.env.CLOUDINARY_URL.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
+    if (match) return { apiKey: match[1], apiSecret: match[2], cloudName: match[3] };
+  }
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null;
+}
+
+function cloudinarySignature(params, apiSecret) {
+  const toSign = Object.keys(params)
+    .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== '')
+    .sort()
+    .map(k => `${k}=${params[k]}`)
+    .join('&');
+  return crypto.createHash('sha1').update(`${toSign}${apiSecret}`).digest('hex');
+}
+
+async function subirACloudinary(file, barberiaId) {
+  const cfg = getCloudinaryConfig();
+  if (!cfg) return null;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = `barber-registro/${barberiaId}`;
+  const params = { folder, timestamp };
+  const body = new URLSearchParams({
+    file: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+    api_key: cfg.apiKey,
+    timestamp: String(timestamp),
+    folder,
+    signature: cloudinarySignature(params, cfg.apiSecret)
+  });
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${cfg.cloudName}/image/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error?.message || 'Error al subir imagen');
+  return { image_url: data.secure_url, cloudinary_public_id: data.public_id };
+}
+
+async function eliminarDeCloudinary(publicId) {
+  const cfg = getCloudinaryConfig();
+  if (!cfg || !publicId) return;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const params = { public_id: publicId, timestamp };
+  const body = new URLSearchParams({
+    public_id: publicId,
+    api_key: cfg.apiKey,
+    timestamp: String(timestamp),
+    signature: cloudinarySignature(params, cfg.apiSecret)
+  });
+  await fetch(`https://api.cloudinary.com/v1_1/${cfg.cloudName}/image/destroy`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body
+  }).catch(() => {});
+}
+
+function fotoUrl(f) {
+  if (!f) return null;
+  if (f.image_url) return f.image_url;
+  if (/^https?:\/\//i.test(f.filename || '')) return f.filename;
+  return `/uploads/${f.barberia_id}/${f.filename}`;
 }
 
 function generarToken(payload, expiresIn = '7d') {
@@ -223,7 +296,7 @@ app.get('/api/barberias/:codigo', async (req, res) => {
 app.get('/api/barberias/:codigo/servicios', async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT s.*, f.filename as foto_filename,
+      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id,
              COALESCE(
                (SELECT COUNT(*) FROM reservas r
                 WHERE r.barberia_id = s.barberia_id
@@ -231,7 +304,7 @@ app.get('/api/barberias/:codigo/servicios', async (req, res) => {
                0
              ) AS reservas_count,
              COALESCE(
-               (SELECT json_agg(json_build_object('url', '/uploads/' || s.barberia_id || '/' || gf.filename, 'desc', COALESCE(gf.descripcion,'')) ORDER BY gf.id)
+               (SELECT json_agg(json_build_object('url', COALESCE(gf.image_url, CASE WHEN gf.filename ~ '^https?://' THEN gf.filename ELSE '/uploads/' || gf.barberia_id || '/' || gf.filename END), 'desc', COALESCE(gf.descripcion,'')) ORDER BY gf.id)
                 FROM fotos gf WHERE gf.servicio_galeria_id = s.id),
                '[]'::json
              ) AS galeria_fotos
@@ -239,7 +312,7 @@ app.get('/api/barberias/:codigo/servicios', async (req, res) => {
       JOIN barberias b ON s.barberia_id=b.id
       LEFT JOIN fotos f ON s.foto_id = f.id
       WHERE b.codigo_unico=$1 AND s.activo=true ORDER BY s.id`, [req.params.codigo]);
-    const rows = r.rows.map(s => ({ ...s, imagen_url: s.foto_filename ? `/uploads/${s.barberia_id}/${s.foto_filename}` : null }));
+    const rows = r.rows.map(s => ({ ...s, imagen_url: s.foto_filename || s.foto_image_url ? fotoUrl({ filename: s.foto_filename, image_url: s.foto_image_url, barberia_id: s.foto_barberia_id || s.barberia_id }) : null }));
     res.json(rows);
   } catch { res.status(500).json({ error: 'Error' }); }
 });
@@ -256,7 +329,7 @@ app.get('/api/barberias/:codigo/fotos', async (req, res) => {
     const br = await pool.query('SELECT id FROM barberias WHERE codigo_unico=$1', [req.params.codigo]);
     if (!br.rows.length) return res.status(404).json({ error: 'No encontrada' });
     const r = await pool.query('SELECT * FROM fotos WHERE barberia_id=$1 ORDER BY created_at DESC', [br.rows[0].id]);
-    res.json(r.rows.map(f => ({ ...f, url: `/uploads/${br.rows[0].id}/${f.filename}` })));
+    res.json(r.rows.map(f => ({ ...f, url: fotoUrl(f) })));
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
@@ -378,11 +451,11 @@ app.put('/api/mi-barberia', authMiddleware, async (req, res) => {
 app.get('/api/mi-barberia/servicios', authMiddleware, async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT s.*, f.filename as foto_filename
+      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id
       FROM servicios s
       LEFT JOIN fotos f ON s.foto_id = f.id
       WHERE s.barberia_id=$1 AND s.activo=true ORDER BY s.id`, [req.user.id]);
-    const rows = r.rows.map(s => ({ ...s, imagen_url: s.foto_filename ? `/uploads/${s.barberia_id}/${s.foto_filename}` : null }));
+    const rows = r.rows.map(s => ({ ...s, imagen_url: s.foto_filename || s.foto_image_url ? fotoUrl({ filename: s.foto_filename, image_url: s.foto_image_url, barberia_id: s.foto_barberia_id || s.barberia_id }) : null }));
     res.json(rows);
   } catch { res.status(500).json({ error: 'Error' }); }
 });
@@ -462,7 +535,8 @@ app.get('/api/mi-barberia/resenas', authMiddleware, async (req, res) => {
 // Fotos dueno
 app.post('/api/mi-barberia/fotos', authMiddleware, async (req, res) => {
   const multer = (await import('multer')).default;
-  const storage = multer.diskStorage({
+  const cloudinaryActivo = !!getCloudinaryConfig();
+  const storage = cloudinaryActivo ? multer.memoryStorage() : multer.diskStorage({
     destination: (r, f, cb) => { const d = path.join(uploadsDir, String(req.user.id)); if (!existsSync(d)) mkdirSync(d, { recursive: true }); cb(null, d); },
     filename: (r, f, cb) => cb(null, `foto_${Date.now()}${path.extname(f.originalname)}`)
   });
@@ -472,17 +546,19 @@ app.post('/api/mi-barberia/fotos', authMiddleware, async (req, res) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'Sin imagen' });
     try {
-      const r = await pool.query('INSERT INTO fotos (barberia_id,filename,descripcion) VALUES($1,$2,$3) RETURNING *',
-        [req.user.id, req.file.filename, (req.body.descripcion||'').trim()]);
-      res.status(201).json({ ...r.rows[0], url: `/uploads/${req.user.id}/${req.file.filename}` });
-    } catch { res.status(500).json({ error: 'Error' }); }
+      const subida = cloudinaryActivo ? await subirACloudinary(req.file, req.user.id) : null;
+      const filename = subida ? path.basename(new URL(subida.image_url).pathname) : req.file.filename;
+      const r = await pool.query('INSERT INTO fotos (barberia_id,filename,descripcion,image_url,cloudinary_public_id) VALUES($1,$2,$3,$4,$5) RETURNING *',
+        [req.user.id, filename, (req.body.descripcion||'').trim(), subida?.image_url || null, subida?.cloudinary_public_id || null]);
+      res.status(201).json({ ...r.rows[0], url: fotoUrl(r.rows[0]) });
+    } catch (e) { res.status(500).json({ error: e.message || 'Error' }); }
   });
 });
 
 app.get('/api/mi-barberia/fotos', authMiddleware, async (req, res) => {
   try {
     const r = await pool.query('SELECT * FROM fotos WHERE barberia_id=$1 ORDER BY created_at DESC', [req.user.id]);
-    res.json(r.rows.map(f => ({ ...f, url: `/uploads/${req.user.id}/${f.filename}` })));
+    res.json(r.rows.map(f => ({ ...f, url: fotoUrl(f) })));
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
@@ -510,8 +586,11 @@ app.delete('/api/mi-barberia/fotos/:id', authMiddleware, async (req, res) => {
   try {
     const f = await pool.query('SELECT * FROM fotos WHERE id=$1 AND barberia_id=$2', [req.params.id, req.user.id]);
     if (!f.rows.length) return res.status(403).json({ error: 'Sin permiso' });
-    const fp = path.join(uploadsDir, String(req.user.id), f.rows[0].filename);
-    if (existsSync(fp)) unlinkSync(fp);
+    if (f.rows[0].cloudinary_public_id) await eliminarDeCloudinary(f.rows[0].cloudinary_public_id);
+    else {
+      const fp = path.join(uploadsDir, String(req.user.id), f.rows[0].filename);
+      if (existsSync(fp)) unlinkSync(fp);
+    }
     await pool.query('DELETE FROM fotos WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch { res.status(500).json({ error: 'Error' }); }
@@ -602,7 +681,7 @@ app.get('/api/admin/barberias/:id/fotos', authMiddleware, adminMiddleware, async
       LEFT JOIN servicios s ON f.servicio_galeria_id = s.id
       WHERE f.barberia_id=$1
       ORDER BY f.created_at DESC`, [req.params.id]);
-    res.json(r.rows.map(f => ({ ...f, url: `/uploads/${f.barberia_id}/${f.filename}` })));
+    res.json(r.rows.map(f => ({ ...f, url: fotoUrl(f) })));
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
@@ -610,8 +689,11 @@ app.delete('/api/admin/fotos/:id', authMiddleware, adminMiddleware, async (req, 
   try {
     const f = await pool.query('SELECT * FROM fotos WHERE id=$1', [req.params.id]);
     if (!f.rows.length) return res.status(404).json({ error: 'Foto no encontrada' });
-    const fp = path.join(uploadsDir, String(f.rows[0].barberia_id), f.rows[0].filename);
-    if (existsSync(fp)) unlinkSync(fp);
+    if (f.rows[0].cloudinary_public_id) await eliminarDeCloudinary(f.rows[0].cloudinary_public_id);
+    else {
+      const fp = path.join(uploadsDir, String(f.rows[0].barberia_id), f.rows[0].filename);
+      if (existsSync(fp)) unlinkSync(fp);
+    }
     await pool.query('DELETE FROM fotos WHERE id=$1', [req.params.id]);
     res.json({ ok: true });
   } catch { res.status(500).json({ error: 'Error' }); }

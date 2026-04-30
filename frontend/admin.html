@@ -453,6 +453,7 @@
             const meta = document.getElementById(`meta-resenas-${barberiaId}`);
             if (meta) meta.innerHTML = `<i class="fas fa-comment"></i> ${total} reseñas`;
         }
+        const assetUrl = (url) => /^https?:\/\//i.test(url || '') ? url : `${config.apiURL.replace('/api','')}${url}`;
 
         window.cargarResenasAdmin = async function(id) {
             const cont = document.getElementById(`resenas-${id}`);
@@ -520,7 +521,7 @@
                     <div class="admin-photo-grid">
                         ${fotos.map(f => `
                             <div class="admin-photo-card">
-                                <img src="${config.apiURL.replace('/api','')}${f.url}" alt="${escapeHTML(f.descripcion || 'Foto de barbería')}" loading="lazy">
+                                <img src="${assetUrl(f.url)}" alt="${escapeHTML(f.descripcion || 'Foto de barbería')}" loading="lazy">
                                 <div class="admin-photo-info">
                                     <strong>${escapeHTML(f.descripcion || 'Sin descripción')}</strong>
                                     <span>${f.servicio_nombre ? `Galería: ${escapeHTML(f.servicio_nombre)}` : 'Sin servicio asignado'}</span>

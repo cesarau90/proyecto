@@ -172,6 +172,7 @@ window.cambiarTab = function (tabId, tabEl) {
 
 // Base URL del backend (sin /api) para construir URLs de imágenes
 const base = config.apiURL.replace('/api', '');
+const assetUrl = (url) => /^https?:\/\//i.test(url || '') ? url : `${base}${url}`;
 
 // Cache de reservas para el exportador CSV (se llena al cargarReservas())
 let reservasCache = [];
@@ -210,7 +211,7 @@ async function cargarServicios() {
 
         c.innerHTML = s.map(x => {
             const imgHTML = x.imagen_url
-                ? `<img src="${base}${x.imagen_url}" alt="${x.nombre}">`
+                ? `<img src="${assetUrl(x.imagen_url)}" alt="${x.nombre}">`
                 : `<div class="srv-card-img-placeholder"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
             return `<div class="srv-card">
                 <div class="srv-card-img" onclick="abrirModalFoto(${x.id},${x.foto_id || 'null'})" role="button" tabindex="0" aria-label="Cambiar foto de ${x.nombre}">
@@ -342,7 +343,7 @@ window.abrirModalFoto = async (servicioId, fotoActualId) => {
                     role="${bloqueada ? 'img' : 'button'}"
                     aria-label="${tooltip}"
                     title="${bloqueada ? tooltip : ''}">
-                    <img src="${base}${f.url || '/uploads/' + f.filename}" alt="${f.descripcion || 'Foto'}">
+                    <img src="${assetUrl(f.url || '/uploads/' + f.filename)}" alt="${f.descripcion || 'Foto'}">
                     ${bloqueada ? `<div class="foto-blocked-badge">En uso</div>` : ''}
                 </div>`;
             }).join('')}`;
@@ -640,7 +641,7 @@ async function cargarFotos() {
                    </select>`;
 
             return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:0;">
-            <img src="${base}${f.url || '/uploads/' + f.filename}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" alt="${f.descripcion || 'Foto de la barbería'}">
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" alt="${f.descripcion || 'Foto de la barbería'}">
             <div style="padding:10px 12px;">
                 <div id="desc-view-${f.id}" style="font-size:12px;color:var(--text-3);margin-bottom:8px;min-height:18px;">
                     ${f.descripcion ? f.descripcion : '<span style="opacity:.45;font-style:italic;">Sin descripción</span>'}
@@ -697,7 +698,7 @@ function renderGaleriaPreview(fotos, servicios) {
     // Thumbnail con botón × para quitar de galería
     const thumbGaleria = (f) => `
         <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="${f.descripcion || ''}">
-            <img src="${base}${f.url || '/uploads/' + f.filename}"
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
                 style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:1px solid var(--border-2);display:block;" loading="lazy">
             <button onclick="guardarServicioFoto(${f.id},'')"
                 style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;"
@@ -709,7 +710,7 @@ function renderGaleriaPreview(fotos, servicios) {
     // Thumbnail de portada: borde dorado, badge "Portada", botón × para quitar sin borrar la foto
     const thumbPortada = (f, svcId) => `
         <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="Portada: ${f.descripcion || ''}">
-            <img src="${base}${f.url || '/uploads/' + f.filename}"
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
                 style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:2px solid var(--gold);display:block;" loading="lazy">
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,71,0.85);font-size:8px;font-weight:700;text-align:center;color:#09090d;padding:2px 0;border-radius:0 0 4px 4px;text-transform:uppercase;letter-spacing:.03em;">Portada</div>
             <button onclick="quitarPortada(${svcId})"
@@ -722,7 +723,7 @@ function renderGaleriaPreview(fotos, servicios) {
     // Thumbnail sin asignación: sin botón ×
     const thumbSin = (f) => `
         <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="${f.descripcion || ''}">
-            <img src="${base}${f.url || '/uploads/' + f.filename}"
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
                 style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:1px solid var(--border-2);display:block;" loading="lazy">
         </div>`;
 
