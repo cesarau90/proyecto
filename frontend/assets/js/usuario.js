@@ -595,6 +595,7 @@ async function cargarFotos() {
 
         if (!fs.length) {
             c.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-images"></i><p>Sin fotos aún. ¡Sube la primera!</p></div>`;
+            renderGaleriaPreview([], servicios.filter(s => s.activo !== false));
             return;
         }
 
