@@ -509,7 +509,12 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
         const fFmt = new Date(datos.fecha + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         document.getElementById('reservaForm').reset();
         document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
-        toast(`¡Reserva confirmada! ${datos.servicio} · ${fFmt} · ${datos.hora}`, 'success', 5000);
+        document.getElementById('reservaOkDetalle').innerHTML =
+            `<div><i class="fas fa-cut" style="color:var(--gold);margin-right:8px;"></i><strong>Servicio:</strong> ${datos.servicio}</div>
+             <div><i class="fas fa-calendar" style="color:var(--gold);margin-right:8px;"></i><strong>Fecha:</strong> ${fFmt}</div>
+             <div><i class="fas fa-clock" style="color:var(--gold);margin-right:8px;"></i><strong>Hora:</strong> ${datos.hora}</div>
+             <div><i class="fas fa-user" style="color:var(--gold);margin-right:8px;"></i><strong>Nombre:</strong> ${datos.nombre}</div>`;
+        document.getElementById('modalReservaOk').classList.add('open');
 
         // El email de confirmación se envía desde el panel del dueño al cambiar el estado a "Confirmada"
     } catch (e) {

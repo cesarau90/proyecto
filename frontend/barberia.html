@@ -179,6 +179,19 @@
 
     </main>
 
+    <!-- MODAL RESERVA EXITOSA -->
+    <div id="modalReservaOk" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="success-modal" style="max-width:480px;width:100%;">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h2 style="text-align:center;margin-bottom:6px;">¡Reserva Confirmada!</h2>
+            <p style="text-align:center;color:var(--text-3);font-size:14px;margin-bottom:20px;">Te esperamos en nuestra barbería</p>
+            <div id="reservaOkDetalle" style="background:var(--ink-3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;font-size:14px;line-height:2;"></div>
+            <button onclick="document.getElementById('modalReservaOk').classList.remove('open')" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;">
+                <i class="fas fa-times"></i> Cerrar
+            </button>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>Powered by <a href="index.html" style="color:var(--gold-light);text-decoration:none;font-weight:600;">Barber Registro</a></p>
     </footer>
