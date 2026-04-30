@@ -506,22 +506,28 @@ window.cambiarEstado = async (id, e) => {
             method: 'PATCH', headers: auth.headers(), body: JSON.stringify({ estado: e })
         });
         toast('Estado actualizado', 'success');
-        // El correo se manda solo cuando el admin confirma, no al momento de la reserva
-        if (e === 'confirmada') {
-            const reserva = reservasCache.find(r => r.id === id);
-            if (reserva) {
-                try {
-                    await emailjs.send(config.emailJS.serviceId, config.emailJS.templateReserva, {
-                        to_email: reserva.email,
-                        to_name: reserva.nombre,
-                        servicio: reserva.servicio,
-                        fecha: fmtFecha(reserva.fecha),
-                        hora: (reserva.hora || '').substring(0, 5),
-                        telefono: reserva.telefono,
-                        comentarios: reserva.comentarios || 'Ninguno'
-                    });
-                } catch { /* el correo es secundario; no interrumpir flujo */ }
-            }
+        const reserva = reservasCache.find(r => r.id === id);
+        if (reserva) {
+            const barberia = auth.getUserData();
+            const barberaNombre = barberia?.nombre || 'Barber Registro';
+            const codigoUnico = barberia?.codigo_unico || '';
+            const linkResena = `${location.origin}/barberia.html?codigo=${codigoUnico}`;
+            const params = {
+                to_email: reserva.email,
+                to_name: reserva.nombre,
+                servicio: reserva.servicio,
+                fecha: fmtFecha(reserva.fecha),
+                hora: (reserva.hora || '').substring(0, 5),
+                telefono: reserva.telefono,
+                comentarios: reserva.comentarios || 'Ninguno',
+                barberia_nombre: barberaNombre,
+                link_resena: linkResena
+            };
+            try {
+                if (e === 'confirmada')  await emailjs.send(config.emailJS.serviceId, config.emailJS.templateConfirmacion, params);
+                if (e === 'cancelada')   await emailjs.send(config.emailJS.serviceId, config.emailJS.templateCancelacion,  params);
+                if (e === 'completada')  await emailjs.send(config.emailJS.serviceId, config.emailJS.templateCompletada,   params);
+            } catch { /* correo secundario; no interrumpir flujo */ }
         }
     } catch {
         toast('Error', 'error');

@@ -24,12 +24,12 @@ const API_URL = 'https://proyecto-production-cef5.up.railway.app/api';
 export const config = {
     apiURL: API_URL,
     emailJS: {
-        serviceId: 'service_wn05ymp',
-        publicKey: 'qFJurRildjWCafr5d',
-        // Template para confirmación de reserva al cliente
-        templateReserva: 'template_ltyvhuj',
-        // Template para registro exitoso de barbería al dueño
-        templateRegistro: 'template_o3nrsar'
+        serviceId: 'service_y72bxiq',
+        publicKey: 'lMU7ga7ekXbMjLdIF',
+        templateConfirmacion: 'template_obbf1yz',
+        templateCancelacion:  'template_hp3crzm',
+        templateCompletada:   'template_1m7ijws',
+        templateRegistro:     'template_obap1kr'
     }
 };
 
