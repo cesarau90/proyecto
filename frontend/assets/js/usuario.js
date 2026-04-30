@@ -589,8 +589,8 @@ async function cargarFotos() {
     try {
         // Cargar fotos y servicios en paralelo para poblar el selector
         const [fs, servicios] = await Promise.all([
-            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers() }).then(r => r.json()),
-            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers() }).then(r => r.json()).catch(() => [])
+            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()),
+            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()).catch(() => [])
         ]);
 
         if (!fs.length) {
@@ -795,10 +795,11 @@ window.subirFoto = async () => {
 window.eliminarFoto = async id => {
     if (!await confirmar('Eliminar foto', '¿Estás seguro de que quieres eliminar esta foto? Esta acción no se puede deshacer.', 'Eliminar')) return;
     try {
-        await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, { method: 'DELETE', headers: auth.headers() });
+        const r = await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, { method: 'DELETE', headers: auth.headers() });
+        if (!r.ok) throw new Error('Error al eliminar');
         toast('Foto eliminada', 'info');
-        cargarFotos();
-    } catch { }
+        await cargarFotos();
+    } catch (e) { toast(e.message || 'Error al eliminar', 'error'); }
 };
 
 window.editarDescFoto = id => {
@@ -841,8 +842,8 @@ window.guardarServicioFoto = async (id, servicioId) => {
 async function _actualizarPreview() {
     try {
         const [fs, servicios] = await Promise.all([
-            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers() }).then(r => r.json()),
-            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers() }).then(r => r.json()).catch(() => [])
+            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()),
+            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()).catch(() => [])
         ]);
         renderGaleriaPreview(fs, servicios.filter(s => s.activo !== false));
     } catch { /* preview no crítica */ }
