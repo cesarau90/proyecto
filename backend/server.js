@@ -519,7 +519,13 @@ app.delete('/api/mi-barberia/fotos/:id', authMiddleware, async (req, res) => {
 
 // === RUTAS ADMIN (administrador de la plataforma) ===
 app.get('/api/admin/barberias', authMiddleware, adminMiddleware, async (req, res) => {
-  try { res.json((await pool.query('SELECT * FROM estadisticas_barberias ORDER BY created_at DESC')).rows); }
+  try {
+    res.json((await pool.query(`
+      SELECT eb.*, COALESCE(b.tema_color, '#c9a847') AS tema_color
+      FROM estadisticas_barberias eb
+      JOIN barberias b ON b.id = eb.id
+      ORDER BY eb.created_at DESC`)).rows);
+  }
   catch { res.status(500).json({ error: 'Error' }); }
 });
 
@@ -531,18 +537,20 @@ app.get('/api/admin/barberias/:id', authMiddleware, adminMiddleware, async (req,
 });
 
 app.put('/api/admin/barberias/:id', authMiddleware, adminMiddleware, async (req, res) => {
-  const { nombre, direccion, ciudad, horarios, activa, dueno_telefono } = req.body;
+  const { nombre, direccion, ciudad, horarios, activa, dueno_telefono, tema_color } = req.body;
+  if (tema_color !== undefined && !colorHexValido(tema_color)) return res.status(400).json({ error: 'Color invalido' });
   try {
     const r = await pool.query(`UPDATE barberias SET nombre=COALESCE($1,nombre), direccion=COALESCE($2,direccion),
       ciudad=COALESCE($3,ciudad), horarios=COALESCE($4,horarios), activa=COALESCE($5,activa),
-      dueno_telefono=COALESCE($6,dueno_telefono), updated_at=CURRENT_TIMESTAMP
-      WHERE id=$7 RETURNING *`, [
+      dueno_telefono=COALESCE($6,dueno_telefono), tema_color=COALESCE($7,tema_color), updated_at=CURRENT_TIMESTAMP
+      WHERE id=$8 RETURNING *`, [
         nombre === undefined ? undefined : normalizarTexto(nombre, 100),
         direccion === undefined ? undefined : normalizarTexto(direccion, 500),
         ciudad === undefined ? undefined : normalizarTexto(ciudad, 100),
         horarios === undefined ? undefined : normalizarTexto(horarios, 2000),
         activa,
         dueno_telefono === undefined ? undefined : normalizarTexto(dueno_telefono, 20),
+        tema_color,
         req.params.id
       ]);
     r.rows.length ? res.json(r.rows[0]) : res.status(404).json({ error: 'No encontrada' });
@@ -569,6 +577,43 @@ app.delete('/api/admin/reservas/:id', authMiddleware, adminMiddleware, async (re
   try {
     const r = await pool.query('DELETE FROM reservas WHERE id=$1 RETURNING id', [req.params.id]);
     r.rows.length ? res.json({ ok: true }) : res.status(404).json({ error: 'Reserva no encontrada' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+app.get('/api/admin/barberias/:id/resenas', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM resenas WHERE barberia_id=$1 ORDER BY created_at DESC', [req.params.id]);
+    res.json(r.rows);
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+app.delete('/api/admin/resenas/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query('DELETE FROM resenas WHERE id=$1 RETURNING id', [req.params.id]);
+    r.rows.length ? res.json({ ok: true }) : res.status(404).json({ error: 'Resena no encontrada' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+app.get('/api/admin/barberias/:id/fotos', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query(`
+      SELECT f.*, s.nombre AS servicio_nombre
+      FROM fotos f
+      LEFT JOIN servicios s ON f.servicio_galeria_id = s.id
+      WHERE f.barberia_id=$1
+      ORDER BY f.created_at DESC`, [req.params.id]);
+    res.json(r.rows.map(f => ({ ...f, url: `/uploads/${f.barberia_id}/${f.filename}` })));
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+app.delete('/api/admin/fotos/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const f = await pool.query('SELECT * FROM fotos WHERE id=$1', [req.params.id]);
+    if (!f.rows.length) return res.status(404).json({ error: 'Foto no encontrada' });
+    const fp = path.join(uploadsDir, String(f.rows[0].barberia_id), f.rows[0].filename);
+    if (existsSync(fp)) unlinkSync(fp);
+    await pool.query('DELETE FROM fotos WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
