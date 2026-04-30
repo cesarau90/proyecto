@@ -107,7 +107,7 @@
                                     <span class="barb-meta-item"><i class="fas fa-calendar"></i> ${b.total_reservas} reservas</span>
                                     <span class="barb-meta-item"><i class="fas fa-cut"></i> ${b.total_servicios} servicios</span>
                                     <span class="barb-meta-item"><i class="fas fa-star" style="color:#f59e0b;"></i> ${b.calificacion_promedio}</span>
-                                    <span class="barb-meta-item"><i class="fas fa-comment"></i> ${b.total_resenas} reseñas</span>
+                                    <span class="barb-meta-item" id="meta-resenas-${b.id}"><i class="fas fa-comment"></i> ${b.total_resenas} reseñas</span>
                                 </div>
                             </div>
                             <div class="barb-actions">
@@ -449,6 +449,10 @@
             try { return new Date(fecha).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }); }
             catch { return '-'; }
         };
+        function actualizarMetaResenas(barberiaId, total) {
+            const meta = document.getElementById(`meta-resenas-${barberiaId}`);
+            if (meta) meta.innerHTML = `<i class="fas fa-comment"></i> ${total} reseñas`;
+        }
 
         window.cargarResenasAdmin = async function(id) {
             const cont = document.getElementById(`resenas-${id}`);
@@ -493,7 +497,8 @@
                 if (!r.ok) throw new Error();
                 document.getElementById(`resenas-${barberiaId}`).innerHTML = '';
                 await cargarResenasAdmin(barberiaId);
-                await loadBarberias();
+                const restantes = document.querySelectorAll(`#resenas-${barberiaId} .admin-review-card`).length;
+                actualizarMetaResenas(barberiaId, restantes);
             } catch { await confirmar('Error', 'No se pudo eliminar la reseña.', 'Cerrar', 'warning'); }
         };
 
