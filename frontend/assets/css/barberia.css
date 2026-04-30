@@ -257,7 +257,11 @@
     box-shadow: 0 10px 24px rgba(var(--gold-rgb),0.08);
 }
 
-.services-grid { gap: 22px; }
+.services-grid {
+    gap: 22px;
+    justify-content: center;
+    justify-items: stretch;
+}
 
 .service-card {
     background:
