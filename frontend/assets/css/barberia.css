@@ -64,17 +64,17 @@
 /* ── HERO ─────────────────────────────────────────────────────
    Sección principal con nombre de la barbería y CTAs.
    El padding-top (110px) deja espacio para el navbar fijo.
-   El gradiente sutil y la línea dorada inferior refuerzan
+   El gradiente más dramático y el padding más generoso refuerzan
    la estética premium sin distraer del contenido.
    ─────────────────────────────────────────────────────────── */
 .hero {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    padding: 126px 20px 72px;
+    padding: 140px 20px 88px;
     background:
-        linear-gradient(160deg, rgba(var(--gold-rgb),0.08) 0%, transparent 36%),
-        linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 70%);
+        linear-gradient(160deg, rgba(var(--gold-rgb),0.12) 0%, transparent 40%),
+        linear-gradient(200deg, var(--ink-3) 0%, var(--ink-2) 30%, var(--ink) 75%);
     text-align: center;
 }
 
@@ -267,8 +267,10 @@
 }
 .service-card:hover,
 .service-card:focus-within {
-    border-color: rgba(var(--gold-rgb),0.72);
-    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.18), 0 18px 42px rgba(var(--gold-rgb),0.14), var(--shadow-lg);
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(var(--gold-rgb),0.76);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.22), 0 20px 48px rgba(var(--gold-rgb),0.16), var(--shadow-lg);
+    cursor: pointer;
 }
 .service-card.selected {
     border-color: var(--gold);
@@ -394,15 +396,15 @@
    ─────────────────────────────────────────────────────────── */
 .booking-card {
     background: var(--surface);
-    border: 1px solid rgba(var(--gold-rgb),0.16);
-    border-radius: 20px;
-    padding: 36px;
-    box-shadow: var(--shadow-lg);
-    max-width: 680px;
+    border: 1px solid rgba(var(--gold-rgb),0.18);
+    border-radius: 24px;
+    padding: 42px;
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(var(--gold-rgb),0.04) inset;
+    max-width: 700px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
-    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+    transition: border-color var(--t-slow), box-shadow var(--t-slow), transform var(--t);
 }
 .booking-card::before {
     content: '';
@@ -451,21 +453,25 @@
     border: 1px solid rgba(var(--gold-rgb),0.12);
     border-radius: 12px;
 }
+/* CTA buttons — más grandes y prominentes */
 #btnReservar,
 #btnResena {
-    min-height: 48px;
-    box-shadow: 0 14px 30px rgba(var(--gold-rgb),0.18) !important;
+    min-height: 54px;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22) !important;
     transition: transform var(--t), box-shadow var(--t), filter var(--t);
 }
 #btnReservar:hover,
 #btnResena:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.06);
-    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.14), 0 18px 38px rgba(var(--gold-rgb),0.22) !important;
+    transform: translateY(-3px);
+    filter: brightness(1.07);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26) !important;
 }
 #btnReservar:active,
 #btnResena:active {
     transform: translateY(0);
+    filter: brightness(0.98);
 }
 
 .star-rating {
@@ -481,36 +487,72 @@
     text-shadow: 0 0 18px rgba(var(--gold-rgb),0.28);
 }
 
+/* Sección reseñas — cards más elegantes con avatar inicial */
 #resenasContainer .review-card {
     background:
         linear-gradient(180deg, rgba(var(--gold-rgb),0.035), transparent 42%),
         var(--surface);
     border-color: rgba(var(--gold-rgb),0.14);
+    border-radius: 16px;
+    padding: 22px 24px;
 }
 #resenasContainer .review-card:hover {
-    border-color: rgba(var(--gold-rgb),0.5);
-    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.1), 0 16px 34px rgba(var(--gold-rgb),0.1);
+    border-color: rgba(var(--gold-rgb),0.55);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.12), 0 18px 38px rgba(var(--gold-rgb),0.12);
+    transform: translateY(-3px);
 }
 .review-header {
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
 }
+/* Avatar circular: usar el .review-author como "nombre" y añadir un badge visual a la izquierda */
 .review-author {
     font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+/* Pseudo-avatar con inicial: genera un círculo dorado antes del nombre */
+.review-author::before {
+    content: attr(data-inicial, '✓');
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(var(--gold-rgb),0.22), rgba(var(--gold-rgb),0.08));
+    border: 1.5px solid rgba(var(--gold-rgb),0.32);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-light);
+    font-family: 'Playfair Display', serif;
+    flex-shrink: 0;
+    /* Fallback decorativo usando primera letra: se sobrescribe con attr() si JS la provee */
+    content: '✦';
+    font-size: 12px;
 }
 .review-rating {
     color: var(--gold-light);
     letter-spacing: 0.04em;
     white-space: nowrap;
+    font-size: 15px;
 }
 .review-text {
     color: var(--text-2);
-    line-height: 1.65;
-    margin-top: 10px;
+    line-height: 1.7;
+    margin-top: 12px;
+    font-size: 14px;
 }
 .review-date {
     border-top: 1px solid rgba(var(--gold-rgb),0.08);
-    padding-top: 8px;
+    padding-top: 10px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-3);
 }
 
 #mapaContainer {

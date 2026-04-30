@@ -82,23 +82,26 @@
 
 /* ── SECCIÓN STATS ─────────────────────────────────────────── */
 .admin-section-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-2);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 14px;
+    letter-spacing: 0.10em;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    padding: 10px 0 10px;
+    border-bottom: 1px solid rgba(var(--gold-rgb),0.12);
 }
 .admin-section-title::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(90deg, rgba(var(--gold-rgb),0.24), transparent);
+    background: linear-gradient(90deg, rgba(var(--gold-rgb),0.20), transparent);
+    margin-top: 1px;
 }
-.admin-section-title i { color: var(--gold); font-size: 11px; }
+.admin-section-title i { color: var(--gold); font-size: 12px; }
 
 .stats-grid {
     display: grid;
@@ -108,16 +111,16 @@
 }
 .stat-card {
     background:
-        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.10), transparent 54%),
+        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.12), transparent 56%),
         linear-gradient(135deg, var(--surface) 0%, var(--ink-3) 100%);
-    border: 1px solid rgba(var(--gold-rgb),0.13);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
+    border: 1px solid rgba(var(--gold-rgb),0.14);
+    border-radius: 18px;
+    padding: 32px 24px;
     text-align: center;
     transition: transform var(--t), border-color var(--t), box-shadow var(--t);
     position: relative;
     overflow: hidden;
-    animation: adminFadeUp .45s ease-out both;
+    animation: adminFadeUp .45s cubic-bezier(0.16,1,0.3,1) both;
 }
 .stat-card:nth-child(2) { animation-delay: .06s; }
 .stat-card:nth-child(3) { animation-delay: .12s; }
@@ -152,21 +155,22 @@
 }
 .stat-card:hover::before { opacity: 1; }
 
+/* Números de stats más grandes y prominentes */
 .stat-card .num {
-    font-size: 44px;
+    font-size: 52px;
     font-weight: 800;
     color: var(--gold);
     font-family: 'Playfair Display', serif;
     line-height: 1;
-    text-shadow: 0 0 24px rgba(var(--gold-rgb),0.34);
+    text-shadow: 0 0 32px rgba(var(--gold-rgb),0.38);
 }
 .stat-card .label {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-3);
-    margin-top: 8px;
-    font-weight: 600;
+    margin-top: 10px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
 }
 
 

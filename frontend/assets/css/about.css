@@ -11,8 +11,11 @@
     z-index: 500;
     padding: 12px 0;
     background: var(--navbar-bg);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-2);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(var(--gold-rgb),0.12);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.16);
+    transition: background var(--t), box-shadow var(--t);
 }
 .about-nav-inner {
     display: flex;
@@ -149,17 +152,29 @@
 }
 .about-que-card {
     background: var(--surface);
-    border: 1px solid var(--border-2);
-    border-radius: var(--radius-lg);
-    padding: 24px 20px;
+    border: 1px solid rgba(var(--gold-rgb),0.14);
+    border-radius: 18px;
+    padding: 28px 20px;
     text-align: center;
-    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t), background var(--t);
+    position: relative;
+    overflow: hidden;
+}
+.about-que-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.10), transparent 52%);
+    opacity: 0;
+    transition: opacity var(--t);
+    pointer-events: none;
 }
 .about-que-card:hover {
-    border-color: var(--border);
-    box-shadow: var(--glow);
-    transform: translateY(-4px);
+    border-color: rgba(var(--gold-rgb),0.48);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.10), var(--glow), 0 18px 38px rgba(0,0,0,0.18);
+    transform: translateY(-5px);
 }
+.about-que-card:hover::before { opacity: 1; }
 .about-que-card i {
     font-size: 28px;
     color: var(--gold);
@@ -251,30 +266,44 @@
 }
 .about-member {
     background: var(--surface);
-    border: 1px solid var(--border-2);
-    border-radius: var(--radius-lg);
-    padding: 32px 20px;
+    border: 1px solid rgba(var(--gold-rgb),0.12);
+    border-radius: 18px;
+    padding: 36px 22px;
     text-align: center;
     transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+    position: relative;
+    overflow: hidden;
+}
+.about-member::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity var(--t);
 }
 .about-member:hover {
-    border-color: var(--border);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-4px);
+    border-color: rgba(var(--gold-rgb),0.46);
+    box-shadow: var(--shadow-md), 0 0 0 1px rgba(var(--gold-rgb),0.12);
+    transform: translateY(-5px);
 }
+.about-member:hover::before { opacity: 1; }
 .about-member-avatar {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 28px;
     color: var(--ink);
-    margin: 0 auto 16px;
+    margin: 0 auto 18px;
     font-weight: 700;
     font-family: 'Playfair Display', serif;
+    box-shadow: 0 8px 24px rgba(var(--gold-rgb),0.24);
+    border: 2px solid rgba(var(--gold-rgb),0.40);
 }
 .about-member-name {
     font-size: 14px;
@@ -294,23 +323,29 @@
 
 /* ── FOOTER ───────────────────────────────────────────────────── */
 .about-footer {
-    background: var(--ink-3);
-    border-top: 1px solid var(--border-2);
-    padding: 40px 0;
+    background:
+        radial-gradient(ellipse 70% 80% at 50% 0%, rgba(var(--gold-rgb),0.07), transparent 66%),
+        var(--ink-3);
+    border-top: 1px solid rgba(var(--gold-rgb),0.14);
+    padding: 48px 0;
     text-align: center;
 }
 .about-footer p {
     color: var(--text-3);
     font-size: 14px;
     margin-bottom: 12px;
+    line-height: 1.6;
 }
 .about-footer a {
     color: var(--gold);
     text-decoration: none;
     font-weight: 600;
-    transition: color var(--t);
+    transition: color var(--t), text-shadow var(--t);
 }
-.about-footer a:hover { color: var(--gold-light); }
+.about-footer a:hover {
+    color: var(--gold-light);
+    text-shadow: 0 0 18px rgba(var(--gold-rgb),0.26);
+}
 
 
 /* ── RESPONSIVE ───────────────────────────────────────────────── */
