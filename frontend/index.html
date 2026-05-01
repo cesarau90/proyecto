@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Barber Registro — Registra tu Barbería</title>
     <!-- Estilos: global + específico de esta página de registro -->
     <link rel="stylesheet" href="assets/css/styles.css">
@@ -12,6 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
+
+    <div id="toastContainer" aria-live="polite"></div>
 
     <!-- Skip link: accesibilidad para navegación con teclado (C7) -->
     <a href="#registroForm" class="skip-link">Saltar al formulario de registro</a>
@@ -25,24 +28,25 @@
                 <a href="#registroForm">Registrar</a>
                 <a href="about.html">Acerca de</a>
                 <a href="login.html">Iniciar Sesión</a>
+                <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- HERO — padding-top incluye espacio para el navbar fijo -->
-    <div class="hero" style="padding-top:120px;">
+    <div class="hero will-reveal reveal-hero" style="padding-top:120px;">
         <div class="hero-inner container">
-            <div class="hero-badge"><i class="fas fa-cut"></i> Sistema de Reservas</div>
-            <h1>Barber<br><em>Registro</em></h1>
-            <p class="hero-sub">Gestiona las citas de tu barbería de forma profesional. Configura en minutos.</p>
-            <a href="login.html" class="hero-cta"><i class="fas fa-sign-in-alt"></i> ¿Ya tienes cuenta? Inicia sesión</a>
+            <div class="hero-badge hero-enter" style="--enter-delay:0.06s"><i class="fas fa-cut"></i> Sistema de Reservas</div>
+            <h1 class="hero-enter" style="--enter-delay:0.14s">Barber<br><em>Registro</em></h1>
+            <p class="hero-sub hero-enter" style="--enter-delay:0.22s">Gestiona las citas de tu barbería de forma profesional. Configura en minutos.</p>
+            <a href="login.html" class="hero-cta hero-enter" style="--enter-delay:0.30s"><i class="fas fa-sign-in-alt"></i> ¿Ya tienes cuenta? Inicia sesión</a>
         </div>
     </div>
 
     <main class="container" id="main-content">
 
         <!-- Grid de 4 beneficios: explica por qué usar la plataforma -->
-        <div class="features" id="features">
+        <div class="features will-reveal reveal-group" id="features">
             <div class="feature will-reveal" style="transition-delay:0.05s">
                 <div class="feature-icon"><i class="fas fa-link"></i></div>
                 <h3>Link Único</h3>
@@ -70,12 +74,12 @@
              100% en el cliente — no hay petición al backend por cada
              tecla, solo al cargar la página una vez.
              ════════════════════════════════════════════════════════ -->
-        <div class="directorio-section" id="directorio">
-            <div class="directorio-header">
+        <div class="directorio-section will-reveal reveal-section" id="directorio">
+            <div class="directorio-header will-reveal" style="transition-delay:0.05s">
                 <h2><i class="fas fa-store"></i> Barberías Registradas</h2>
                 <p>Encuentra una barbería o comparte tu página con clientes</p>
             </div>
-            <div class="busqueda-wrap">
+            <div class="busqueda-wrap will-reveal" style="transition-delay:0.12s">
                 <div class="busqueda-input-wrap">
                     <i class="fas fa-search busqueda-icon" aria-hidden="true"></i>
                     <input type="search" id="busquedaInput" class="busqueda-input"
@@ -85,12 +89,12 @@
                 </div>
                 <p id="busquedaCount" class="busqueda-count" aria-live="polite"></p>
             </div>
-            <div id="barberiasGrid" class="barb-grid-pub" aria-label="Listado de barberías"></div>
+            <div id="barberiasGrid" class="barb-grid-pub will-reveal" style="transition-delay:0.18s" aria-label="Listado de barberías"></div>
         </div>
 
         <!-- Formulario de registro: datos del dueño + info de barbería + horarios -->
-        <div class="form-container">
-            <div class="form-card">
+        <div class="form-container will-reveal reveal-section">
+            <div class="form-card will-reveal" style="transition-delay:0.08s">
                 <h2><i class="fas fa-store" style="color:var(--gold);margin-right:10px;"></i>Registra tu Barbería</h2>
                 <p class="sub">Crea tu cuenta y obtén tu página pública en minutos</p>
 
@@ -119,9 +123,9 @@
                     <div class="form-row">
                         <div class="form-group" style="position:relative;">
                             <label>Dirección *</label>
-                            <input type="text" id="direccion" class="form-control" required placeholder="Escribe para buscar..." autocomplete="off">
+                            <input type="text" id="direccion" class="form-control" required placeholder="Escribe para buscar..." autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="sugerenciasDir">
                             <!-- Lista de sugerencias que aparece debajo del input -->
-                            <div id="sugerenciasDir" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink-3);border:1px solid var(--border);border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;"></div>
+                            <div id="sugerenciasDir" role="listbox" aria-label="Sugerencias de dirección" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink-3);border:1px solid var(--border);border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;"></div>
                         </div>
                         <div class="form-group"><label>Ciudad *</label><input type="text" id="ciudad" class="form-control" required placeholder="Se llena automáticamente"></div>
                     </div>
@@ -129,7 +133,7 @@
                     <div class="section-title">Horarios de Atención *</div>
                     <div class="horarios-grid" id="horariosGrid"></div>
 
-                    <button type="submit" id="btnRegistro" class="btn btn-primary" style="width:100%;margin-top:32px;padding:15px;font-size:15px;border-radius:12px;">
+                    <button type="submit" id="btnRegistro" class="btn btn-primary" style="width:100%;margin-top:36px;padding:17px;font-size:15px;border-radius:14px;letter-spacing:0.025em;">
                         <i class="fas fa-rocket"></i> Crear mi Barbería
                     </button>
                     <p style="text-align:center;margin-top:20px;color:var(--text-3);font-size:13px;">
@@ -141,13 +145,13 @@
     </main>
 
     <!-- MODAL ÉXITO -->
-    <div id="modalExito" class="modal-overlay">
+    <div id="modalExito" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalExitoTitulo">
         <div class="success-modal">
             <div class="success-icon"><i class="fas fa-check"></i></div>
-            <h2>¡Barbería Creada!</h2>
-            <p style="text-align:center;color:var(--text-3);font-size:14px;margin-bottom:24px;">Tu cuenta y página pública están listas</p>
+            <h2 id="modalExitoTitulo" style="text-align:center;margin-bottom:8px;">¡Barbería Creada!</h2>
+            <p style="text-align:center;color:var(--text-3);font-size:15px;margin-bottom:28px;">Tu cuenta y página pública están listas</p>
             <div id="infoExito"></div>
-            <button onclick="window.location.href='usuario.html'" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;margin-top:8px;">
+            <button onclick="window.location.href='usuario.html'" class="btn btn-primary" style="width:100%;padding:16px;font-size:15px;border-radius:14px;margin-top:10px;letter-spacing:0.02em;">
                 <i class="fas fa-cog"></i> Ir a mi Panel
             </button>
         </div>
@@ -155,6 +159,9 @@
 
     <script type="module">
         import { config, auth } from './assets/js/config.js';
+        import { initTema, openModal, initGlobalModalEscape, toast } from './assets/js/utils.js';
+        initTema();
+        initGlobalModalEscape();
         if (auth.estaLogueado() && auth.getRole()==='dueno') window.location.href='usuario.html';
         emailjs.init({ publicKey: config.emailJS.publicKey });
 
@@ -165,6 +172,26 @@
         const hAp=['06:00','07:00','08:00','09:00','10:00','11:00'];
         const hCi=['14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'];
         const grid=document.getElementById('horariosGrid');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const revealObserver = reduceMotion ? null : new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -56px 0px' });
+
+        function observarReveals(scope = document) {
+            const items = scope.querySelectorAll('.will-reveal:not(.revealed)');
+            items.forEach(el => {
+                if (reduceMotion) {
+                    el.classList.add('revealed');
+                } else {
+                    revealObserver.observe(el);
+                }
+            });
+        }
 
         dias.forEach((d,i)=>{
             const act=i<6;
@@ -187,9 +214,9 @@
         form.addEventListener('submit', async e=>{
             e.preventDefault();
             const pw=document.getElementById('password').value, pw2=document.getElementById('password_confirm').value;
-            if(pw!==pw2){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</div>'; return; }
-            if(pw.length<6){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Contraseña mínimo 6 caracteres</div>'; return; }
-            if(!dias.some(d=>document.getElementById(`ck-${d.id}`).checked)){ msg.innerHTML='<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Selecciona al menos un día</div>'; return; }
+            if(pw!==pw2){ toast('Las contraseñas no coinciden','error'); return; }
+            if(pw.length<6){ toast('Contraseña mínimo 6 caracteres','error'); return; }
+            if(!dias.some(d=>document.getElementById(`ck-${d.id}`).checked)){ toast('Selecciona al menos un día de trabajo','error'); return; }
             btn.disabled=true; btn.innerHTML='<span class="loading"></span> Creando...'; msg.innerHTML='';
             const datos={nombre:document.getElementById('nombre').value.trim(),direccion:document.getElementById('direccion').value.trim(),ciudad:document.getElementById('ciudad').value.trim(),horarios:genHorarios(),dueno_nombre:document.getElementById('dueno_nombre').value.trim(),dueno_email:document.getElementById('dueno_email').value.trim(),dueno_telefono:document.getElementById('dueno_telefono').value.trim(),password:pw};
             try {
@@ -201,8 +228,8 @@
                     <div class="alert alert-success"><i class="fas fa-check-circle"></i> ¡Tu barbería está lista!</div>
                     <p style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Link para tus clientes:</p>
                     <div class="link-box"><a href="barberia.html?codigo=${d.barberia.codigo_unico}" target="_blank">${location.origin}/barberia.html?codigo=${d.barberia.codigo_unico}</a></div>`;
-                modal.classList.add('open'); form.reset();
-            } catch(e){ msg.innerHTML=`<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`; }
+                openModal(modal, btn); form.reset();
+            } catch(e){ toast(e.message,'error'); }
             finally{ btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket"></i> Crear mi Barbería'; }
         });
 
@@ -218,6 +245,60 @@
         const inputCiudad = document.getElementById('ciudad');
         const sugBox = document.getElementById('sugerenciasDir');
         let debounceTimer = null;
+        let sugerencias = [];
+        let sugActiva = -1;
+
+        function cerrarSugerencias() {
+            sugBox.style.display = 'none';
+            sugBox.innerHTML = '';
+            inputDir.setAttribute('aria-expanded', 'false');
+            inputDir.removeAttribute('aria-activedescendant');
+            sugerencias = [];
+            sugActiva = -1;
+        }
+
+        function seleccionarSugerencia(idx) {
+            const lugar = sugerencias[idx];
+            if (!lugar) return;
+            const addr = lugar.address || {};
+            const calle = addr.road || addr.pedestrian || addr.neighbourhood || '';
+            const numero = addr.house_number || '';
+            inputDir.value = numero ? `${calle} ${numero}` : calle || lugar.display_name.split(',')[0];
+            const ciudad = addr.city || addr.town || addr.village || addr.municipality || addr.state || '';
+            const estado = addr.state || '';
+            inputCiudad.value = ciudad + (estado && estado !== ciudad ? ', ' + estado : '');
+            cerrarSugerencias();
+            inputCiudad.focus();
+        }
+
+        function actualizarSugerenciaActiva() {
+            sugBox.querySelectorAll('[role="option"]').forEach((el, i) => {
+                const activo = i === sugActiva;
+                el.classList.toggle('active', activo);
+                el.setAttribute('aria-selected', activo ? 'true' : 'false');
+                if (activo) {
+                    inputDir.setAttribute('aria-activedescendant', el.id);
+                    el.scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+
+        function renderSugerencias(resultados) {
+            sugerencias = resultados;
+            sugActiva = -1;
+            sugBox.innerHTML = resultados.map((r, i) => `
+                <div id="sug-dir-${i}" class="sugerencia-dir" role="option" aria-selected="false" tabindex="-1" data-idx="${i}">
+                    <i class="fas fa-map-marker-alt" style="color:var(--gold);margin-right:6px;font-size:11px;"></i>
+                    ${r.display_name}
+                </div>
+            `).join('');
+            sugBox.style.display = 'block';
+            inputDir.setAttribute('aria-expanded', 'true');
+            sugBox.querySelectorAll('[data-idx]').forEach(el => {
+                el.addEventListener('mousedown', e => e.preventDefault());
+                el.addEventListener('click', () => seleccionarSugerencia(parseInt(el.dataset.idx)));
+            });
+        }
 
         // Escuchar cada tecla en el campo de dirección
         inputDir.addEventListener('input', function() {
@@ -225,7 +306,7 @@
             const query = this.value.trim();
 
             // Mínimo 3 caracteres para buscar
-            if (query.length < 3) { sugBox.style.display = 'none'; return; }
+            if (query.length < 3) { cerrarSugerencias(); return; }
 
             // Esperar 400ms después de que deje de escribir para buscar
             debounceTimer = setTimeout(async () => {
@@ -234,8 +315,9 @@
                     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', México')}&limit=5&addressdetails=1`;
                     const resp = await fetch(url, { headers: { 'Accept-Language': 'es' } });
                     const resultados = await resp.json();
+                    sugerencias = resultados;
 
-                    if (!resultados.length) { sugBox.style.display = 'none'; return; }
+                    if (!resultados.length) { cerrarSugerencias(); return; }
 
                     // Mostrar sugerencias como lista clickeable
                     sugBox.innerHTML = resultados.map((r, i) => `
@@ -248,6 +330,14 @@
                         </div>
                     `).join('');
                     sugBox.style.display = 'block';
+                    inputDir.setAttribute('aria-expanded', 'true');
+                    sugBox.querySelectorAll('[data-idx]').forEach((el, i) => {
+                        el.id = `sug-dir-${i}`;
+                        el.classList.add('sugerencia-dir');
+                        el.setAttribute('role', 'option');
+                        el.setAttribute('aria-selected', 'false');
+                        el.setAttribute('tabindex', '-1');
+                    });
 
                     // Al hacer click en una sugerencia, llenar los campos
                     sugBox.querySelectorAll('[data-idx]').forEach(el => {
@@ -266,20 +356,39 @@
                             const estado = addr.state || '';
                             inputCiudad.value = ciudad + (estado && estado !== ciudad ? ', ' + estado : '');
 
-                            sugBox.style.display = 'none';
+                            cerrarSugerencias();
                         });
                     });
                 } catch (e) {
                     console.log('Error buscando direcciones:', e);
-                    sugBox.style.display = 'none';
+                    cerrarSugerencias();
                 }
             }, 400);
+        });
+
+        inputDir.addEventListener('keydown', e => {
+            if (sugBox.style.display !== 'block') return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                sugActiva = (sugActiva + 1) % sugerencias.length;
+                actualizarSugerenciaActiva();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                sugActiva = (sugActiva - 1 + sugerencias.length) % sugerencias.length;
+                actualizarSugerenciaActiva();
+            } else if (e.key === 'Enter' && sugActiva >= 0) {
+                e.preventDefault();
+                seleccionarSugerencia(sugActiva);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cerrarSugerencias();
+            }
         });
 
         // Cerrar sugerencias al hacer click fuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#direccion') && !e.target.closest('#sugerenciasDir')) {
-                sugBox.style.display = 'none';
+                cerrarSugerencias();
             }
         });
 
@@ -333,11 +442,7 @@
                     </a>
                 </div>`).join('');
 
-            // IntersectionObserver: revelar tarjetas al entrar al viewport
-            const obs = new IntersectionObserver((entries) => {
-                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); } });
-            }, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' });
-            grid.querySelectorAll('.will-reveal').forEach(el => obs.observe(el));
+            observarReveals(grid);
         }
 
         // Filtrar en tiempo real (por nombre o ciudad)
@@ -352,11 +457,7 @@
 
         cargarDirectorio();
 
-        // IntersectionObserver para las feature cards (elementos estáticos)
-        const featureObs = new IntersectionObserver((entries) => {
-            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); featureObs.unobserve(e.target); } });
-        }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
-        document.querySelectorAll('.feature.will-reveal').forEach(el => featureObs.observe(el));
+        observarReveals();
     </script>
 </body>
 </html>

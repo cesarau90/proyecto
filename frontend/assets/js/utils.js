@@ -44,6 +44,7 @@ export function toast(msg, type = 'info', duration = 3000) {
  */
 export function confirmar(titulo, mensaje, btnTexto = 'Confirmar', tipo = 'danger') {
     return new Promise(resolve => {
+        const previo = document.activeElement;
         const btnBg = tipo === 'danger' ? 'var(--red,#e05252)' : 'var(--gold,#c9a847)';
 
         const overlay = document.createElement('div');
@@ -55,11 +56,11 @@ export function confirmar(titulo, mensaje, btnTexto = 'Confirmar', tipo = 'dange
         ].join(';');
 
         overlay.innerHTML = `
-            <div style="background:var(--surface,#1a1a24);border:1px solid var(--border-2,rgba(255,255,255,0.09));
+            <div role="dialog" aria-modal="true" aria-labelledby="_conf-title" style="background:var(--surface,#1a1a24);border:1px solid var(--border-2,rgba(255,255,255,0.09));
                         border-radius:16px;padding:28px 24px;max-width:380px;width:100%;
                         box-shadow:0 24px 60px rgba(0,0,0,0.55);
                         animation:conf-in 0.18s cubic-bezier(0.34,1.56,0.64,1);">
-                <p style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;
+                <p id="_conf-title" style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;
                            color:var(--text,#ece9e0);margin-bottom:8px;">${titulo}</p>
                 <p style="font-size:13px;color:var(--text-2,#b5b2ab);line-height:1.65;margin-bottom:24px;">${mensaje}</p>
                 <div style="display:flex;gap:10px;justify-content:flex-end;">
@@ -83,12 +84,109 @@ export function confirmar(titulo, mensaje, btnTexto = 'Confirmar', tipo = 'dange
         document.body.appendChild(overlay);
         overlay.querySelector('#_conf-no').focus();
 
-        const cerrar = val => { overlay.remove(); resolve(val); };
+        const cerrar = val => {
+            overlay.remove();
+            if (previo && typeof previo.focus === 'function') previo.focus();
+            resolve(val);
+        };
         overlay.querySelector('#_conf-no').addEventListener('click', () => cerrar(false));
         overlay.querySelector('#_conf-si').addEventListener('click', () => cerrar(true));
         overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(false); });
-        overlay.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(false); });
+        overlay.addEventListener('keydown', e => {
+            if (e.key === 'Escape') cerrar(false);
+            if (e.key === 'Tab') {
+                const focusables = Array.from(overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+                    .filter(el => !el.disabled && el.offsetParent !== null);
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        });
     });
+}
+
+export function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('open');
+    const returnTo = modal.dataset.returnFocus;
+    if (returnTo) {
+        const el = document.getElementById(returnTo);
+        if (el && typeof el.focus === 'function') el.focus();
+    }
+    delete modal.dataset.returnFocus;
+}
+
+export function openModal(modal, trigger = document.activeElement) {
+    if (!modal) return;
+    if (trigger?.id) modal.dataset.returnFocus = trigger.id;
+    modal.classList.add('open');
+    const focusable = modal.querySelector('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    if (focusable) setTimeout(() => focusable.focus(), 0);
+}
+
+export function closeOpenModals() {
+    document.querySelectorAll('.modal-overlay.open').forEach(modal => closeModal(modal));
+}
+
+export function initGlobalModalEscape() {
+    document.addEventListener('keydown', e => {
+        const modal = document.querySelector('.modal-overlay.open');
+        if (!modal) return;
+        if (e.key === 'Escape') {
+            closeModal(modal);
+            return;
+        }
+        if (e.key !== 'Tab') return;
+        const focusables = Array.from(modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+            .filter(el => el.offsetParent !== null);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    });
+}
+
+
+/**
+ * Inicializa el toggle de tema oscuro/claro.
+ * Requiere un <button id="btnTema"> y un <i id="iconTema"> en el HTML.
+ * Lee la preferencia de localStorage y aplica el tema al cargar.
+ */
+export function initTema() {
+    const btn = document.getElementById('btnTema');
+    const icon = document.getElementById('iconTema');
+
+    const root = document.documentElement;
+
+    function aplicar(modo) {
+        if (modo === 'claro') {
+            root.setAttribute('data-tema', 'claro');
+            if (icon) icon.className = 'fas fa-moon';
+            if (btn) btn.setAttribute('aria-label', 'Cambiar a modo oscuro');
+        } else {
+            root.removeAttribute('data-tema');
+            if (icon) icon.className = 'fas fa-sun';
+            if (btn) btn.setAttribute('aria-label', 'Cambiar a modo claro');
+        }
+    }
+
+    aplicar(localStorage.getItem('barber-tema') || 'oscuro');
+
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const nuevo = root.getAttribute('data-tema') === 'claro' ? 'oscuro' : 'claro';
+            aplicar(nuevo);
+            localStorage.setItem('barber-tema', nuevo);
+        });
+    }
 }
 
 

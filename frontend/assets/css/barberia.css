@@ -10,6 +10,7 @@
    ================================================================ */
 
 
+<<<<<<< HEAD
 /* ── BOTÓN TOGGLE TEMA (oscuro/claro) ────────────────────────
    Vive en el navbar, junto a los links de navegación.
    Usa ícono de sol (dark→light) o luna (light→dark).
@@ -48,32 +49,73 @@
 [data-tema="claro"] .btn-tema:hover {
     background: rgba(15,23,42,0.09);
 }
+=======
+/* Modo claro: btn-hero-ghost hover para fondo claro */
+>>>>>>> cba706b14148d56617b574b5ab0bc8c3be0aeda6
 [data-tema="claro"] .btn-hero-ghost:hover {
     background: rgba(15,23,42,0.08);
     color: var(--text);
     border-color: rgba(15,23,42,0.18);
 }
 
-/* Modo claro: color-scheme ajusta los íconos nativos del picker
-   (calendario, reloj, flecha de select) para que sean visibles */
-[data-tema="claro"] input[type="date"].form-control,
-[data-tema="claro"] input[type="time"].form-control,
-[data-tema="claro"] select.form-control {
-    color-scheme: light;
+/* Ambiente general de la página pública */
+#content {
+    overflow-x: hidden;
+    background:
+        radial-gradient(ellipse 70% 36% at 50% 0%, rgba(var(--gold-rgb),0.08), transparent 66%),
+        linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 48%, var(--ink) 100%);
+}
+
+
+/* ── NAVBAR PREMIUM ─────────────────────────────────────────── */
+.navbar {
+    border-bottom-color: rgba(var(--gold-rgb),0.16);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+}
+.navbar-brand i {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 24px rgba(var(--gold-rgb),0.18);
+}
+.navbar-links a {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: color var(--t), background var(--t), border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.navbar-links a:hover {
+    background: rgba(var(--gold-rgb),0.08);
+    border-color: rgba(var(--gold-rgb),0.24);
+    color: var(--text);
+    transform: translateY(-1px);
+}
+.navbar-links a.active {
+    color: var(--gold-light);
+    background: rgba(var(--gold-rgb),0.12);
+    border-color: rgba(var(--gold-rgb),0.38);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.08), 0 12px 28px rgba(var(--gold-rgb),0.1);
 }
 
 
 /* ── HERO ─────────────────────────────────────────────────────
    Sección principal con nombre de la barbería y CTAs.
    El padding-top (110px) deja espacio para el navbar fijo.
-   El gradiente sutil y la línea dorada inferior refuerzan
+   El gradiente más dramático y el padding más generoso refuerzan
    la estética premium sin distraer del contenido.
    ─────────────────────────────────────────────────────────── */
 .hero {
     position: relative;
+    isolation: isolate;
     overflow: hidden;
-    padding: 110px 20px 60px;
-    background: linear-gradient(160deg, var(--ink-3) 0%, var(--ink) 70%);
+    padding: 140px 20px 88px;
+    background:
+        linear-gradient(160deg, rgba(var(--gold-rgb),0.12) 0%, transparent 40%),
+        linear-gradient(200deg, var(--ink-3) 0%, var(--ink-2) 30%, var(--ink) 75%);
     text-align: center;
 }
 
@@ -82,7 +124,12 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(201,168,76,.1) 0%, transparent 65%);
+    z-index: -2;
+    background:
+        radial-gradient(ellipse 72% 58% at 50% 4%, rgba(var(--gold-rgb),0.16) 0%, transparent 64%),
+        radial-gradient(circle at 18% 20%, rgba(var(--gold-rgb),0.09), transparent 28%),
+        radial-gradient(circle at 82% 18%, rgba(255,255,255,0.055), transparent 24%);
+    animation: barberHeroGlow 10s ease-in-out infinite alternate;
 }
 
 /* Línea dorada decorativa en el borde inferior */
@@ -92,20 +139,25 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
+    width: min(220px, 50vw);
     height: 2px;
     background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    box-shadow: 0 0 20px rgba(var(--gold-rgb),0.42);
 }
 
-.hero-content { position: relative; z-index: 1; }
+.hero-content {
+    position: relative;
+    z-index: 1;
+    animation: barberFadeUp 0.65s ease-out both;
+}
 
 /* Badge pequeño arriba del título ("Barber Registro") */
 .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: rgba(201,168,76,.1);
-    border: 1px solid var(--border);
+    background: rgba(var(--gold-rgb),0.1);
+    border: 1px solid rgba(var(--gold-rgb),0.34);
     color: var(--gold-light);
     border-radius: 30px;
     padding: 5px 14px;
@@ -114,14 +166,16 @@
     letter-spacing: .07em;
     text-transform: uppercase;
     margin-bottom: 18px;
+    box-shadow: 0 12px 28px rgba(var(--gold-rgb),0.08);
 }
 
 /* Nombre de la barbería: responsive con clamp() */
 .hero h1 {
-    font-size: clamp(34px, 6vw, 58px);
+    font-size: clamp(38px, 6.8vw, 68px);
     color: var(--text);
     letter-spacing: -1px;
     margin-bottom: 10px;
+    text-shadow: 0 18px 55px rgba(0,0,0,0.32);
 }
 
 /* Metadatos debajo del nombre (ciudad, dirección) */
@@ -137,6 +191,22 @@
 }
 .hero-meta span { display: flex; align-items: center; gap: 5px; }
 .hero-meta i { color: var(--gold); }
+.hero-meta a {
+    color: var(--text-2) !important;
+    border: 1px solid rgba(var(--gold-rgb),0.14);
+    background: rgba(255,255,255,0.035);
+    border-radius: 999px;
+    padding: 7px 12px;
+    text-decoration: none !important;
+    transition: color var(--t), background var(--t), border-color var(--t), transform var(--t), box-shadow var(--t);
+}
+.hero-meta a:hover {
+    color: var(--gold-light) !important;
+    background: rgba(var(--gold-rgb),0.09);
+    border-color: rgba(var(--gold-rgb),0.38);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(var(--gold-rgb),0.1);
+}
 
 /* Botones de acción rápida del hero (Agendar, Ver Servicios, WhatsApp) */
 .hero-actions {
@@ -156,19 +226,20 @@
     font-weight: 600;
     text-decoration: none;
     transition: all var(--t);
-    border: none;
+    border: 1px solid rgba(var(--gold-rgb),0.16);
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
+    min-height: 44px;
 }
 .btn-hero-primary {
-    background: linear-gradient(135deg, var(--gold) 0%, #a87a28 100%);
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
     color: var(--ink);
-    box-shadow: 0 4px 16px rgba(201,168,76,.3);
+    box-shadow: 0 14px 30px rgba(var(--gold-rgb),0.24);
 }
 .btn-hero-primary:hover {
     filter: brightness(1.1);
-    transform: translateY(-2px);
-    box-shadow: var(--glow);
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.2), var(--glow), 0 18px 40px rgba(var(--gold-rgb),0.22);
 }
 .btn-hero-ghost {
     background: rgba(255,255,255,.07);
@@ -176,9 +247,14 @@
     border: 1px solid var(--border-2);
 }
 .btn-hero-ghost:hover {
-    background: rgba(255,255,255,.12);
+    background: rgba(var(--gold-rgb),0.09);
     color: var(--text);
-    border-color: rgba(255,255,255,.15);
+    border-color: rgba(var(--gold-rgb),0.32);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(var(--gold-rgb),0.1);
+}
+.btn-hero:active {
+    transform: translateY(-1px) scale(0.99);
 }
 
 
@@ -211,14 +287,93 @@
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    background: rgba(201,168,76,.1);
-    border: 1px solid var(--border);
+    background: rgba(var(--gold-rgb),0.1);
+    border: 1px solid rgba(var(--gold-rgb),0.32);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--gold);
     font-size: 14px;
     flex-shrink: 0;
+    box-shadow: 0 10px 24px rgba(var(--gold-rgb),0.08);
+}
+
+.services-grid {
+    gap: 22px;
+    justify-content: center;
+    justify-items: stretch;
+}
+
+.service-card {
+    background:
+        linear-gradient(180deg, rgba(var(--gold-rgb),0.035), transparent 38%),
+        var(--surface);
+    border-color: rgba(var(--gold-rgb),0.14);
+}
+.service-card:hover,
+.service-card:focus-within {
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(var(--gold-rgb),0.76);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.22), 0 20px 48px rgba(var(--gold-rgb),0.16), var(--shadow-lg);
+    cursor: pointer;
+}
+.service-card.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.24), 0 18px 42px rgba(var(--gold-rgb),0.16);
+}
+.service-img-wrapper {
+    border-bottom: 1px solid var(--border-2);
+    background:
+        radial-gradient(circle at 50% 20%, rgba(var(--gold-rgb),0.12), transparent 55%),
+        var(--ink-3);
+}
+.service-img-fallback {
+    opacity: 1;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(var(--gold-rgb),0.18), transparent 48%),
+        linear-gradient(145deg, var(--ink-4), var(--ink-3));
+    color: var(--gold);
+}
+.service-img-fallback i {
+    opacity: 0.65;
+    text-shadow: 0 0 24px rgba(var(--gold-rgb),0.22);
+}
+.service-name {
+    font-size: 18px;
+    letter-spacing: 0;
+}
+.service-description {
+    color: var(--text-2);
+    line-height: 1.6;
+}
+.service-price {
+    color: var(--gold-light);
+    text-shadow: 0 10px 26px rgba(var(--gold-rgb),0.16);
+}
+.service-duration {
+    width: max-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--ink-3);
+    border: 1px solid rgba(var(--gold-rgb),0.14);
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+.badge-popular {
+    box-shadow: 0 12px 26px rgba(var(--gold-rgb),0.18);
+}
+.btn-ver-fotos {
+    border-color: rgba(var(--gold-rgb),0.3) !important;
+    background: rgba(var(--gold-rgb),0.07) !important;
+    color: var(--gold-light) !important;
+    transition: background var(--t), border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.btn-ver-fotos:hover {
+    background: rgba(var(--gold-rgb),0.13) !important;
+    border-color: rgba(var(--gold-rgb),0.48) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(var(--gold-rgb),0.12);
 }
 
 
@@ -234,21 +389,26 @@
 }
 .info-strip-item {
     background: var(--surface);
-    border: 1px solid var(--border-2);
+    border: 1px solid rgba(var(--gold-rgb),0.14);
     border-radius: var(--radius);
     padding: 16px 18px;
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: border-color var(--t);
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t), background var(--t);
 }
-.info-strip-item:hover { border-color: var(--border); }
+.info-strip-item:hover {
+    border-color: rgba(var(--gold-rgb),0.48);
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.08), 0 16px 34px rgba(var(--gold-rgb),0.1);
+}
 
 .info-strip-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: rgba(201,168,76,.1);
+    background: rgba(var(--gold-rgb),0.1);
+    border: 1px solid rgba(var(--gold-rgb),0.24);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -281,18 +441,187 @@
    ─────────────────────────────────────────────────────────── */
 .booking-card {
     background: var(--surface);
-    border: 1px solid var(--border-2);
-    border-radius: 20px;
-    padding: 36px;
-    box-shadow: var(--shadow-lg);
-    max-width: 680px;
+    border: 1px solid rgba(var(--gold-rgb),0.18);
+    border-radius: 24px;
+    padding: 42px;
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(var(--gold-rgb),0.04) inset;
+    max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    transition: border-color var(--t-slow), box-shadow var(--t-slow), transform var(--t);
+}
+.booking-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.12), transparent 42%),
+        linear-gradient(180deg, rgba(var(--gold-rgb),0.035), transparent 38%);
+    opacity: 0.78;
+}
+.booking-card > * {
+    position: relative;
+    z-index: 1;
+}
+.booking-card:hover,
+.booking-card:focus-within {
+    border-color: rgba(var(--gold-rgb),0.46);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.12), 0 20px 50px rgba(var(--gold-rgb),0.12), var(--shadow-lg);
 }
 .booking-card h2 {
     font-size: 22px;
     color: var(--text);
     text-align: center;
     margin-bottom: 28px;
+}
+.booking-card h2 i {
+    color: var(--gold) !important;
+}
+.booking-card .form-control {
+    min-height: 46px;
+    transition: border-color var(--t), box-shadow var(--t), background var(--t), transform var(--t);
+}
+.booking-card textarea.form-control { min-height: 96px; }
+.booking-card .form-control:hover {
+    border-color: rgba(var(--gold-rgb),0.26);
+}
+.booking-card .form-control:focus-visible,
+.booking-card .form-control:focus {
+    border-color: var(--gold);
+    box-shadow: var(--focus-ring), 0 10px 24px rgba(var(--gold-rgb),0.08);
+}
+.booking-card .checkbox-inline {
+    padding: 10px 12px;
+    background: var(--ink-3);
+    border: 1px solid rgba(var(--gold-rgb),0.12);
+    border-radius: 12px;
+}
+/* CTA buttons — más grandes y prominentes */
+#btnReservar,
+#btnResena {
+    min-height: 54px;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22) !important;
+    transition: transform var(--t), box-shadow var(--t), filter var(--t);
+}
+#btnReservar:hover,
+#btnResena:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.07);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26) !important;
+}
+#btnReservar:active,
+#btnResena:active {
+    transform: translateY(0);
+    filter: brightness(0.98);
+}
+
+.star-rating {
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 0;
+}
+.star-rating label {
+    transition: color var(--t), transform var(--t), text-shadow var(--t);
+}
+.star-rating label:hover {
+    transform: translateY(-2px) scale(1.05);
+    text-shadow: 0 0 18px rgba(var(--gold-rgb),0.28);
+}
+
+/* Sección reseñas — cards más elegantes con avatar inicial */
+#resenasContainer .review-card {
+    background:
+        linear-gradient(180deg, rgba(var(--gold-rgb),0.035), transparent 42%),
+        var(--surface);
+    border-color: rgba(var(--gold-rgb),0.14);
+    border-radius: 16px;
+    padding: 22px 24px;
+}
+#resenasContainer .review-card:hover {
+    border-color: rgba(var(--gold-rgb),0.55);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.12), 0 18px 38px rgba(var(--gold-rgb),0.12);
+    transform: translateY(-3px);
+}
+.review-header {
+    align-items: center;
+    gap: 14px;
+}
+/* Avatar circular: usar el .review-author como "nombre" y añadir un badge visual a la izquierda */
+.review-author {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+/* Pseudo-avatar con inicial: genera un círculo dorado antes del nombre */
+.review-author::before {
+    content: attr(data-inicial, '✓');
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(var(--gold-rgb),0.22), rgba(var(--gold-rgb),0.08));
+    border: 1.5px solid rgba(var(--gold-rgb),0.32);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-light);
+    font-family: 'Playfair Display', serif;
+    flex-shrink: 0;
+    /* Fallback decorativo usando primera letra: se sobrescribe con attr() si JS la provee */
+    content: '✦';
+    font-size: 12px;
+}
+.review-rating {
+    color: var(--gold-light);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    font-size: 15px;
+}
+.review-text {
+    color: var(--text-2);
+    line-height: 1.7;
+    margin-top: 12px;
+    font-size: 14px;
+}
+.review-date {
+    border-top: 1px solid rgba(var(--gold-rgb),0.08);
+    padding-top: 10px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-3);
+}
+
+#mapaContainer {
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid rgba(var(--gold-rgb),0.16);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+}
+#mapa {
+    border: 1px solid rgba(var(--gold-rgb),0.24) !important;
+    box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb),0.08);
+}
+#btnGoogleMaps {
+    background: rgba(var(--gold-rgb),0.08) !important;
+    border-color: rgba(var(--gold-rgb),0.3) !important;
+    color: var(--gold-light) !important;
+    transition: background var(--t), border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+#btnGoogleMaps:hover {
+    background: rgba(var(--gold-rgb),0.14) !important;
+    border-color: rgba(var(--gold-rgb),0.5) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(var(--gold-rgb),0.12);
 }
 
 /* 2 columnas en desktop para los campos del formulario */
@@ -303,14 +632,23 @@
 
 /* ── FOOTER ───────────────────────────────────────────────── */
 .footer {
-    background: var(--ink-3);
-    border-top: 1px solid var(--border-2);
+    background:
+        radial-gradient(ellipse 70% 80% at 50% 0%, rgba(var(--gold-rgb),0.08), transparent 64%),
+        var(--ink-3);
+    border-top: 1px solid rgba(var(--gold-rgb),0.16);
     text-align: center;
     padding: 22px;
     margin-top: 70px;
 }
 .footer p { color: var(--text-3); font-size: 13px; }
 .footer strong { color: var(--gold); }
+.footer a {
+    transition: color var(--t), text-shadow var(--t);
+}
+.footer a:hover {
+    color: var(--gold-light) !important;
+    text-shadow: 0 0 18px rgba(var(--gold-rgb),0.28);
+}
 
 
 /* ── LOADING SCREEN ───────────────────────────────────────────
@@ -334,13 +672,118 @@
    selecciona un día en que la barbería está cerrada.
    ─────────────────────────────────────────────────────────── */
 .aviso-dia .alert-info {
-    background: rgba(201,168,76,.08);
+    background: rgba(var(--gold-rgb),0.08);
     border: 1px solid var(--border);
     color: var(--gold-light);
     border-radius: 8px;
     padding: 8px 12px;
     font-size: 13px;
     margin-top: 8px;
+}
+
+
+/* ── GALERÍA Y MODALES ─────────────────────────────────────── */
+.galeria-modal-item {
+    border-color: rgba(var(--gold-rgb),0.16);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.galeria-modal-item:hover {
+    border-color: rgba(var(--gold-rgb),0.48);
+    box-shadow: 0 14px 30px rgba(var(--gold-rgb),0.12);
+}
+
+
+/* ── MODO CLARO: contraste premium ─────────────────────────── */
+[data-tema="claro"] #content {
+    background:
+        radial-gradient(ellipse 72% 34% at 50% 0%, rgba(var(--gold-rgb),0.11), transparent 66%),
+        linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 48%, var(--ink) 100%);
+}
+[data-tema="claro"] .hero {
+    background:
+        linear-gradient(160deg, rgba(var(--gold-rgb),0.12) 0%, transparent 38%),
+        linear-gradient(160deg, var(--ink-2) 0%, var(--surface) 72%);
+}
+[data-tema="claro"] .hero-badge,
+[data-tema="claro"] .navbar-links a.active,
+[data-tema="claro"] .hero-meta a:hover,
+[data-tema="claro"] .service-price,
+[data-tema="claro"] .review-rating,
+[data-tema="claro"] #btnGoogleMaps,
+[data-tema="claro"] .btn-ver-fotos,
+[data-tema="claro"] .footer strong {
+    color: var(--gold-dim) !important;
+}
+[data-tema="claro"] .navbar-brand i,
+[data-tema="claro"] .btn-hero-primary {
+    color: #111827;
+}
+[data-tema="claro"] .sec-icon,
+[data-tema="claro"] .info-strip-icon,
+[data-tema="claro"] .hero-meta i,
+[data-tema="claro"] .booking-card h2 i,
+[data-tema="claro"] .service-img-fallback {
+    color: var(--gold-dim);
+}
+[data-tema="claro"] .btn-hero-ghost {
+    background: rgba(15,23,42,0.04);
+    color: var(--text-2);
+}
+[data-tema="claro"] .aviso-dia .alert-info {
+    color: var(--gold-dim);
+    background: rgba(var(--gold-rgb),0.1);
+    border-color: rgba(var(--gold-rgb),0.3);
+}
+[data-tema="claro"] .booking-card {
+    border-color: rgba(var(--gold-rgb),0.4);
+    box-shadow: 0 4px 18px rgba(var(--gold-rgb),0.14), 0 10px 36px rgba(0,0,0,0.07);
+}
+[data-tema="claro"] .booking-card::before {
+    background:
+        radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.22), transparent 42%),
+        linear-gradient(180deg, rgba(var(--gold-rgb),0.10), transparent 38%);
+    opacity: 1;
+}
+
+
+/* ── ANIMACIONES SUAVES ────────────────────────────────────── */
+@keyframes barberHeroGlow {
+    from { transform: translate3d(0,0,0) scale(1); opacity: 0.88; }
+    to { transform: translate3d(0,10px,0) scale(1.03); opacity: 1; }
+}
+
+@keyframes barberFadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero::before,
+    .hero-content {
+        animation: none !important;
+    }
+    .btn-hero,
+    .service-card,
+    .booking-card,
+    .info-strip-item,
+    .review-card,
+    .galeria-modal-item,
+    #btnGoogleMaps,
+    #btnReservar,
+    #btnResena {
+        transition-duration: 0.01ms !important;
+    }
+    .btn-hero:hover,
+    .service-card:hover,
+    .booking-card:hover,
+    .info-strip-item:hover,
+    .galeria-modal-item:hover,
+    #btnGoogleMaps:hover,
+    #btnReservar:hover,
+    #btnResena:hover {
+        transform: none !important;
+    }
 }
 
 
@@ -385,6 +828,59 @@
 
     /* Reseñas: full width en móvil */
     #resenasContainer { max-width: 100% !important; }
+
+    /* Modal galería: 2 columnas en móvil */
+    .galeria-modal-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* ── MODAL DE GALERÍA DE FOTOS ────────────────────────────────
+   Grid de fotos que se abre desde el botón "Ver más fotos"
+   en cada tarjeta de servicio.
+   ─────────────────────────────────────────────────────────── */
+.galeria-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.galeria-modal-item {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: var(--ink-3);
+    border: 1px solid var(--border-2);
+}
+.galeria-modal-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+.galeria-modal-item:hover img { transform: scale(1.06); }
+.galeria-modal-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 6px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* Refuerzo final porque el bloque base de la galería vive al final del archivo. */
+.galeria-modal-item {
+    border-color: rgba(var(--gold-rgb),0.16);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    transition: border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.galeria-modal-item:hover {
+    border-color: rgba(var(--gold-rgb),0.48);
+    box-shadow: 0 14px 30px rgba(var(--gold-rgb),0.12);
 }
 
 @media (max-width: 400px) {
@@ -392,4 +888,29 @@
     .hero h1 { font-size: 26px; }
     .hero-badge { font-size: 10px; padding: 4px 12px; }
     .booking-card { padding: 18px 12px; border-radius: 14px; }
+}
+
+@media (max-width: 640px) {
+    .navbar-inner { gap: 10px; }
+    .navbar-links {
+        gap: 4px;
+        max-width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .navbar-links::-webkit-scrollbar { display: none; }
+    .navbar-links a { padding: 7px 10px; }
+    .hero-meta a {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+    }
+    #mapaContainer { padding: 10px; }
+    #mapa { height: 260px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .galeria-modal-item:hover img {
+        transform: none !important;
+    }
 }

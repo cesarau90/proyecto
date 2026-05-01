@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Admin - Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/admin.css">
@@ -27,6 +28,7 @@
                 <div><h1><i class="fas fa-cut"></i> Barber Registro <span class="badge-sa">ADMIN</span></h1></div>
                 <div style="display:flex;align-items:center;gap:12px;">
                     <span id="saName" style="font-size:13px;opacity:0.7;"></span>
+                    <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
                     <button onclick="saLogout()" class="btn-sa"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </div>
             </div>
@@ -56,7 +58,8 @@
          ═══════════════════════════════════════════════════════ -->
     <script type="module">
         import { config, auth } from './assets/js/config.js';
-        import { confirmar } from './assets/js/utils.js';
+        import { confirmar, initTema } from './assets/js/utils.js';
+        initTema();
 
         // Si no hay sesión de admin activa, redirigir al login unificado
         if (!auth.estaLogueado() || auth.getRole() !== 'admin') {
@@ -104,7 +107,7 @@
                                     <span class="barb-meta-item"><i class="fas fa-calendar"></i> ${b.total_reservas} reservas</span>
                                     <span class="barb-meta-item"><i class="fas fa-cut"></i> ${b.total_servicios} servicios</span>
                                     <span class="barb-meta-item"><i class="fas fa-star" style="color:#f59e0b;"></i> ${b.calificacion_promedio}</span>
-                                    <span class="barb-meta-item"><i class="fas fa-comment"></i> ${b.total_resenas} reseñas</span>
+                                    <span class="barb-meta-item" id="meta-resenas-${b.id}"><i class="fas fa-comment"></i> ${b.total_resenas} reseñas</span>
                                 </div>
                             </div>
                             <div class="barb-actions">
@@ -122,6 +125,8 @@
                                 <div class="form-group" style="margin:0;"><label>Teléfono dueño</label><input type="tel" class="form-control" id="ed-tel-${b.id}" value="${b.dueno_telefono||''}"></div>
                                 <div class="form-group" style="margin:0;"><label>Dirección</label><input type="text" class="form-control" id="ed-dir-${b.id}" value="${b.direccion||''}"></div>
                                 <div class="form-group" style="margin:0;"><label>Ciudad</label><input type="text" class="form-control" id="ed-ciudad-${b.id}" value="${b.ciudad||''}"></div>
+                                <div class="form-group" style="margin:0;"><label>Email dueño</label><input type="email" class="form-control" value="${b.dueno_email||''}" disabled></div>
+                                <div class="form-group" style="margin:0;"><label>Color de identidad</label><input type="color" class="form-control admin-color-input" id="ed-color-${b.id}" value="${b.tema_color||'#c9a847'}"></div>
                             </div>
                             <div style="margin-top:16px;">
                                 <label style="display:block;margin-bottom:10px;font-weight:600;color:var(--text-2);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Horarios de Atención</label>
@@ -130,10 +135,16 @@
                             <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
                                 <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;width:auto;" onclick="guardarEdicion(${b.id})"><i class="fas fa-save"></i> Guardar</button>
                                 <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarReservas(${b.id})"><i class="fas fa-calendar-alt"></i> Historial de Reservas</button>
+                                <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarServiciosAdmin(${b.id})"><i class="fas fa-cut"></i> Servicios</button>
+                                <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarResenasAdmin(${b.id})"><i class="fas fa-star"></i> Reseñas</button>
+                                <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarFotosAdmin(${b.id})"><i class="fas fa-images"></i> Fotos</button>
                                 <a href="barberia.html?codigo=${b.codigo_unico}" target="_blank" class="btn btn-outline" style="padding:8px 18px;font-size:13px;width:auto;text-decoration:none;"><i class="fas fa-external-link-alt"></i> Ver página pública</a>
                             </div>
                             <div id="ed-msg-${b.id}" style="margin-top:8px;"></div>
                             <div id="reservas-${b.id}" style="margin-top:14px;"></div>
+                            <div id="servicios-${b.id}" style="margin-top:14px;"></div>
+                            <div id="resenas-${b.id}" style="margin-top:14px;"></div>
+                            <div id="fotos-${b.id}" style="margin-top:14px;"></div>
                         </div>
                     </div>
                 `).join('');
@@ -303,7 +314,8 @@
                 dueno_telefono: document.getElementById(`ed-tel-${id}`).value.trim(),
                 direccion: document.getElementById(`ed-dir-${id}`).value.trim(),
                 ciudad: document.getElementById(`ed-ciudad-${id}`).value.trim(),
-                horarios: generarEdHorarios(id)
+                horarios: generarEdHorarios(id),
+                tema_color: document.getElementById(`ed-color-${id}`).value
             };
             const msg = document.getElementById(`ed-msg-${id}`);
             try {
@@ -318,6 +330,9 @@
         // Historial de reservas con resumen de estadísticas por estado
         window.cargarReservas = async function(id) {
             const cont = document.getElementById(`reservas-${id}`);
+            document.getElementById(`servicios-${id}`).innerHTML = '';
+            document.getElementById(`resenas-${id}`).innerHTML = '';
+            document.getElementById(`fotos-${id}`).innerHTML = '';
             if (cont.innerHTML.trim()) { cont.innerHTML = ''; return; }
             cont.innerHTML = '<p style="color:var(--text-3);padding:10px;"><span class="loading"></span> Cargando historial...</p>';
             try {
@@ -427,6 +442,141 @@
                 cargarReservas(barberiaId);
                 await loadStats();
             } catch { await confirmar('Error', 'No se pudo eliminar la reserva.', 'Cerrar', 'warning'); }
+        };
+
+        const escapeHTML = (v = '') => String(v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+        const fmtFechaAdmin = (fecha) => {
+            try { return new Date(fecha).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' }); }
+            catch { return '-'; }
+        };
+        function actualizarMetaResenas(barberiaId, total) {
+            const meta = document.getElementById(`meta-resenas-${barberiaId}`);
+            if (meta) meta.innerHTML = `<i class="fas fa-comment"></i> ${total} reseñas`;
+        }
+        const assetUrl = (url) => /^https?:\/\//i.test(url || '') ? url : `${config.apiURL.replace('/api','')}${url}`;
+
+        window.cargarResenasAdmin = async function(id) {
+            const cont = document.getElementById(`resenas-${id}`);
+            document.getElementById(`reservas-${id}`).innerHTML = '';
+            document.getElementById(`servicios-${id}`).innerHTML = '';
+            document.getElementById(`fotos-${id}`).innerHTML = '';
+            if (cont.innerHTML.trim()) { cont.innerHTML = ''; return; }
+            cont.innerHTML = '<p style="color:var(--text-3);padding:10px;"><span class="loading"></span> Cargando reseñas...</p>';
+            try {
+                const resenas = await (await fetch(`${config.apiURL}/admin/barberias/${id}/resenas`, { headers: auth.headers() })).json();
+                if (!resenas.length) {
+                    cont.innerHTML = '<div class="admin-empty"><i class="fas fa-star"></i><span>Esta barbería todavía no tiene reseñas.</span></div>';
+                    return;
+                }
+                cont.innerHTML = `
+                    <p class="detail-section-title"><i class="fas fa-star"></i> Reseñas de clientes</p>
+                    <div class="admin-review-grid">
+                        ${resenas.map(r => `
+                            <div class="admin-review-card">
+                                <div class="admin-review-head">
+                                    <strong>${escapeHTML(r.cliente_nombre)}</strong>
+                                    <span class="admin-review-stars">${'★'.repeat(r.calificacion)}<span>${'★'.repeat(5 - r.calificacion)}</span></span>
+                                </div>
+                                <p>${escapeHTML(r.comentario)}</p>
+                                <div class="admin-review-foot">
+                                    <span>${fmtFechaAdmin(r.created_at)}</span>
+                                    <button onclick="eliminarResenaAdmin(${r.id},${id})" class="admin-danger-mini" title="Eliminar reseña"><i class="fas fa-trash"></i> Eliminar</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<p style="color:var(--red);padding:10px;font-size:13px;">Error al cargar reseñas</p>';
+            }
+        };
+
+        window.eliminarResenaAdmin = async function(resenaId, barberiaId) {
+            if (!await confirmar('Eliminar reseña', '¿Quieres borrar esta reseña? Esta acción no se puede deshacer.', 'Eliminar')) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/resenas/${resenaId}`, { method: 'DELETE', headers: auth.headers() });
+                if (!r.ok) throw new Error();
+                document.getElementById(`resenas-${barberiaId}`).innerHTML = '';
+                await cargarResenasAdmin(barberiaId);
+                const restantes = document.querySelectorAll(`#resenas-${barberiaId} .admin-review-card`).length;
+                actualizarMetaResenas(barberiaId, restantes);
+            } catch { await confirmar('Error', 'No se pudo eliminar la reseña.', 'Cerrar', 'warning'); }
+        };
+
+        window.cargarFotosAdmin = async function(id) {
+            const cont = document.getElementById(`fotos-${id}`);
+            document.getElementById(`reservas-${id}`).innerHTML = '';
+            document.getElementById(`servicios-${id}`).innerHTML = '';
+            document.getElementById(`resenas-${id}`).innerHTML = '';
+            if (cont.innerHTML.trim()) { cont.innerHTML = ''; return; }
+            cont.innerHTML = '<p style="color:var(--text-3);padding:10px;"><span class="loading"></span> Cargando fotos...</p>';
+            try {
+                const fotos = await (await fetch(`${config.apiURL}/admin/barberias/${id}/fotos`, { headers: auth.headers(), cache: 'no-store' })).json();
+                if (!fotos.length) {
+                    cont.innerHTML = '<div class="admin-empty"><i class="fas fa-images"></i><span>Esta barbería todavía no tiene fotos.</span></div>';
+                    return;
+                }
+                cont.innerHTML = `
+                    <p class="detail-section-title"><i class="fas fa-images"></i> Fotos de la barbería</p>
+                    <div class="admin-photo-grid">
+                        ${fotos.map(f => `
+                            <div class="admin-photo-card">
+                                <img src="${assetUrl(f.url)}" alt="${escapeHTML(f.descripcion || 'Foto de barbería')}" loading="lazy">
+                                <div class="admin-photo-info">
+                                    <strong>${escapeHTML(f.descripcion || 'Sin descripción')}</strong>
+                                    <span>${f.servicio_nombre ? `Galería: ${escapeHTML(f.servicio_nombre)}` : 'Sin servicio asignado'}</span>
+                                    <button onclick="eliminarFotoAdmin(${f.id},${id})" class="admin-danger-mini" title="Eliminar foto"><i class="fas fa-trash"></i> Eliminar</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<p style="color:var(--red);padding:10px;font-size:13px;">Error al cargar fotos</p>';
+            }
+        };
+
+        window.eliminarFotoAdmin = async function(fotoId, barberiaId) {
+            if (!await confirmar('Eliminar foto', '¿Quieres borrar esta foto de la barbería? Esta acción no se puede deshacer.', 'Eliminar')) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/fotos/${fotoId}`, { method: 'DELETE', headers: auth.headers() });
+                if (!r.ok) throw new Error();
+                document.getElementById(`fotos-${barberiaId}`).innerHTML = '';
+                await cargarFotosAdmin(barberiaId);
+            } catch { await confirmar('Error', 'No se pudo eliminar la foto.', 'Cerrar', 'warning'); }
+        };
+
+        window.cargarServiciosAdmin = async function(id) {
+            const cont = document.getElementById(`servicios-${id}`);
+            document.getElementById(`reservas-${id}`).innerHTML = '';
+            document.getElementById(`resenas-${id}`).innerHTML = '';
+            document.getElementById(`fotos-${id}`).innerHTML = '';
+            if (cont.innerHTML.trim()) { cont.innerHTML = ''; return; }
+            cont.innerHTML = '<p style="color:var(--text-3);padding:10px;"><span class="loading"></span> Cargando servicios...</p>';
+            try {
+                const servicios = await (await fetch(`${config.apiURL}/admin/barberias/${id}/servicios`, { headers: auth.headers() })).json();
+                if (!servicios.length) {
+                    cont.innerHTML = '<div class="admin-empty"><i class="fas fa-cut"></i><span>Esta barbería todavía no tiene servicios.</span></div>';
+                    return;
+                }
+                cont.innerHTML = `
+                    <p class="detail-section-title"><i class="fas fa-cut"></i> Servicios configurados</p>
+                    <div class="admin-service-grid">
+                        ${servicios.map(s => `
+                            <div class="admin-service-card">
+                                <div class="admin-service-icon"><i class="fas fa-${escapeHTML(s.icono || 'cut')}"></i></div>
+                                <div>
+                                    <strong>${escapeHTML(s.nombre)}</strong>
+                                    <p>${escapeHTML(s.descripcion || 'Sin descripción')}</p>
+                                    <span>$${Number(s.precio || 0).toFixed(2)} · ${s.duracion || 30} min</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<p style="color:var(--red);padding:10px;font-size:13px;">Error al cargar servicios</p>';
+            }
         };
     </script>
 </body>

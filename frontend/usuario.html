@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Mi Panel — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/usuario.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 <!-- Skip link para navegación por teclado -->
@@ -26,6 +28,7 @@
         <div class="topbar-actions">
             <a id="linkVerPagina" href="#" target="_blank" class="btn btn-ghost" style="padding:7px 12px;font-size:12px;"><i class="fas fa-external-link-alt"></i> Ver página</a>
             <span id="emailUsuario" class="topbar-email"></span>
+            <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
             <button onclick="cerrarSesion()" class="btn btn-outline" style="padding:7px 12px;font-size:12px;"><i class="fas fa-sign-out-alt"></i> Salir</button>
         </div>
     </div>
@@ -87,11 +90,13 @@
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
                 <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="file" id="fotoInput" accept="image/jpeg,image/png,image/webp" class="form-control"></div>
                 <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="text" id="fotoDesc" class="form-control" placeholder="Descripción (opcional)"></div>
-                <button onclick="subirFoto()" id="btnFoto" class="btn btn-success" style="white-space:nowrap;"><i class="fas fa-upload"></i> Subir</button>
+                <button type="button" onclick="subirFoto()" id="btnFoto" class="btn btn-success" style="white-space:nowrap;"><i class="fas fa-upload"></i> Subir</button>
             </div>
             <div id="msgFoto"></div>
         </div>
         <div id="galeriaAdmin" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-top:4px;"></div>
+        <!-- Vista previa de galerías agrupadas por servicio -->
+        <div id="galeriaPreview" style="margin-top:28px;"></div>
     </div>
 
     <!-- CONFIG -->
@@ -155,15 +160,15 @@
 </div>
 
 <!-- MODAL FOTO -->
-<div id="modalFoto" class="modal-overlay" onclick="cerrarModal(event)">
+<div id="modalFoto" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFotoTitulo" onclick="cerrarModal(event)">
     <div class="modal">
         <div class="modal-header">
-            <h3><i class="fas fa-image" style="color:var(--gold);margin-right:8px;"></i>Elige foto para el servicio</h3>
-            <button class="modal-close" onclick="document.getElementById('modalFoto').classList.remove('open')">&times;</button>
+            <h3 id="modalFotoTitulo"><i class="fas fa-image" style="color:var(--gold);margin-right:8px;"></i>Elige foto para el servicio</h3>
+            <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">&times;</button>
         </div>
         <div id="modalFotoGrid" class="foto-grid"></div>
         <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px;">
-            <button onclick="document.getElementById('modalFoto').classList.remove('open')" class="btn btn-outline">Cancelar</button>
+            <button onclick="cerrarModal()" class="btn btn-outline">Cancelar</button>
             <button onclick="confirmarFoto()" class="btn btn-primary"><i class="fas fa-check"></i> Asignar foto</button>
         </div>
     </div>
