@@ -7,7 +7,7 @@
  * - Módulo `auth` para manejo de sesión (token JWT en sessionStorage)
  *
  * DESARROLLO LOCAL:
- *   const API_URL = 'http://localhost:3001/api';
+ *   const API_URL = 'https://proyecto-production-cef5.up.railway.app/api';
  *
  * CON NGROK (para acceso público temporal):
  *   1. Ejecuta: ngrok http 3001
@@ -19,17 +19,17 @@
  * en tu red local usa: http://TU-IP-LOCAL:5500/frontend/barberia.html?codigo=XXXX
  */
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://proyecto-production-cef5.up.railway.app/api';
 
 export const config = {
     apiURL: API_URL,
     emailJS: {
-        serviceId: 'service_wn05ymp',
-        publicKey: 'qFJurRildjWCafr5d',
-        // Template para confirmación de reserva al cliente
-        templateReserva: 'template_ltyvhuj',
-        // Template para registro exitoso de barbería al dueño
-        templateRegistro: 'template_o3nrsar'
+        serviceId: 'service_y72bxiq',
+        publicKey: 'lMU7ga7ekXbMjLdIF',
+        templateConfirmacion: 'template_obbf1yz',
+        templateCancelacion:  'template_hp3crzm',
+        templateCompletada:   'template_1m7ijws',
+        templateRegistro:     'template_obap1kr'
     }
 };
 

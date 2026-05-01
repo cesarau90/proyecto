@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title id="pageTitle">Barbería — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/barberia.css">
@@ -70,7 +71,7 @@
         </section>
 
         <!-- BOOKING -->
-        <section id="booking" style="margin:60px 0;" aria-label="Formulario de reserva">
+        <section id="booking" style="margin:72px 0;" aria-label="Formulario de reserva">
             <div class="booking-card fade-up">
                 <h2><i class="fas fa-calendar-plus" style="color:var(--gold);margin-right:10px;"></i>Agenda tu Cita</h2>
                 <div id="mensaje" role="alert"></div>
@@ -87,7 +88,7 @@
                     <div class="form-group"><label for="hora">Hora *</label><input type="time" id="hora" class="form-control" required></div>
                     <div class="form-group form-full"><label for="comentarios">Comentarios (opcional)</label><textarea id="comentarios" class="form-control" placeholder="¿Algún detalle especial?"></textarea></div>
                     <div class="form-full">
-                        <button type="submit" id="btnReservar" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;border-radius:12px;justify-content:center;box-shadow:0 4px 20px rgba(201,168,76,.25);">
+                        <button type="submit" id="btnReservar" class="btn btn-primary" style="width:100%;padding:16px;font-size:15px;border-radius:14px;justify-content:center;letter-spacing:0.02em;">
                             <i class="fas fa-check"></i> Confirmar Reserva
                         </button>
                     </div>
@@ -95,8 +96,8 @@
             </div>
         </section>
 
-        <!-- RESEÑA FORM -->
-        <section id="seccionResenaForm" style="margin:40px 0;" aria-label="Dejar una reseña">
+        <!-- RESEÑA FORM oculto: reseñas se solicitan por correo al completar la cita -->
+        <section id="seccionResenaForm" style="display:none;" aria-label="Dejar una reseña">
             <div class="booking-card" style="max-width:580px;">
                 <h2><i class="fas fa-pen" style="color:var(--gold);margin-right:10px;"></i>Deja tu Reseña</h2>
                 <div id="mensajeResena" role="alert"></div>
@@ -178,6 +179,19 @@
 
     </main>
 
+    <!-- MODAL RESERVA EXITOSA -->
+    <div id="modalReservaOk" class="modal-overlay" role="dialog" aria-modal="true">
+        <div class="success-modal" style="max-width:500px;width:100%;">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h2 style="text-align:center;margin-bottom:8px;">¡Reserva Confirmada!</h2>
+            <p style="text-align:center;color:var(--text-3);font-size:15px;margin-bottom:24px;">Te esperamos en nuestra barbería</p>
+            <div id="reservaOkDetalle" style="background:var(--ink-3);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:24px;font-size:14px;line-height:2.2;"></div>
+            <button onclick="document.getElementById('modalReservaOk').classList.remove('open')" class="btn btn-primary" style="width:100%;padding:15px;font-size:15px;border-radius:14px;">
+                <i class="fas fa-check-circle"></i> Entendido
+            </button>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>Powered by <a href="index.html" style="color:var(--gold-light);text-decoration:none;font-weight:600;">Barber Registro</a></p>
     </footer>
@@ -186,6 +200,17 @@
 
 <!-- Invisible holders que el JS necesita -->
 <div id="seccionFotos" style="display:none;"><div id="galeriaFotos"></div></div>
+
+<!-- Modal galería de fotos del servicio -->
+<div id="modalGaleria" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Galería de trabajos" onclick="cerrarModalGaleria(event)">
+    <div class="modal" style="max-width:860px;width:95%;">
+        <div class="modal-header">
+            <h3><i class="fas fa-images"></i> Galería de trabajos</h3>
+            <button class="modal-close" onclick="cerrarModalGaleria()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="modalGaleriaGrid" class="galeria-modal-grid"></div>
+    </div>
+</div>
 
 <!-- Botón "volver arriba" para mejorar navegación (C4) -->
 <button class="back-to-top" id="backToTop" aria-label="Volver arriba">
@@ -201,28 +226,25 @@
     const btnTema = document.getElementById('btnTema');
     const iconTema = document.getElementById('iconTema');
 
+    const _root = document.documentElement;
     function aplicarTema(modo) {
         if (modo === 'claro') {
-            document.body.setAttribute('data-tema', 'claro');
+            _root.setAttribute('data-tema', 'claro');
             iconTema.className = 'fas fa-moon';
             btnTema.setAttribute('aria-label', 'Cambiar a modo oscuro');
         } else {
-            document.body.removeAttribute('data-tema');
+            _root.removeAttribute('data-tema');
             iconTema.className = 'fas fa-sun';
             btnTema.setAttribute('aria-label', 'Cambiar a modo claro');
         }
     }
 
-    // Cargar preferencia guardada (o default oscuro)
-    const temaGuardado = localStorage.getItem('barber-tema') || 'oscuro';
-    aplicarTema(temaGuardado);
+    aplicarTema(localStorage.getItem('barber-tema') || 'oscuro');
 
     if (btnTema) {
         btnTema.addEventListener('click', () => {
-            const actual = document.body.getAttribute('data-tema') === 'claro' ? 'claro' : 'oscuro';
-            const nuevo = actual === 'claro' ? 'oscuro' : 'claro';
-            aplicarTema(nuevo);
-            localStorage.setItem('barber-tema', nuevo);
+            aplicarTema(_root.getAttribute('data-tema') === 'claro' ? 'oscuro' : 'claro');
+            localStorage.setItem('barber-tema', _root.getAttribute('data-tema') || 'oscuro');
         });
     }
 

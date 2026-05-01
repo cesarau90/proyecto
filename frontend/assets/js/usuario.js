@@ -21,7 +21,7 @@
  */
 
 import { config, auth } from './config.js';
-import { toast, fmtFecha, confirmar } from './utils.js';
+import { toast, fmtFecha, confirmar, initTema, openModal, closeModal, initGlobalModalEscape } from './utils.js';
 
 // IIFE para bloquear la página antes de que el DOM termine de renderizar;
 // un guard en DOMContentLoaded llegaría demasiado tarde y el usuario vería contenido protegido.
@@ -35,6 +35,9 @@ import { toast, fmtFecha, confirmar } from './utils.js';
         window.location.href = 'login.html';
         return;
     }
+    // EmailJS se inicializa aquí (no en barberia.js) porque el correo
+    // de confirmación lo envía el admin, no el cliente al reservar.
+    emailjs.init({ publicKey: config.emailJS.publicKey });
     init();
 })();
 
@@ -46,6 +49,9 @@ import { toast, fmtFecha, confirmar } from './utils.js';
    tanto en localhost como en ngrok sin cambiar configuración.
    ────────────────────────────────────────────────────────────── */
 function init() {
+    initTema();
+    initGlobalModalEscape();
+
     const barberia = auth.getUserData();
     document.getElementById('nombreBarberia').textContent = barberia.nombre;
     document.getElementById('emailUsuario').textContent = barberia.dueno_email;
@@ -54,7 +60,10 @@ function init() {
     document.getElementById('linkPublico').value = `${base}barberia.html?codigo=${barberia.codigo_unico}`;
     document.getElementById('linkVerPagina').href = `${base}barberia.html?codigo=${barberia.codigo_unico}`;
 
-    cargarServicios();
+    // Restaurar el último tab visitado para no perder contexto al recargar
+    const tabGuardado = sessionStorage.getItem('activeTab') || 'servicios';
+    const tabElGuardado = document.querySelector(`.tab[aria-controls="${tabGuardado}"]`);
+    cambiarTab(tabGuardado, tabElGuardado);
 }
 
 
@@ -81,6 +90,9 @@ window.cambiarTab = function (tabId, tabEl) {
         tabEl.setAttribute('aria-selected', 'true');
         tabEl.setAttribute('tabindex', '0');
     }
+
+    // Persistir tab activo para restaurarlo al recargar la página
+    sessionStorage.setItem('activeTab', tabId);
 
     // Recargar datos de la sección para mantenerlos actualizados sin F5
     if (tabId === 'servicios') cargarServicios();
@@ -160,6 +172,7 @@ window.cambiarTab = function (tabId, tabEl) {
 
 // Base URL del backend (sin /api) para construir URLs de imágenes
 const base = config.apiURL.replace('/api', '');
+const assetUrl = (url) => /^https?:\/\//i.test(url || '') ? url : `${base}${url}`;
 
 // Cache de reservas para el exportador CSV (se llena al cargarReservas())
 let reservasCache = [];
@@ -198,7 +211,7 @@ async function cargarServicios() {
 
         c.innerHTML = s.map(x => {
             const imgHTML = x.imagen_url
-                ? `<img src="${base}${x.imagen_url}" alt="${x.nombre}">`
+                ? `<img src="${assetUrl(x.imagen_url)}" alt="${x.nombre}">`
                 : `<div class="srv-card-img-placeholder"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
             return `<div class="srv-card">
                 <div class="srv-card-img" onclick="abrirModalFoto(${x.id},${x.foto_id || 'null'})" role="button" tabindex="0" aria-label="Cambiar foto de ${x.nombre}">
@@ -292,25 +305,48 @@ window.abrirModalFoto = async (servicioId, fotoActualId) => {
     _modalFotoSeleccionada = fotoActualId;
     const grid = document.getElementById('modalFotoGrid');
     grid.innerHTML = '<p style="color:var(--text-3);grid-column:1/-1;"><span class="loading"></span> Cargando...</p>';
-    document.getElementById('modalFoto').classList.add('open');
+    openModal(document.getElementById('modalFoto'));
 
     try {
-        const fotos = await (await fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers() })).json();
+        const [fotos, servicios] = await Promise.all([
+            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers() }).then(r => r.json()),
+            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers() }).then(r => r.json()).catch(() => [])
+        ]);
+
         if (!fotos.length) {
             grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text-3);">
                 <i class="fas fa-images" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>
                 No tienes fotos subidas.<br><small>Ve a la pestaña <strong style="color:var(--gold);">Fotos</strong> y sube algunas primero.</small></div>`;
             return;
         }
-        // Opción "Sin foto" + todas las fotos de la galería
+
+        // IDs de fotos usadas como portada en OTROS servicios (no el actual)
+        const otrasPortadas = new Set(
+            servicios.filter(s => s.foto_id && s.id != servicioId).map(s => s.foto_id)
+        );
+
         grid.innerHTML = `
             <div class="foto-none ${!fotoActualId ? 'selected' : ''}" onclick="seleccionarFoto(null,this)" tabindex="0" role="button" aria-label="Sin foto">
                 <i class="fas fa-times"></i>Sin foto
             </div>
-            ${fotos.map(f => `
-            <div class="foto-option ${f.id == fotoActualId ? 'selected' : ''}" onclick="seleccionarFoto(${f.id},this)" tabindex="0" role="button" aria-label="Seleccionar foto ${f.descripcion || f.id}">
-                <img src="${base}${f.url || '/uploads/' + f.filename}" alt="${f.descripcion || 'Foto'}">
-            </div>`).join('')}`;
+            ${fotos.map(f => {
+                const esPortadaActual = f.id == fotoActualId;
+                // Bloqueada si está en galería de cualquier servicio, o es portada de otro
+                const bloqueada = !esPortadaActual && (f.servicio_galeria_id != null || otrasPortadas.has(f.id));
+                const tooltip = bloqueada
+                    ? (otrasPortadas.has(f.id) ? 'Ya es portada de otro servicio' : 'Ya está en la galería de un servicio')
+                    : `Seleccionar foto ${f.descripcion || ''}`;
+                return `
+                <div class="foto-option ${esPortadaActual ? 'selected' : ''} ${bloqueada ? 'foto-blocked' : ''}"
+                    ${bloqueada ? '' : `onclick="seleccionarFoto(${f.id},this)"`}
+                    tabindex="${bloqueada ? '-1' : '0'}"
+                    role="${bloqueada ? 'img' : 'button'}"
+                    aria-label="${tooltip}"
+                    title="${bloqueada ? tooltip : ''}">
+                    <img src="${assetUrl(f.url || '/uploads/' + f.filename)}" alt="${f.descripcion || 'Foto'}">
+                    ${bloqueada ? `<div class="foto-blocked-badge">En uso</div>` : ''}
+                </div>`;
+            }).join('')}`;
 
         // C7: Activar fotos con Enter/Space para usuarios de teclado
         grid.querySelectorAll('[role="button"]').forEach(el => {
@@ -333,8 +369,8 @@ window.seleccionarFoto = (fotoId, el) => {
 
 /** Cierra el modal si se hace click en el overlay (fuera del modal) */
 window.cerrarModal = (e) => {
-    if (e.target === document.getElementById('modalFoto'))
-        document.getElementById('modalFoto').classList.remove('open');
+    const modal = document.getElementById('modalFoto');
+    if (!e || e.target === modal) closeModal(modal);
 };
 
 /** Confirma la asignación de foto al servicio vía PATCH */
@@ -347,10 +383,52 @@ window.confirmarFoto = async () => {
             body: JSON.stringify({ foto_id: _modalFotoSeleccionada })
         });
         if (!r.ok) throw 0;
-        document.getElementById('modalFoto').classList.remove('open');
+        closeModal(document.getElementById('modalFoto'));
         toast('Foto asignada al servicio', 'success');
-        cargarServicios();
+        if (document.getElementById('servicios')?.classList.contains('active')) cargarServicios();
+        if (document.getElementById('fotos')?.classList.contains('active')) cargarFotos();
     } catch { toast('Error al asignar foto', 'error'); }
+};
+
+/** Asigna o quita la portada de un servicio directamente desde el tab Fotos */
+window.asignarPortada = async (selectEl, fotoId) => {
+    const nuevoSvcId = selectEl.value;
+    const viejoSvcId = selectEl.dataset.oldSvc;
+    try {
+        // Quitar de servicio anterior si cambió
+        if (viejoSvcId && viejoSvcId !== nuevoSvcId) {
+            await fetch(`${config.apiURL}/mi-barberia/servicios/${viejoSvcId}/foto`, {
+                method: 'PATCH', headers: auth.headers(),
+                body: JSON.stringify({ foto_id: null })
+            });
+        }
+        // Asignar al nuevo servicio (si se eligió uno)
+        if (nuevoSvcId) {
+            await fetch(`${config.apiURL}/mi-barberia/servicios/${nuevoSvcId}/foto`, {
+                method: 'PATCH', headers: auth.headers(),
+                body: JSON.stringify({ foto_id: fotoId })
+            });
+        }
+        toast(nuevoSvcId ? 'Portada asignada' : 'Portada eliminada', 'info', 2000);
+        if (document.getElementById('fotos')?.classList.contains('active')) cargarFotos();
+        if (document.getElementById('servicios')?.classList.contains('active')) cargarServicios();
+    } catch { toast('Error al asignar portada', 'error'); }
+};
+
+/** Quita la foto de portada de un servicio sin eliminar la foto del disco */
+window.quitarPortada = async (servicioId) => {
+    try {
+        const r = await fetch(`${config.apiURL}/mi-barberia/servicios/${servicioId}/foto`, {
+            method: 'PATCH',
+            headers: auth.headers(),
+            body: JSON.stringify({ foto_id: null })
+        });
+        if (!r.ok) throw 0;
+        toast('Portada eliminada', 'info', 2000);
+        // Recargar el grid completo de fotos para actualizar los avisos "Portada de X"
+        if (document.getElementById('fotos')?.classList.contains('active')) cargarFotos();
+        if (document.getElementById('servicios')?.classList.contains('active')) cargarServicios();
+    } catch { toast('Error al quitar portada', 'error'); }
 };
 
 
@@ -429,6 +507,29 @@ window.cambiarEstado = async (id, e) => {
             method: 'PATCH', headers: auth.headers(), body: JSON.stringify({ estado: e })
         });
         toast('Estado actualizado', 'success');
+        const reserva = reservasCache.find(r => r.id === id);
+        if (reserva) {
+            const barberia = auth.getUserData();
+            const barberaNombre = barberia?.nombre || 'Barber Registro';
+            const codigoUnico = barberia?.codigo_unico || '';
+            const linkResena = `${location.origin}/resena.html?codigo=${codigoUnico}&nombre=${encodeURIComponent(reserva.nombre)}`;
+            const params = {
+                to_email: reserva.email,
+                to_name: reserva.nombre,
+                servicio: reserva.servicio,
+                fecha: fmtFecha(reserva.fecha),
+                hora: (reserva.hora || '').substring(0, 5),
+                telefono: reserva.telefono,
+                comentarios: reserva.comentarios || 'Ninguno',
+                barberia_nombre: barberaNombre,
+                link_resena: linkResena
+            };
+            try {
+                if (e === 'confirmada')  await emailjs.send(config.emailJS.serviceId, config.emailJS.templateConfirmacion, params);
+                if (e === 'cancelada')   await emailjs.send(config.emailJS.serviceId, config.emailJS.templateCancelacion,  params);
+                if (e === 'completada')  await emailjs.send(config.emailJS.serviceId, config.emailJS.templateCompletada,   params);
+            } catch { /* correo secundario; no interrumpir flujo */ }
+        }
     } catch {
         toast('Error', 'error');
         cargarReservas(); // Recargar para revertir el select al estado real
@@ -487,20 +588,178 @@ async function cargarFotos() {
     c.innerHTML = Array(3).fill(`<div class="card" style="padding:0;overflow:hidden;"><div class="skeleton" style="width:100%;aspect-ratio:4/3;"></div><div style="padding:10px;"><div class="skeleton" style="height:12px;margin-bottom:8px;"></div><div class="skeleton" style="height:34px;border-radius:8px;"></div></div></div>`).join('');
 
     try {
-        const fs = await (await fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers() })).json();
+        // Cargar fotos y servicios en paralelo para poblar el selector
+        const [fs, servicios] = await Promise.all([
+            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()),
+            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()).catch(() => [])
+        ]);
 
         if (!fs.length) {
             c.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-images"></i><p>Sin fotos aún. ¡Sube la primera!</p></div>`;
+            renderGaleriaPreview([], servicios.filter(s => s.activo !== false));
             return;
         }
 
-        c.innerHTML = fs.map(f => `<div class="card" style="padding:0;overflow:hidden;margin-bottom:0;">
-            <img src="${base}${f.url || '/uploads/' + f.filename}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" alt="${f.descripcion || 'Foto de la barbería'}">
+        const svcActivos = servicios.filter(s => s.activo !== false);
+        const buildOpts = (selId) => `<option value="">— Sin servicio asignado —</option>` +
+            svcActivos.map(s => `<option value="${s.id}" ${s.id == selId ? 'selected' : ''}>${s.nombre}</option>`).join('');
+
+        // Mapa de foto_id → servicio completo que la usa como portada
+        const portadaMap = new Map(svcActivos.filter(s => s.foto_id).map(s => [s.foto_id, s]));
+
+        // Opciones del dropdown de portada: muestra todos los servicios
+        const buildPortadaOpts = (fotoId) => {
+            const svcActual = portadaMap.get(fotoId);
+            return `<option value="">— Sin portada —</option>` +
+                svcActivos.map(s => `<option value="${s.id}" ${svcActual && svcActual.id == s.id ? 'selected' : ''}>${s.nombre}</option>`).join('');
+        };
+
+        c.innerHTML = fs.map(f => {
+            const svcPortada = portadaMap.get(f.id); // objeto servicio o undefined
+            const esPortada = !!svcPortada;
+            const enGaleria = f.servicio_galeria_id != null;
+
+            // Galería: bloqueada si es portada
+            const galeriaHTML = esPortada && !enGaleria
+                ? `<div class="foto-cover-notice"><i class="fas fa-star"></i> Portada de "${svcPortada.nombre}" — no puede asignarse a galería</div>`
+                : esPortada
+                    ? `<div class="foto-cover-notice" style="margin-bottom:6px;"><i class="fas fa-exclamation-triangle"></i> Es portada de "${svcPortada.nombre}". Quita la asignación de galería:</div>
+                       <select class="form-control" style="font-size:12px;padding:5px 8px;" onchange="guardarServicioFoto(${f.id}, this.value)">
+                           <option value="">— Sin servicio asignado —</option>
+                       </select>`
+                    : `<select class="form-control" style="font-size:12px;padding:5px 8px;" onchange="guardarServicioFoto(${f.id}, this.value)">
+                           ${buildOpts(f.servicio_galeria_id)}
+                       </select>`;
+
+            // Portada: bloqueada si ya está en una galería
+            const portadaHTML = enGaleria
+                ? `<div class="foto-cover-notice"><i class="fas fa-images"></i> En galería — quita la asignación de galería para usarla como portada</div>`
+                : `<select class="form-control" style="font-size:12px;padding:5px 8px;"
+                       data-old-svc="${svcPortada ? svcPortada.id : ''}"
+                       onchange="asignarPortada(this, ${f.id})">
+                       ${buildPortadaOpts(f.id)}
+                   </select>`;
+
+            return `<div class="card" style="padding:0;overflow:hidden;margin-bottom:0;">
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" alt="${f.descripcion || 'Foto de la barbería'}">
             <div style="padding:10px 12px;">
-                ${f.descripcion ? `<p style="font-size:12px;color:var(--text-3);margin-bottom:8px;">${f.descripcion}</p>` : ''}
-                <button onclick="eliminarFoto(${f.id})" class="btn btn-danger" style="width:100%;padding:7px;font-size:12px;justify-content:center;"><i class="fas fa-trash"></i> Eliminar</button>
-            </div></div>`).join('');
+                <div id="desc-view-${f.id}" style="font-size:12px;color:var(--text-3);margin-bottom:8px;min-height:18px;">
+                    ${f.descripcion ? f.descripcion : '<span style="opacity:.45;font-style:italic;">Sin descripción</span>'}
+                </div>
+                <div id="desc-edit-${f.id}" style="display:none;margin-bottom:8px;">
+                    <input type="text" id="desc-input-${f.id}" class="form-control" style="font-size:12px;padding:6px 10px;margin-bottom:6px;"
+                        placeholder="Descripción de la foto..." value="${(f.descripcion || '').replace(/"/g,'&quot;')}">
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="guardarDescFoto(${f.id})" class="btn btn-success" style="flex:1;padding:6px;font-size:12px;justify-content:center;"><i class="fas fa-check"></i> Guardar</button>
+                        <button onclick="cancelarDescFoto(${f.id})" class="btn" style="padding:6px 10px;font-size:12px;background:var(--ink-3);color:var(--text-2);border:1px solid var(--border-2);">Cancelar</button>
+                    </div>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Portada del servicio</label>
+                    ${portadaHTML}
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;">Galería del servicio</label>
+                    ${galeriaHTML}
+                </div>
+                <div style="display:flex;gap:6px;">
+                    <button onclick="editarDescFoto(${f.id})" class="btn" style="flex:1;padding:7px;font-size:12px;justify-content:center;background:var(--ink-3);color:var(--text-2);border:1px solid var(--border-2);"><i class="fas fa-pencil-alt"></i> Descripción</button>
+                    <button onclick="eliminarFoto(${f.id})" class="btn btn-danger" style="padding:7px 10px;font-size:12px;"><i class="fas fa-trash"></i></button>
+                </div>
+            </div></div>`;
+        }).join('');
+
+        renderGaleriaPreview(fs, svcActivos);
     } catch (e) { console.error('Error cargando fotos:', e); }
+}
+
+function renderGaleriaPreview(fotos, servicios) {
+    const prev = document.getElementById('galeriaPreview');
+    if (!prev) return;
+
+    // IDs de fotos usadas como portada en algún servicio
+    const portadaIds = new Set(servicios.map(s => s.foto_id).filter(Boolean));
+
+    // Fotos de galería agrupadas por servicio (solo servicio_galeria_id)
+    const grupos = {};
+    fotos.forEach(f => {
+        if (f.servicio_galeria_id) {
+            if (!grupos[f.servicio_galeria_id]) grupos[f.servicio_galeria_id] = [];
+            grupos[f.servicio_galeria_id].push(f);
+        }
+    });
+
+    // Fotos sin asignación de galería Y que tampoco son portada de ningún servicio
+    const sinAsignar = fotos.filter(f => !f.servicio_galeria_id && !portadaIds.has(f.id));
+
+    const hayAlgo = servicios.some(s => grupos[s.id]?.length || s.foto_id) || sinAsignar.length;
+    if (!hayAlgo) { prev.innerHTML = ''; return; }
+
+    // Thumbnail con botón × para quitar de galería
+    const thumbGaleria = (f) => `
+        <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="${f.descripcion || ''}">
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
+                style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:1px solid var(--border-2);display:block;" loading="lazy">
+            <button onclick="guardarServicioFoto(${f.id},'')"
+                style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                title="Quitar de galería" aria-label="Quitar foto de galería">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+
+    // Thumbnail de portada: borde dorado, badge "Portada", botón × para quitar sin borrar la foto
+    const thumbPortada = (f, svcId) => `
+        <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="Portada: ${f.descripcion || ''}">
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
+                style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:2px solid var(--gold);display:block;" loading="lazy">
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(201,168,71,0.85);font-size:8px;font-weight:700;text-align:center;color:#09090d;padding:2px 0;border-radius:0 0 4px 4px;text-transform:uppercase;letter-spacing:.03em;">Portada</div>
+            <button onclick="quitarPortada(${svcId})"
+                style="position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+                title="Quitar foto de portada" aria-label="Quitar foto de portada">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>`;
+
+    // Thumbnail sin asignación: sin botón ×
+    const thumbSin = (f) => `
+        <div style="position:relative;width:72px;height:72px;flex-shrink:0;" title="${f.descripcion || ''}">
+            <img src="${assetUrl(f.url || '/uploads/' + f.filename)}"
+                style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:1px solid var(--border-2);display:block;" loading="lazy">
+        </div>`;
+
+    let html = `<div class="card" style="padding:18px 20px;">
+        <p class="panel-title" style="margin-bottom:16px;"><i class="fas fa-th-large"></i> Vista por servicio</p>`;
+
+    servicios.forEach(s => {
+        const fotosCover = s.foto_id ? fotos.filter(f => f.id == s.foto_id) : [];
+        const fotosGaleria = grupos[s.id] || [];
+        if (!fotosCover.length && !fotosGaleria.length) return;
+
+        const total = fotosCover.length + fotosGaleria.length;
+        html += `<div style="margin-bottom:16px;">
+            <p style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-cut" style="color:var(--gold);font-size:10px;"></i> ${s.nombre}
+                <span style="font-size:11px;font-weight:400;color:var(--text-3);">(${total} foto${total !== 1 ? 's' : ''})</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${fotosCover.map(f => thumbPortada(f, s.id)).join('')}
+                ${fotosGaleria.map(thumbGaleria).join('')}
+            </div>
+        </div>`;
+    });
+
+    if (sinAsignar.length) {
+        html += `<div style="margin-bottom:4px;">
+            <p style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-unlink" style="font-size:10px;"></i> Sin servicio asignado
+                <span style="font-size:11px;font-weight:400;">(${sinAsignar.length} foto${sinAsignar.length !== 1 ? 's' : ''})</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">${sinAsignar.map(thumbSin).join('')}</div>
+        </div>`;
+    }
+
+    html += '</div>';
+    prev.innerHTML = html;
 }
 
 /** Sube una foto al backend via FormData (multipart) */
@@ -538,11 +797,59 @@ window.subirFoto = async () => {
 window.eliminarFoto = async id => {
     if (!await confirmar('Eliminar foto', '¿Estás seguro de que quieres eliminar esta foto? Esta acción no se puede deshacer.', 'Eliminar')) return;
     try {
-        await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, { method: 'DELETE', headers: auth.headers() });
+        const r = await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, { method: 'DELETE', headers: auth.headers() });
+        if (!r.ok) throw new Error('Error al eliminar');
         toast('Foto eliminada', 'info');
-        cargarFotos();
-    } catch { }
+        await cargarFotos();
+    } catch (e) { toast(e.message || 'Error al eliminar', 'error'); }
 };
+
+window.editarDescFoto = id => {
+    document.getElementById(`desc-view-${id}`).style.display = 'none';
+    document.getElementById(`desc-edit-${id}`).style.display = 'block';
+    document.getElementById(`desc-input-${id}`).focus();
+};
+
+window.cancelarDescFoto = id => {
+    document.getElementById(`desc-edit-${id}`).style.display = 'none';
+    document.getElementById(`desc-view-${id}`).style.display = 'block';
+};
+
+window.guardarDescFoto = async id => {
+    const desc = document.getElementById(`desc-input-${id}`).value.trim();
+    try {
+        await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, {
+            method: 'PATCH', headers: auth.headers(), body: JSON.stringify({ descripcion: desc })
+        });
+        document.getElementById(`desc-view-${id}`).innerHTML =
+            desc ? desc : '<span style="opacity:.45;font-style:italic;">Sin descripción</span>';
+        cancelarDescFoto(id);
+        toast('Descripción guardada', 'success');
+    } catch { toast('Error al guardar', 'error'); }
+};
+
+window.guardarServicioFoto = async (id, servicioId) => {
+    try {
+        await fetch(`${config.apiURL}/mi-barberia/fotos/${id}`, {
+            method: 'PATCH', headers: auth.headers(),
+            body: JSON.stringify({ servicio_galeria_id: servicioId ? parseInt(servicioId) : null })
+        });
+        toast('Servicio asignado', 'success', 2000);
+        // Recargar el grid completo para que los avisos "Portada de X" se actualicen
+        if (document.getElementById('fotos')?.classList.contains('active')) cargarFotos();
+        else _actualizarPreview();
+    } catch { toast('Error al asignar', 'error'); }
+};
+
+async function _actualizarPreview() {
+    try {
+        const [fs, servicios] = await Promise.all([
+            fetch(`${config.apiURL}/mi-barberia/fotos`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()),
+            fetch(`${config.apiURL}/mi-barberia/servicios`, { headers: auth.headers(), cache: 'no-store' }).then(r => r.json()).catch(() => [])
+        ]);
+        renderGaleriaPreview(fs, servicios.filter(s => s.activo !== false));
+    } catch { /* preview no crítica */ }
+}
 
 
 /* ═══════════════════════════════════════════════════════════════
