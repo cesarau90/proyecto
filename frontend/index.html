@@ -34,12 +34,12 @@
     </nav>
 
     <!-- HERO — padding-top incluye espacio para el navbar fijo -->
-    <div class="hero will-reveal reveal-hero" style="padding-top:120px;">
+    <div class="hero will-reveal reveal-hero hero-navbar-space">
         <div class="hero-inner container">
-            <div class="hero-badge hero-enter" style="--enter-delay:0.06s"><i class="fas fa-cut"></i> Sistema de Reservas</div>
-            <h1 class="hero-enter" style="--enter-delay:0.14s">Barber<br><em>Registro</em></h1>
-            <p class="hero-sub hero-enter" style="--enter-delay:0.22s">Gestiona las citas de tu barbería de forma profesional. Configura en minutos.</p>
-            <a href="login.html" class="hero-cta hero-enter" style="--enter-delay:0.30s"><i class="fas fa-sign-in-alt"></i> ¿Ya tienes cuenta? Inicia sesión</a>
+            <div class="hero-badge hero-enter delay-06s"><i class="fas fa-cut"></i> Sistema de Reservas</div>
+            <h1 class="hero-enter delay-14s">Barber<br><em>Registro</em></h1>
+            <p class="hero-sub hero-enter delay-22s">Gestiona las citas de tu barbería de forma profesional. Configura en minutos.</p>
+            <a href="login.html" class="hero-cta hero-enter delay-30s"><i class="fas fa-sign-in-alt"></i> ¿Ya tienes cuenta? Inicia sesión</a>
         </div>
     </div>
 
@@ -47,22 +47,22 @@
 
         <!-- Grid de 4 beneficios: explica por qué usar la plataforma -->
         <div class="features will-reveal reveal-group" id="features">
-            <div class="feature will-reveal" style="transition-delay:0.05s">
+            <div class="feature will-reveal delay-05s">
                 <div class="feature-icon"><i class="fas fa-link"></i></div>
                 <h3>Link Único</h3>
                 <p>Enlace personalizado para compartir en redes sociales y con clientes</p>
             </div>
-            <div class="feature will-reveal" style="transition-delay:0.13s">
+            <div class="feature will-reveal delay-13s">
                 <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
                 <h3>Reservas Online</h3>
                 <p>Tus clientes agendan citas 24/7 desde cualquier dispositivo</p>
             </div>
-            <div class="feature will-reveal" style="transition-delay:0.21s">
+            <div class="feature will-reveal delay-21s">
                 <div class="feature-icon"><i class="fas fa-camera"></i></div>
                 <h3>Galería de Fotos</h3>
                 <p>Sube fotos de tus cortes y asígnalas a tus servicios</p>
             </div>
-            <div class="feature will-reveal" style="transition-delay:0.29s">
+            <div class="feature will-reveal delay-29s">
                 <div class="feature-icon"><i class="fas fa-star"></i></div>
                 <h3>Reseñas</h3>
                 <p>Muestra los comentarios y calificaciones de tus clientes</p>
@@ -75,11 +75,11 @@
              tecla, solo al cargar la página una vez.
              ════════════════════════════════════════════════════════ -->
         <div class="directorio-section will-reveal reveal-section" id="directorio">
-            <div class="directorio-header will-reveal" style="transition-delay:0.05s">
+            <div class="directorio-header will-reveal delay-05s">
                 <h2><i class="fas fa-store"></i> Barberías Registradas</h2>
                 <p>Encuentra una barbería o comparte tu página con clientes</p>
             </div>
-            <div class="busqueda-wrap will-reveal" style="transition-delay:0.12s">
+            <div class="busqueda-wrap will-reveal delay-12s">
                 <div class="busqueda-input-wrap">
                     <i class="fas fa-search busqueda-icon" aria-hidden="true"></i>
                     <input type="search" id="busquedaInput" class="busqueda-input"
@@ -89,13 +89,13 @@
                 </div>
                 <p id="busquedaCount" class="busqueda-count" aria-live="polite"></p>
             </div>
-            <div id="barberiasGrid" class="barb-grid-pub will-reveal" style="transition-delay:0.18s" aria-label="Listado de barberías"></div>
+            <div id="barberiasGrid" class="barb-grid-pub will-reveal delay-18s" aria-label="Listado de barberías"></div>
         </div>
 
         <!-- Formulario de registro: datos del dueño + info de barbería + horarios -->
         <div class="form-container will-reveal reveal-section">
-            <div class="form-card will-reveal" style="transition-delay:0.08s">
-                <h2><i class="fas fa-store" style="color:var(--gold);margin-right:10px;"></i>Registra tu Barbería</h2>
+            <div class="form-card will-reveal delay-08s">
+                <h2><i class="fas fa-store icon-gold"></i>Registra tu Barbería</h2>
                 <p class="sub">Crea tu cuenta y obtén tu página pública en minutos</p>
 
                 <!-- Contenedor de mensajes de error -->
@@ -121,11 +121,11 @@
                          Al seleccionar una, se llena dirección + ciudad.
                          ══════════════════════════════════════════════════ -->
                     <div class="form-row">
-                        <div class="form-group" style="position:relative;">
+                        <div class="form-group form-group--relative">
                             <label>Dirección *</label>
-                            <input type="text" id="direccion" class="form-control" required placeholder="Escribe para buscar..." autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="sugerenciasDir">
+                            <input type="text" id="direccion" class="form-control" required placeholder="Escribe para buscar..." autocomplete="off" aria-autocomplete="list" aria-controls="sugerenciasDir">
                             <!-- Lista de sugerencias que aparece debajo del input -->
-                            <div id="sugerenciasDir" role="listbox" aria-label="Sugerencias de dirección" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--ink-3);border:1px solid var(--border);border-radius:0 0 10px 10px;max-height:200px;overflow-y:auto;"></div>
+                            <div id="sugerenciasDir" role="listbox" aria-label="Sugerencias de dirección" class="sugerencias-dir"></div>
                         </div>
                         <div class="form-group"><label>Ciudad *</label><input type="text" id="ciudad" class="form-control" required placeholder="Se llena automáticamente"></div>
                     </div>
@@ -133,11 +133,11 @@
                     <div class="section-title">Horarios de Atención *</div>
                     <div class="horarios-grid" id="horariosGrid"></div>
 
-                    <button type="submit" id="btnRegistro" class="btn btn-primary" style="width:100%;margin-top:36px;padding:17px;font-size:15px;border-radius:14px;letter-spacing:0.025em;">
+                    <button type="submit" id="btnRegistro" class="btn btn-primary btn-registro">
                         <i class="fas fa-rocket"></i> Crear mi Barbería
                     </button>
-                    <p style="text-align:center;margin-top:20px;color:var(--text-3);font-size:13px;">
-                        ¿Ya tienes cuenta? <a href="login.html" style="color:var(--gold);font-weight:600;text-decoration:none;">Inicia sesión</a>
+                    <p class="form-footer">
+                        ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
                     </p>
                 </form>
             </div>
@@ -148,10 +148,10 @@
     <div id="modalExito" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalExitoTitulo">
         <div class="success-modal">
             <div class="success-icon"><i class="fas fa-check"></i></div>
-            <h2 id="modalExitoTitulo" style="text-align:center;margin-bottom:8px;">¡Barbería Creada!</h2>
-            <p style="text-align:center;color:var(--text-3);font-size:15px;margin-bottom:28px;">Tu cuenta y página pública están listas</p>
+            <h2 id="modalExitoTitulo" class="modal-title">¡Barbería Creada!</h2>
+            <p class="modal-text">Tu cuenta y página pública están listas</p>
             <div id="infoExito"></div>
-            <button onclick="window.location.href='usuario.html'" class="btn btn-primary" style="width:100%;padding:16px;font-size:15px;border-radius:14px;margin-top:10px;letter-spacing:0.02em;">
+            <button onclick="window.location.href='usuario.html'" class="btn btn-primary btn-modal">
                 <i class="fas fa-cog"></i> Ir a mi Panel
             </button>
         </div>
@@ -433,7 +433,7 @@
             }
 
             grid.innerHTML = lista.map((b, i) => `
-                <div class="barb-card-pub will-reveal" style="transition-delay:${i * 0.07}s">
+                <div class="barb-card-pub will-reveal delay-${String(i * 7).padStart(2, '0')}s">
                     <div class="barb-card-nombre">${b.nombre}</div>
                     ${b.ciudad ? `<div class="barb-card-ciudad"><i class="fas fa-location-dot" aria-hidden="true"></i> ${b.ciudad}</div>` : ''}
                     ${b.direccion ? `<div class="barb-card-dir"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${b.direccion}</div>` : ''}

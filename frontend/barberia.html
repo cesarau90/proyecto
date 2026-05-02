@@ -25,7 +25,7 @@
     <p>Cargando barbería...</p>
 </div>
 
-<div id="content" style="display:none;">
+<div id="content" class="d-none">
 
     <!-- NAVBAR: navegación fija para acceso rápido a secciones (C4) -->
     <nav class="navbar" role="navigation" aria-label="Navegación principal">
@@ -49,8 +49,8 @@
             <h1 id="nombreBarberia"></h1>
             <div class="hero-meta">
                 <!-- Ciudad y dirección son links que llevan directo al mapa -->
-                <a href="#mapaContainer" id="ciudadWrap" style="display:none;text-decoration:none;color:var(--text-3);cursor:pointer;transition:color .2s;align-items:center;gap:5px;" onmouseover="this.style.color='var(--gold-light)'" onmouseout="this.style.color='var(--text-3)'"><i class="fas fa-location-dot" style="color:var(--gold);font-size:12px;line-height:1;"></i> <span id="ciudadBarberia"></span></a>
-                <a href="#mapaContainer" style="text-decoration:none;color:var(--text-3);cursor:pointer;display:flex;align-items:center;gap:5px;transition:color .2s;" onmouseover="this.style.color='var(--gold-light)'" onmouseout="this.style.color='var(--text-3)'"><i class="fas fa-map-marker-alt" style="color:var(--gold)"></i> <span id="direccionBarberia"></span></a>
+                <a href="#mapaContainer" id="ciudadWrap" class="hero-meta-link d-none" title="Ver ciudad en el mapa" aria-label="Ver ciudad en el mapa"><i class="fas fa-location-dot hero-meta-icon"></i> <span id="ciudadBarberia"></span></a>
+                <a href="#mapaContainer" class="hero-meta-link" title="Ver dirección en el mapa" aria-label="Ver dirección en el mapa"><i class="fas fa-map-marker-alt hero-meta-icon"></i> <span id="direccionBarberia"></span></a>
             </div>
             <div class="hero-actions">
                 <a href="#booking" class="btn-hero btn-hero-primary"><i class="fas fa-calendar-plus"></i> Agendar Cita</a>
@@ -62,7 +62,7 @@
     <main id="main-content" class="container">
 
         <!-- SERVICIOS -->
-        <section id="servicios" style="margin:60px 0;" aria-label="Servicios disponibles">
+        <section id="servicios" class="section-spaced" aria-label="Servicios disponibles">
             <div class="sec-head">
                 <div class="sec-icon"><i class="fas fa-cut"></i></div>
                 <h2>Nuestros Servicios</h2>
@@ -71,9 +71,9 @@
         </section>
 
         <!-- BOOKING -->
-        <section id="booking" style="margin:72px 0;" aria-label="Formulario de reserva">
+        <section id="booking" class="section-spaced-large" aria-label="Formulario de reserva">
             <div class="booking-card fade-up">
-                <h2><i class="fas fa-calendar-plus" style="color:var(--gold);margin-right:10px;"></i>Agenda tu Cita</h2>
+                <h2><i class="fas fa-calendar-plus hero-heading-icon"></i>Agenda tu Cita</h2>
                 <div id="mensaje" role="alert"></div>
                 <form id="reservaForm" class="form-2col">
                     <div class="form-group"><label for="nombre">Tu Nombre *</label><input type="text" id="nombre" class="form-control" required placeholder="Juan Pérez"></div>
@@ -83,12 +83,12 @@
                     <div class="form-group">
                         <label for="fecha">Fecha *</label>
                         <input type="date" id="fecha" class="form-control" required>
-                        <div id="avisoDia" class="aviso-dia" style="display:none;" role="alert"></div>
-                    </div>
-                    <div class="form-group"><label for="hora">Hora *</label><input type="time" id="hora" class="form-control" required></div>
-                    <div class="form-group form-full"><label for="comentarios">Comentarios (opcional)</label><textarea id="comentarios" class="form-control" placeholder="¿Algún detalle especial?"></textarea></div>
+                    <div id="avisoDia" class="aviso-dia d-none" role="alert"></div>
+                </div>
+                <div class="form-group"><label for="hora">Hora *</label><input type="time" id="hora" class="form-control" required></div>
+                <div class="form-group form-full"><label for="comentarios">Comentarios (opcional)</label><textarea id="comentarios" class="form-control" placeholder="¿Algún detalle especial?"></textarea></div>
                     <div class="form-full">
-                        <button type="submit" id="btnReservar" class="btn btn-primary" style="width:100%;padding:16px;font-size:15px;border-radius:14px;justify-content:center;letter-spacing:0.02em;">
+                        <button type="submit" id="btnReservar" class="btn btn-primary btn-full btn-large">
                             <i class="fas fa-check"></i> Confirmar Reserva
                         </button>
                     </div>
@@ -97,9 +97,9 @@
         </section>
 
         <!-- RESEÑA FORM oculto: reseñas se solicitan por correo al completar la cita -->
-        <section id="seccionResenaForm" style="display:none;" aria-label="Dejar una reseña">
-            <div class="booking-card" style="max-width:580px;">
-                <h2><i class="fas fa-pen" style="color:var(--gold);margin-right:10px;"></i>Deja tu Reseña</h2>
+        <section id="seccionResenaForm" class="d-none" aria-label="Dejar una reseña">
+            <div class="booking-card booking-card--compact">
+                <h2><i class="fas fa-pen hero-heading-icon"></i>Deja tu Reseña</h2>
                 <div id="mensajeResena" role="alert"></div>
                 <form id="resenaForm">
                     <div class="form-group"><label for="resena_cliente">Tu Nombre</label><input type="text" id="resena_cliente" class="form-control" required></div>
@@ -113,8 +113,8 @@
                             <input type="radio" id="s1" name="cal" value="1"><label for="s1" aria-label="1 estrella">&#9733;</label>
                         </div>
                     </div>
-                    <div class="form-group"><label for="resena_comentario">Comentario *</label><textarea id="resena_comentario" class="form-control" required placeholder="¿Cómo fue tu experiencia?" style="min-height:80px;"></textarea></div>
-                    <button type="submit" id="btnResena" class="btn btn-success" style="width:100%;padding:13px;font-size:14px;border-radius:12px;justify-content:center;">
+                    <div class="form-group"><label for="resena_comentario">Comentario *</label><textarea id="resena_comentario" class="form-control tall" required placeholder="¿Cómo fue tu experiencia?"></textarea></div>
+                    <button type="submit" id="btnResena" class="btn btn-success btn-full btn-small">
                         <i class="fas fa-paper-plane"></i> Enviar Reseña
                     </button>
                 </form>
@@ -122,16 +122,16 @@
         </section>
 
         <!-- RESEÑAS -->
-        <section style="margin:60px 0;" aria-label="Reseñas de clientes">
+        <section class="section-spaced" aria-label="Reseñas de clientes">
             <div class="sec-head">
                 <div class="sec-icon"><i class="fas fa-star"></i></div>
                 <h2>Lo que dicen nuestros clientes</h2>
             </div>
-            <div id="resenasContainer" style="max-width:680px;margin:0 auto;"></div>
+            <div id="resenasContainer" class="reviews-wrapper"></div>
         </section>
 
         <!-- INFO BARBERÍA -->
-        <section id="info-section" style="margin:60px 0;" aria-label="Información de la barbería">
+        <section id="info-section" class="section-spaced" aria-label="Información de la barbería">
             <div class="sec-head">
                 <div class="sec-icon"><i class="fas fa-info-circle"></i></div>
                 <h2>Información</h2>
@@ -165,12 +165,12 @@
                  Usa Leaflet.js (librería gratis, sin API key) + OpenStreetMap.
                  También incluye un botón para abrir la dirección en Google Maps.
                  ═══════════════════════════════════════════════════════════ -->
-            <div id="mapaContainer" style="margin-top:20px;display:none;">
+            <div id="mapaContainer" class="mapa-container d-none">
                 <!-- Mapa embebido de Leaflet -->
-                <div id="mapa" style="width:100%;height:300px;border-radius:var(--radius-lg);border:1px solid var(--border-2);overflow:hidden;"></div>
+                <div id="mapa"></div>
                 <!-- Botón para abrir en Google Maps -->
-                <div style="margin-top:12px;text-align:center;">
-                    <a id="btnGoogleMaps" href="#" target="_blank" class="btn btn-ghost" style="font-size:13px;">
+                <div class="map-actions">
+                    <a id="btnGoogleMaps" href="#" target="_blank" class="btn btn-ghost btn-link-primary">
                         <i class="fas fa-external-link-alt"></i> Abrir en Google Maps
                     </a>
                 </div>
@@ -181,29 +181,29 @@
 
     <!-- MODAL RESERVA EXITOSA -->
     <div id="modalReservaOk" class="modal-overlay" role="dialog" aria-modal="true">
-        <div class="success-modal" style="max-width:500px;width:100%;">
+        <div class="success-modal modal-confirm">
             <div class="success-icon"><i class="fas fa-check"></i></div>
-            <h2 style="text-align:center;margin-bottom:8px;">¡Reserva Confirmada!</h2>
-            <p style="text-align:center;color:var(--text-3);font-size:15px;margin-bottom:24px;">Te esperamos en nuestra barbería</p>
-            <div id="reservaOkDetalle" style="background:var(--ink-3);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:24px;font-size:14px;line-height:2.2;"></div>
-            <button onclick="document.getElementById('modalReservaOk').classList.remove('open')" class="btn btn-primary" style="width:100%;padding:15px;font-size:15px;border-radius:14px;">
+            <h2 class="modal-confirm-title">¡Reserva Confirmada!</h2>
+            <p class="modal-confirm-copy">Te esperamos en nuestra barbería</p>
+            <div id="reservaOkDetalle" class="reservation-detail"></div>
+            <button onclick="document.getElementById('modalReservaOk').classList.remove('open')" class="btn btn-primary btn-full btn-large">
                 <i class="fas fa-check-circle"></i> Entendido
             </button>
         </div>
     </div>
 
     <footer class="footer">
-        <p>Powered by <a href="index.html" style="color:var(--gold-light);text-decoration:none;font-weight:600;">Barber Registro</a></p>
+        <p>Powered by <a href="index.html" class="footer-link">Barber Registro</a></p>
     </footer>
 
 </div>
 
 <!-- Invisible holders que el JS necesita -->
-<div id="seccionFotos" style="display:none;"><div id="galeriaFotos"></div></div>
+<div id="seccionFotos" class="d-none"><div id="galeriaFotos"></div></div>
 
 <!-- Modal galería de fotos del servicio -->
 <div id="modalGaleria" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Galería de trabajos" onclick="cerrarModalGaleria(event)">
-    <div class="modal" style="max-width:860px;width:95%;">
+    <div class="modal gallery-modal">
         <div class="modal-header">
             <h3><i class="fas fa-images"></i> Galería de trabajos</h3>
             <button class="modal-close" onclick="cerrarModalGaleria()" aria-label="Cerrar"><i class="fas fa-times"></i></button>

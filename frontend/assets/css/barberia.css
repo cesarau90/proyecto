@@ -4,7 +4,7 @@
    Esta página es lo que ven los clientes cuando entran al link
    de una barbería. Incluye: hero, secciones de servicios, booking,
    reseñas, info y mapa.
-   
+
    Los estilos globales (botones, cards, forms, etc.) están en
    styles.css — aquí solo va lo específico de esta página.
    ================================================================ */
@@ -23,6 +23,138 @@
     background:
         radial-gradient(ellipse 70% 36% at 50% 0%, rgba(var(--gold-rgb),0.08), transparent 66%),
         linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 48%, var(--ink) 100%);
+}
+
+.d-none { 
+    display: none; 
+}
+
+.hero-meta-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-3);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .2s ease;
+}
+.hero-meta-link:hover {
+    color: var(--gold-light);
+}
+.hero-meta-link i {
+    color: var(--gold);
+    font-size: 12px;
+    line-height: 1;
+}
+
+.section-spaced { 
+    margin: 60px 0; 
+}
+.section-spaced-large { 
+    margin: 72px 0; 
+}
+
+.hero-heading-icon {
+    color: var(--gold);
+    margin-right: 10px;
+}
+
+.btn-full { 
+    width: 100%; 
+}
+.btn-large {
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 14px;
+    justify-content: center;
+    letter-spacing: 0.02em;
+}
+.btn-small { 
+    font-size: 13px; 
+    padding: 13px 16px; 
+    border-radius: 12px; 
+    justify-content: center; 
+}
+
+.form-control.tall { 
+    min-height: 80px; 
+}
+
+.booking-card--compact { 
+    max-width: 580px; 
+}
+
+.reviews-wrapper { 
+    max-width: 680px; margin: 0 auto; 
+}
+
+.mapa-container { 
+    margin-top: 20px; 
+}
+
+#mapa {
+    width: 100%;
+    height: 300px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-2);
+    overflow: hidden;
+}
+
+.map-actions { 
+    margin-top: 12px; text-align: center; 
+}
+
+.btn-link-primary {
+    font-size: 13px;
+}
+
+.modal-confirm {
+    max-width: 500px;
+    width: 100%;
+}
+
+.modal-confirm-title {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.modal-confirm-copy {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 15px;
+    margin-bottom: 24px;
+}
+
+.reservation-detail {
+    background: var(--ink-3);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 2.2;
+}
+
+.footer-link {
+    color: var(--gold-light);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+.modal.gallery-modal {
+    max-width: 860px;
+    width: 95%;
+}
+
+#modalReservaOk.modal-overlay {
+    pointer-events: none;
+}
+#modalReservaOk.modal-overlay .success-modal {
+    pointer-events: auto;
 }
 
 
@@ -850,12 +982,13 @@
 }
 
 @media (max-width: 640px) {
+    /* Mejoras móviles: navbar con scroll horizontal, scrollbar oculto */
     .navbar-inner { gap: 10px; }
     .navbar-links {
         gap: 4px;
         max-width: 100%;
         overflow-x: auto;
-        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
     .navbar-links::-webkit-scrollbar { display: none; }
     .navbar-links a { padding: 7px 10px; }

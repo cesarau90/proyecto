@@ -43,6 +43,7 @@ body {
         linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
     background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 65% 62% at 50% 38%, #000 0%, transparent 72%);
     mask-image: radial-gradient(ellipse 65% 62% at 50% 38%, #000 0%, transparent 72%);
     opacity: .55;
 }
@@ -292,6 +293,13 @@ body {
     text-shadow: 0 0 18px rgba(var(--gold-rgb),0.22);
 }
 .login-register-link:hover::after { transform: scaleX(1); }
+
+.theme-toggle-fixed {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 50;
+}
 
 @keyframes loginFadeUp {
     from { opacity: 0; transform: translateY(18px); }
