@@ -1024,23 +1024,7 @@
 }
 
 @media (max-width: 640px) {
-    /* Mejoras móviles: navbar con scroll horizontal, scrollbar oculto */
-    .navbar-inner { 
-        gap: 10px; 
-    }
-    .navbar-links {
-        overflow: hidden;
-        position: fixed;
-        top: 0;
-        width: 100%;
-    }
-    .navbar-links::-webkit-scrollbar { display: none; }
-    .navbar-links a,
-    .navbar-links .btn-tema {
-        flex: 0 0 auto;
-        white-space: nowrap;
-    }
-    .navbar-links a { padding: 7px 10px; }
+    .navbar-links a { padding: 5px 8px; font-size: 11px; }
     .hero-meta a {
         width: 100%;
         max-width: 320px;
