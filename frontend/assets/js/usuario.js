@@ -1082,3 +1082,18 @@ window.copiarLink = id => {
 window.cerrarSesion = async () => {
     if (await confirmar('Cerrar sesión', '¿Deseas cerrar tu sesión?', 'Cerrar sesión', 'warning')) auth.logout();
 };
+
+window.eliminarCuenta = async () => {
+    if (!await confirmar(
+        'Eliminar cuenta',
+        '¿Estás seguro? Se eliminarán permanentemente tu barbería, servicios, reservas, reseñas y fotos. <strong>Esta acción no se puede deshacer.</strong>',
+        'Sí, eliminar todo',
+        'danger'
+    )) return;
+    try {
+        const r = await fetch(`${config.apiURL}/mi-barberia`, { method: 'DELETE', headers: auth.headers() });
+        if (!r.ok) throw new Error('Error al eliminar');
+        toast('Cuenta eliminada. ¡Hasta pronto!', 'info', 4000);
+        setTimeout(() => { sessionStorage.clear(); window.location.href = 'index.html'; }, 1500);
+    } catch (e) { toast(e.message || 'Error al eliminar la cuenta', 'error'); }
+};

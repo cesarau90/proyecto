@@ -704,6 +704,55 @@ app.get('/api/admin/barberias/:id/servicios', authMiddleware, adminMiddleware, a
   catch { res.status(500).json({ error: 'Error' }); }
 });
 
+/* Admin elimina una barbería completa con todos sus datos */
+app.delete('/api/admin/barberias/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const fotos = (await client.query('SELECT * FROM fotos WHERE barberia_id=$1', [req.params.id])).rows;
+    for (const f of fotos) {
+      if (f.cloudinary_public_id) { try { await eliminarDeCloudinary(f.cloudinary_public_id); } catch {} }
+      else { const fp = path.join(uploadsDir, String(req.params.id), f.filename); if (existsSync(fp)) try { unlinkSync(fp); } catch {} }
+    }
+    await client.query('BEGIN');
+    await client.query('DELETE FROM fotos     WHERE barberia_id=$1', [req.params.id]);
+    await client.query('DELETE FROM servicios WHERE barberia_id=$1', [req.params.id]);
+    await client.query('DELETE FROM reservas  WHERE barberia_id=$1', [req.params.id]);
+    await client.query('DELETE FROM resenas   WHERE barberia_id=$1', [req.params.id]);
+    const r = await client.query('DELETE FROM barberias WHERE id=$1 RETURNING id', [req.params.id]);
+    await client.query('COMMIT');
+    r.rows.length ? res.json({ ok: true }) : res.status(404).json({ error: 'Barbería no encontrada' });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Error eliminando barbería:', e);
+    res.status(500).json({ error: 'Error al eliminar' });
+  } finally { client.release(); }
+});
+
+/* El dueño elimina su propia barbería */
+app.delete('/api/mi-barberia', authMiddleware, async (req, res) => {
+  const client = await pool.connect();
+  const barbId = req.user.id;
+  try {
+    const fotos = (await client.query('SELECT * FROM fotos WHERE barberia_id=$1', [barbId])).rows;
+    for (const f of fotos) {
+      if (f.cloudinary_public_id) { try { await eliminarDeCloudinary(f.cloudinary_public_id); } catch {} }
+      else { const fp = path.join(uploadsDir, String(barbId), f.filename); if (existsSync(fp)) try { unlinkSync(fp); } catch {} }
+    }
+    await client.query('BEGIN');
+    await client.query('DELETE FROM fotos     WHERE barberia_id=$1', [barbId]);
+    await client.query('DELETE FROM servicios WHERE barberia_id=$1', [barbId]);
+    await client.query('DELETE FROM reservas  WHERE barberia_id=$1', [barbId]);
+    await client.query('DELETE FROM resenas   WHERE barberia_id=$1', [barbId]);
+    await client.query('DELETE FROM barberias WHERE id=$1', [barbId]);
+    await client.query('COMMIT');
+    res.json({ ok: true });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Error eliminando cuenta:', e);
+    res.status(500).json({ error: 'Error al eliminar' });
+  } finally { client.release(); }
+});
+
 app.get('/api/admin/stats', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const barberias = (await pool.query('SELECT COUNT(*) FROM barberias')).rows[0].count;

@@ -124,7 +124,17 @@
                                 <div class="form-group" style="margin:0;"><label>Dirección</label><input type="text" class="form-control" id="ed-dir-${b.id}" value="${b.direccion||''}"></div>
                                 <div class="form-group" style="margin:0;"><label>Ciudad</label><input type="text" class="form-control" id="ed-ciudad-${b.id}" value="${b.ciudad||''}"></div>
                                 <div class="form-group" style="margin:0;"><label>Email dueño</label><input type="email" class="form-control" value="${b.dueno_email||''}" disabled></div>
-                                <div class="form-group" style="margin:0;"><label>Color de identidad</label><input type="color" class="form-control admin-color-input" id="ed-color-${b.id}" value="${b.tema_color||'#c9a847'}"></div>
+                                <div class="form-group" style="margin:0;grid-column:1/-1;">
+                                    <label>Color de identidad</label>
+                                    <div style="display:flex;gap:7px;flex-wrap:wrap;margin:8px 0;">
+                                        ${['#c9a847','#e05252','#60a5fa','#3ecf8e','#a78bfa','#fb923c','#f472b6','#94a3b8'].map(c => `<button type="button" onclick="setAdminColor('${b.id}','${c}')" data-barbid="${b.id}" data-color="${c}" style="width:30px;height:30px;border-radius:50%;background:${c};border:2px solid ${(b.tema_color||'#c9a847')===c?'var(--text)':'transparent'};cursor:pointer;transition:transform .15s,border-color .15s;flex-shrink:0;" title="${c}"></button>`).join('')}
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:var(--text-3);">Personalizado:</span>
+                                        <input type="color" id="ed-custom-color-${b.id}" style="width:36px;height:32px;border:1px solid var(--border-2);border-radius:6px;cursor:pointer;padding:2px;background:transparent;" value="${b.tema_color||'#c9a847'}" oninput="setAdminColor('${b.id}',this.value)">
+                                        <input type="text" id="ed-color-${b.id}" class="form-control" style="max-width:110px;font-size:13px;" value="${b.tema_color||'#c9a847'}" maxlength="20" oninput="syncAdminColorText('${b.id}',this.value)">
+                                    </div>
+                                </div>
                             </div>
                             <div style="margin-top:16px;">
                                 <label style="display:block;margin-bottom:10px;font-weight:600;color:var(--text-2);font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Horarios de Atención</label>
@@ -137,6 +147,7 @@
                                 <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarResenasAdmin(${b.id})"><i class="fas fa-star"></i> Reseñas</button>
                                 <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarFotosAdmin(${b.id})"><i class="fas fa-images"></i> Fotos</button>
                                 <a href="barberia.html?codigo=${b.codigo_unico}" target="_blank" class="btn btn-outline" style="padding:8px 18px;font-size:13px;width:auto;text-decoration:none;"><i class="fas fa-external-link-alt"></i> Ver página pública</a>
+                                <button class="btn btn-danger" style="padding:8px 18px;font-size:13px;width:auto;margin-left:auto;" onclick="eliminarBarberiaAdmin(${b.id},'${b.nombre.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-trash-alt"></i> Eliminar Barbería</button>
                             </div>
                             <div id="ed-msg-${b.id}" style="margin-top:8px;"></div>
                             <div id="reservas-${b.id}" style="margin-top:14px;"></div>
@@ -542,6 +553,37 @@
                 document.getElementById(`fotos-${barberiaId}`).innerHTML = '';
                 await cargarFotosAdmin(barberiaId);
             } catch { await confirmar('Error', 'No se pudo eliminar la foto.', 'Cerrar', 'warning'); }
+        };
+
+        /* ── PALETA DE COLOR ADMIN ─────────────────────────────────── */
+        window.setAdminColor = function(barbId, color) {
+            document.getElementById(`ed-color-${barbId}`).value = color;
+            const custom = document.getElementById(`ed-custom-color-${barbId}`);
+            if (custom && /^#[0-9a-fA-F]{3,6}$/.test(color)) custom.value = color;
+            document.querySelectorAll(`[data-barbid="${barbId}"]`).forEach(btn => {
+                const match = btn.dataset.color === color;
+                btn.style.border = `2px solid ${match ? 'var(--text)' : 'transparent'}`;
+                btn.style.transform = match ? 'scale(1.15)' : '';
+            });
+        };
+        window.syncAdminColorText = function(barbId, val) {
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) setAdminColor(barbId, val);
+        };
+
+        /* ── ELIMINAR BARBERÍA (admin) ──────────────────────────────── */
+        window.eliminarBarberiaAdmin = async function(id, nombre) {
+            if (!await confirmar(
+                'Eliminar barbería',
+                `¿Eliminar <strong>${nombre}</strong> y <strong>todos</strong> sus datos (servicios, reservas, reseñas, fotos)? Esta acción es <strong>irreversible</strong>.`,
+                'Eliminar todo',
+                'danger'
+            )) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/barberias/${id}`, { method: 'DELETE', headers: auth.headers() });
+                if (!r.ok) throw new Error();
+                await loadBarberias();
+                await loadStats();
+            } catch { await confirmar('Error', 'No se pudo eliminar la barbería.', 'Cerrar', 'warning'); }
         };
 
         window.cargarServiciosAdmin = async function(id) {
