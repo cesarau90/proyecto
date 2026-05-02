@@ -183,8 +183,15 @@
     border-color: rgba(var(--gold-rgb),0.48);
     box-shadow: 0 0 26px rgba(var(--gold-rgb),0.30);
 }
-.feature h3 { font-size: 15px; color: var(--text); margin-bottom: 8px; }
-.feature p  { color: var(--text-3); font-size: 13px; line-height: 1.6; }
+.feature h3 { 
+    font-size: 15px; 
+    color: var(--text); 
+    margin-bottom: 8px; }
+.feature p  { 
+    color: var(--text-3); 
+    font-size: 13px; 
+    line-height: 1.6; 
+}
 
 
 /* ── FORM CONTAINER ───────────────────────────────────────────
@@ -643,6 +650,10 @@
         transform: translateX(-50%);
         width: calc(100% - 10px);
         max-width: 300px;
+    }
+
+    .barb-card-nombre {
+        font-size: 10px;
     }
 
     .form-card { 
