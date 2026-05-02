@@ -1132,6 +1132,7 @@ Se muestra sobre el hero con fondo semitransparente.
     align-items: center;
     gap: 6px;
     min-width: 0;
+    margin-left: auto;
 }
 .navbar-links a {
     padding: 7px 14px;
