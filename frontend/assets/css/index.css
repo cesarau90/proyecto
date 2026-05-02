@@ -641,9 +641,8 @@
         position: fixed;
         left: 50%;
         transform: translateX(-50%);
-        width: calc(100% - 30px);
+        width: calc(100% - 10px);
         max-width: 300px;
-        font-size: 10px
     }
 
     .form-card { 
