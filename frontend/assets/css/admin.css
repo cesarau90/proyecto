@@ -646,7 +646,7 @@
     .stats-grid { grid-template-columns: 1fr; }
     .sa-topbar-inner { 
         flex-direction: row; 
-        align-items: flex-start; 
+        align-items:last baseline; 
     }
     .barb-header { 
         flex-direction: column; 
