@@ -26,11 +26,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
     padding: 12px 0;
 }
-.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.topbar-brand { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
+.topbar-text { min-width: 0; overflow: hidden; }
+.topbar-text h1, .topbar-text p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Logo: cuadrado con gradiente dorado */
 .topbar-logo {
@@ -48,7 +50,7 @@
 }
 .topbar-text h1 { font-size: 14px; font-weight: 700; color: var(--text); font-family: 'DM Sans', sans-serif; line-height: 1.2; }
 .topbar-text p  { font-size: 11px; color: var(--text-3); font-family: 'DM Sans', sans-serif; }
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .topbar-actions .btn {
     border-color: rgba(var(--gold-rgb),0.18);
 }
@@ -587,12 +589,10 @@ select.estado-sel:hover {
 
 @media (max-width: 640px) {
     .topbar-inner {
-        align-items: flex-start;
+        align-items: center;
     }
     .topbar-actions {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
+        gap: 4px;
     }
     .topbar-actions .btn {
         min-height: 38px;
