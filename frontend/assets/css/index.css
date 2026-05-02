@@ -642,7 +642,7 @@
         left: 50%;
         transform: translateX(-50%);
         width: calc(100% - 30px);
-        max-width: 480px;
+        max-width: 300px;
     }
 
     .form-card { 
