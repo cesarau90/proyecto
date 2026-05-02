@@ -687,23 +687,7 @@
 [data-tema="claro"] .navbar-brand i {
     color: #111827;
 }
-[data-tema="claro"] .btn-hero-primary {
-    color: #fff;                /* letras blancas en modo claro */
-    background: linear-gradient(135deg,
-        #1a2a3c 0%,
-        #5a3d1c 48%,
-        #b8712a 100%
-    );
-    border-color: rgba(180, 110, 40, 0.20);
-    box-shadow: 0 16px 36px rgba(var(--gold-rgb), 0.22);
-}
-[data-tema="claro"] .btn-hero-primary:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.09);
-    box-shadow:
-        0 0 0 1px rgba(var(--gold-rgb), 0.18),
-        0 22px 46px rgba(var(--gold-rgb), 0.26);
-}
+
 [data-tema="claro"] .sec-icon,
 [data-tema="claro"] .info-strip-icon,
 [data-tema="claro"] .hero-meta i,
