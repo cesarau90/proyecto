@@ -1101,6 +1101,7 @@ select.estado-sel:focus { border-color: var(--gold); }
     z-index: 500;
     padding: 12px 0;
     background: var(--navbar-bg);
+    overflow-x: hidden;
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(var(--gold-rgb),0.12);
@@ -1111,6 +1112,7 @@ select.estado-sel:focus { border-color: var(--gold); }
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-width: 0;
 }
 .navbar-brand {
     display: flex;
@@ -1127,6 +1129,7 @@ select.estado-sel:focus { border-color: var(--gold); }
     display: flex;
     align-items: center;
     gap: 6px;
+    min-width: 0;
 }
 .navbar-links a {
     padding: 7px 14px;
@@ -1196,6 +1199,21 @@ select.estado-sel:focus { border-color: var(--gold); }
     .galeria { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .container { padding: 0 16px; }
     /* Navbar se adapta a móvil */
+    .navbar-inner { gap: 10px; }
+    .navbar-links {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 6px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+    }
+    .navbar-links::-webkit-scrollbar { display: none; }
+    .navbar-links a,
+    .navbar-links .btn-tema {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
     .navbar-links a { padding: 6px 10px; font-size: 12px; }
     /* Toast se centra en móvil */
     #toastContainer { left: 16px; right: 16px; bottom: 16px; align-items: stretch; }

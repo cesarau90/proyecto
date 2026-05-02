@@ -660,7 +660,34 @@
 @media (max-width: 640px) {
     /* Mejoras móviles: topbar responsive, layout de una columna, botones flexibles */
     .stats-grid { grid-template-columns: 1fr; }
-    .sa-topbar-inner { flex-direction: row; justify-content: space-between; align-items: center; }
+    .sa-topbar-inner {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+    .sa-topbar h1 {
+        width: 100%;
+        min-width: 0;
+    }
+    .sa-topbar-actions {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .sa-topbar-actions .sa-name {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .sa-topbar-actions .btn-sa,
+    .sa-topbar-actions .btn-tema {
+        flex: 0 0 auto;
+    }
     .barb-header { flex-direction: column; }
     .barb-actions { width: 100%; }
     .barb-actions button { flex: 1; justify-content: center; }
