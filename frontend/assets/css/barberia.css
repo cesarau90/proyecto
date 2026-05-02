@@ -809,7 +809,7 @@
     color: #111827;
 }
 [data-tema="claro"] .btn-hero-primary {
-    color: #111827;
+    color: #ffffff;
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
     border-color: rgba(249,214,74,0.16);
     box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22);
@@ -992,13 +992,17 @@
 
 @media (max-width: 640px) {
     /* Mejoras móviles: navbar con scroll horizontal, scrollbar oculto */
-    .navbar-inner { gap: 10px; }
+    .navbar-inner { 
+        gap: 10px; 
+    }
     .navbar-links {
         display: flex;
         flex: 1 1 auto;
         min-width: 0;
         gap: 4px;
-        overflow-x: auto;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
         scroll-behavior: smooth;
     }
     .navbar-links::-webkit-scrollbar { display: none; }

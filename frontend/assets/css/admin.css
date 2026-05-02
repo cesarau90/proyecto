@@ -644,10 +644,19 @@
 
 @media (max-width: 640px) {
     .stats-grid { grid-template-columns: 1fr; }
-    .sa-topbar-inner { flex-direction: column; align-items: flex-start; }
-    .barb-header { flex-direction: column; }
-    .barb-actions { width: 100%; }
-    .barb-actions button { flex: 1; justify-content: center; }
+    .sa-topbar-inner { 
+        flex-direction: row; 
+        align-items: flex-start; 
+    }
+    .barb-header { 
+        flex-direction: column; 
+    }
+    .barb-actions { 
+        width: 100%; 
+    }
+    .barb-actions button { 
+        flex: 1;
+    }
     .detail-panel .form-2col-admin { grid-template-columns: 1fr !important; }
     .detail-panel div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
     .login-box { max-width: 100%; }
