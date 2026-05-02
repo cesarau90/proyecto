@@ -186,7 +186,7 @@
             <h2 class="modal-confirm-title">¡Reserva Confirmada!</h2>
             <p class="modal-confirm-copy">Te esperamos en nuestra barbería</p>
             <div id="reservaOkDetalle" class="reservation-detail"></div>
-            <button onclick="document.getElementById('modalReservaOk').classList.remove('open')" class="btn btn-primary btn-full btn-large">
+            <button onclick="cerrarModalReservaOk()" class="btn btn-primary btn-full btn-large">
                 <i class="fas fa-check-circle"></i> Entendido
             </button>
         </div>
@@ -221,6 +221,12 @@
 
 <!-- Script para el botón back-to-top y highlight de navbar -->
 <script>
+    // Cierra el modal de reserva confirmada y desbloquea el scroll
+    function cerrarModalReservaOk() {
+        document.getElementById('modalReservaOk').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
     // ── TOGGLE MODO OSCURO / CLARO ──────────────────────────────
     // Aplica/quita data-tema="claro" en el body y guarda preferencia.
     const btnTema = document.getElementById('btnTema');

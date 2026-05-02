@@ -516,6 +516,7 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
              <div><i class="fas fa-clock" style="color:var(--gold);margin-right:8px;"></i><strong>Hora:</strong> ${datos.hora}</div>
              <div><i class="fas fa-user" style="color:var(--gold);margin-right:8px;"></i><strong>Nombre:</strong> ${datos.nombre}</div>`;
         document.getElementById('modalReservaOk').classList.add('open');
+        document.body.style.overflow = 'hidden';
 
         // El email de confirmación se envía desde el panel del dueño al cambiar el estado a "Confirmada"
     } catch (e) {
