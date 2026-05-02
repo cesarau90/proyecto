@@ -120,6 +120,7 @@
     color: gray;
     font-size: 15px;
     margin-bottom: 24px;
+    border-radius: 14px;
 }
 
 .reservation-detail {
