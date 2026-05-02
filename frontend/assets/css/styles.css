@@ -1090,8 +1090,8 @@ select.estado-sel:focus { border-color: var(--gold); }
 
 
 /* ── 27. NAVBAR (página pública) ──────────────────────────────
-   Barra fija en la parte superior para barberia.html e index.html.
-   Se muestra sobre el hero con fondo semitransparente.
+Barra fija en la parte superior para barberia.html e index.html.
+Se muestra sobre el hero con fondo semitransparente.
    ─────────────────────────────────────────────────────────── */
 .navbar {
     position: fixed;
@@ -1101,8 +1101,8 @@ select.estado-sel:focus { border-color: var(--gold); }
     z-index: 500;
     padding: 12px 0;
     background: var(--navbar-bg);
-    backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(var(--gold-rgb),0.12);
     transition: background var(--t), border-color var(--t), box-shadow var(--t);
     box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 28px rgba(0,0,0,0.18);
