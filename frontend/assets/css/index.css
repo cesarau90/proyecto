@@ -636,6 +636,16 @@
         font-size: 30px; 
         letter-spacing: -1px; 
     }
+
+    .link-box {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px);
+        max-width: 480px;
+    }
+
     .form-card { 
         padding: 24px 20px; 
     }
