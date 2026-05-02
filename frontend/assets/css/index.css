@@ -589,83 +589,6 @@
     box-shadow: var(--focus-ring);
 }
 
-/* ── TOPBAR / NAVBAR PERFECTO ───────────────────────────── */
-
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border-2);
-  z-index: 1000;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.14);
-}
-
-.navbar-inner {
-  height: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  /* esta es la clave: no se rompe en dos líneas */
-  flex-wrap: nowrap;
-}
-
-.navbar-links a {
-  color: var(--text-2);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 8px 0;
-  transition: color 0.25s ease;
-}
-
-.navbar-links a:hover {
-  color: var(--gold);
-}
-
-/* Botón de tema más compacto en móvil */
-.btn-tema {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: none;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  padding: 0;
-  margin-left: 8px;
-  transition: border-color 0.25s ease, color 0.25s ease;
-}
-
-.btn-tema:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
 /* ── MOTION SYSTEM ──────────────────────────────────────────── */
 @keyframes heroEnter {
     from { opacity: 0; transform: translateY(16px); }
@@ -708,27 +631,6 @@
 @media (max-width: 900px) {
     .features { grid-template-columns: 1fr 1fr; gap: 14px; }
 }
-
-@media (max-width: 768px) {
-  .navbar-links {
-    gap: 16px;
-  }
-  .navbar-links a {
-    font-size: 13px;
-    padding: 6px 0;
-  }
-  .navbar-brand {
-    font-size: 14px;
-    gap: 8px;
-  }
-  .btn-tema {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-    margin-left: 6px;
-  }
-}
-
 @media (max-width: 640px) {
     .hero h1 { 
         font-size: 30px; 
