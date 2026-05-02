@@ -106,21 +106,18 @@
 .modal-confirm {
     max-width: 500px;
     width: 100%;
-    color: black;
 }
 
 .modal-confirm-title {
     text-align: center;
     margin-bottom: 8px;
-    color: white;
 }
 
 .modal-confirm-copy {
     text-align: center;
-    color: gray;
+    color: var(--text-3);
     font-size: 15px;
     margin-bottom: 24px;
-
 }
 
 .reservation-detail {
@@ -847,6 +844,25 @@
         radial-gradient(circle at 50% 0%, rgba(var(--gold-rgb),0.22), transparent 42%),
         linear-gradient(180deg, rgba(var(--gold-rgb),0.10), transparent 38%);
     opacity: 1;
+}
+
+[data-tema="claro"] .modal-confirm {
+    max-width: 500px;
+    width: 100%;
+    color: black;
+}
+
+.modal-confirm-title {
+    text-align: center;
+    margin-bottom: 8px;
+    color: white;
+}
+
+.modal-confirm-copy {
+    text-align: center;
+    color: white;
+    font-size: 15px;
+    margin-bottom: 24px;
 }
 
 
