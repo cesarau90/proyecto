@@ -106,7 +106,6 @@
 .modal-confirm {
     max-width: 500px;
     width: 100%;
-    color: white;
 }
 
 .modal-confirm-title {
@@ -120,7 +119,7 @@
     color: gray;
     font-size: 15px;
     margin-bottom: 24px;
-    border-radius: 14px;
+    
 }
 
 .reservation-detail {
