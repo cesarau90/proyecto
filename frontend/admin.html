@@ -27,7 +27,6 @@
             <div class="container sa-topbar-inner">
                 <div><h1><i class="fas fa-cut"></i> Barber Registro <span class="badge-sa">ADMIN</span></h1></div>
                 <div class="sa-topbar-actions">
-                    <span id="saName" class="sa-name"></span>
                     <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
                     <button onclick="saLogout()" class="btn-sa"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </div>
@@ -74,8 +73,6 @@
         // Inicializar panel
         async function showPanel() {
             document.getElementById('panelView').style.display='block';
-            const sa = auth.getUserData();
-            if (sa) document.getElementById('saName').textContent = sa.nombre || sa.email;
             await loadStats();
             await loadBarberias();
         }

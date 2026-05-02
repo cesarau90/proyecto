@@ -1198,17 +1198,20 @@ select.estado-sel:focus { border-color: var(--gold); }
     th, td { padding: 9px 8px; }
     .galeria { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     .container { padding: 0 16px; }
-    /* Navbar se adapta a móvil */
-    .navbar-inner { gap: 10px; }
+    /* Navbar se adapta a móvil sin scroll horizontal */
+    .navbar-inner {
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
     .navbar-links {
         display: flex;
-        flex: 1 1 auto;
+        flex: 1 1 100%;
         min-width: 0;
         gap: 6px;
-        overflow-x: auto;
-        scroll-behavior: smooth;
+        flex-wrap: wrap;
+        justify-content: center;
     }
-    .navbar-links::-webkit-scrollbar { display: none; }
     .navbar-links a,
     .navbar-links .btn-tema {
         flex: 0 0 auto;
