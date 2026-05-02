@@ -996,11 +996,10 @@
         gap: 10px; 
     }
     .navbar-links {
-        display: flex;
-        flex: 1 1 auto;
-        min-width: 0;
-        gap: 4px;
-        scroll-behavior: smooth;
+        overflow: hidden;
+        position: fixed;
+        top: 0;
+        width: 100%;
     }
     .navbar-links::-webkit-scrollbar { display: none; }
     .navbar-links a,
