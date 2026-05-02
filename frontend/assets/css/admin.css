@@ -644,10 +644,21 @@
 
 @media (max-width: 640px) {
     .stats-grid { grid-template-columns: 1fr; }
-    .sa-topbar-inner { 
-        flex-direction: row; 
-        align-items:last baseline; 
+    .sa-topbar-inner {
+        flex-wrap: nowrap;
+        align-items: center;
     }
+    .sa-topbar h1 {
+        font-size: 16px;
+        letter-spacing: -0.3px;
+    }
+    .sa-topbar h1 i {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    .sa-topbar .badge-sa { display: none; }
+    #saName { display: none !important; }
     .barb-header { 
         flex-direction: column; 
     }
