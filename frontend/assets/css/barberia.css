@@ -4,18 +4,13 @@
    Esta página es lo que ven los clientes cuando entran al link
    de una barbería. Incluye: hero, secciones de servicios, booking,
    reseñas, info y mapa.
-   
+
    Los estilos globales (botones, cards, forms, etc.) están en
    styles.css — aquí solo va lo específico de esta página.
    ================================================================ */
 
 
-/* Modo claro: btn-hero-ghost hover para fondo claro */
-[data-tema="claro"] .btn-hero-ghost:hover {
-    background: rgba(15,23,42,0.08);
-    color: var(--text);
-    border-color: rgba(15,23,42,0.18);
-}
+
 
 /* Ambiente general de la página pública */
 #content {
@@ -23,6 +18,138 @@
     background:
         radial-gradient(ellipse 70% 36% at 50% 0%, rgba(var(--gold-rgb),0.08), transparent 66%),
         linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 48%, var(--ink) 100%);
+}
+
+.d-none { 
+    display: none; 
+}
+
+.hero-meta-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-3);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .2s ease;
+}
+.hero-meta-link:hover {
+    color: var(--gold-light);
+}
+.hero-meta-link i {
+    color: var(--gold);
+    font-size: 12px;
+    line-height: 1;
+}
+
+.section-spaced { 
+    margin: 60px 0; 
+}
+.section-spaced-large { 
+    margin: 72px 0; 
+}
+
+.hero-heading-icon {
+    color: var(--gold);
+    margin-right: 10px;
+}
+
+.btn-full { 
+    width: 100%; 
+}
+.btn-large {
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 14px;
+    justify-content: center;
+    letter-spacing: 0.02em;
+}
+.btn-small { 
+    font-size: 13px; 
+    padding: 13px 16px; 
+    border-radius: 12px; 
+    justify-content: center; 
+}
+
+.form-control.tall { 
+    min-height: 80px; 
+}
+
+.booking-card--compact { 
+    max-width: 580px; 
+}
+
+.reviews-wrapper { 
+    max-width: 680px; margin: 0 auto; 
+}
+
+.mapa-container { 
+    margin-top: 20px; 
+}
+
+#mapa {
+    width: 100%;
+    height: 300px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-2);
+    overflow: hidden;
+}
+
+.map-actions { 
+    margin-top: 12px; text-align: center; 
+}
+
+.btn-link-primary {
+    font-size: 13px;
+}
+
+.modal-confirm {
+    max-width: 500px;
+    width: 100%;
+}
+
+.modal-confirm-title {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.modal-confirm-copy {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 15px;
+    margin-bottom: 24px;
+}
+
+.reservation-detail {
+    background: var(--ink-3);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 2.2;
+}
+
+.footer-link {
+    color: var(--gold-light);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+.modal.gallery-modal {
+    max-width: 860px;
+    width: 95%;
+}
+
+#modalReservaOk.modal-overlay {
+    pointer-events: none;
+}
+#modalReservaOk.modal-overlay .success-modal {
+    pointer-events: auto;
 }
 
 
@@ -191,24 +318,18 @@
     min-height: 44px;
 }
 .btn-hero-primary {
-    background: linear-gradient(135deg,
-        #1a2a3c 0%,
-        #5a3d1c 48%,
-        #b8712a 100%
-    );
-    color: var(--ink);          /* letras negras en modo oscuro */
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
+    color: var(--ink);
     min-height: 54px;
     font-size: 15px;
     letter-spacing: 0.02em;
-    box-shadow: 0 16px 36px rgba(var(--gold-rgb), 0.22);
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22);
     transition: transform var(--t), box-shadow var(--t), filter var(--t);
 }
 .btn-hero-primary:hover {
     transform: translateY(-3px);
-    filter: brightness(1.09);
-    box-shadow:
-        0 0 0 1px rgba(var(--gold-rgb), 0.18),
-        0 22px 46px rgba(var(--gold-rgb), 0.28);
+    filter: brightness(1.07);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26);
 }
 .btn-hero-ghost {
     background: rgba(255,255,255,.07);
@@ -687,7 +808,18 @@
 [data-tema="claro"] .navbar-brand i {
     color: #111827;
 }
-
+[data-tema="claro"] .btn-hero-primary {
+    color: #111827;
+    background: linear-gradient(135deg, rgba(255,241,183,0.98) 0%, rgba(250,225,116,0.96) 50%, rgba(255,247,208,0.95) 100%);
+    border-color: rgba(249,214,74,0.16);
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22);
+}
+[data-tema="claro"] .btn-hero-primary:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.07);
+    background: linear-gradient(135deg, rgba(255,247,208,0.98) 0%, rgba(250,225,116,0.96) 55%, rgba(255,241,183,0.95) 100%);
+    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26);
+}
 [data-tema="claro"] .sec-icon,
 [data-tema="claro"] .info-strip-icon,
 [data-tema="claro"] .hero-meta i,
@@ -860,6 +992,7 @@
 }
 
 @media (max-width: 640px) {
+    /* Mejoras móviles: navbar con scroll horizontal, scrollbar oculto */
     .navbar-inner { gap: 10px; }
     .navbar-links {
         display: flex;
@@ -867,7 +1000,7 @@
         min-width: 0;
         gap: 4px;
         overflow-x: auto;
-        scrollbar-width: none;
+        scroll-behavior: smooth;
     }
     .navbar-links::-webkit-scrollbar { display: none; }
     .navbar-links a,
