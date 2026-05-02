@@ -704,6 +704,14 @@ app.get('/api/admin/barberias/:id/servicios', authMiddleware, adminMiddleware, a
   catch { res.status(500).json({ error: 'Error' }); }
 });
 
+/* Soft-delete igual que el dueño — preserva historial de reservas */
+app.delete('/api/admin/servicios/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const r = await pool.query('UPDATE servicios SET activo=false WHERE id=$1 RETURNING id', [req.params.id]);
+    r.rows.length ? res.json({ ok: true }) : res.status(404).json({ error: 'Servicio no encontrado' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
 /* Admin elimina una barbería completa con todos sus datos */
 app.delete('/api/admin/barberias/:id', authMiddleware, adminMiddleware, async (req, res) => {
   const client = await pool.connect();

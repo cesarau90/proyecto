@@ -586,6 +586,16 @@
             } catch { await confirmar('Error', 'No se pudo eliminar la barbería.', 'Cerrar', 'warning'); }
         };
 
+        window.eliminarServicioAdmin = async function(servicioId, barberiaId, nombre) {
+            if (!await confirmar('Eliminar servicio', `¿Eliminar <strong>${nombre}</strong>? El historial de reservas que lo mencionen se conserva.`, 'Eliminar', 'danger')) return;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/servicios/${servicioId}`, { method: 'DELETE', headers: auth.headers() });
+                if (!r.ok) throw new Error();
+                document.getElementById(`servicios-${barberiaId}`).innerHTML = '';
+                await cargarServiciosAdmin(barberiaId);
+            } catch { await confirmar('Error', 'No se pudo eliminar el servicio.', 'Cerrar', 'warning'); }
+        };
+
         window.cargarServiciosAdmin = async function(id) {
             const cont = document.getElementById(`servicios-${id}`);
             document.getElementById(`reservas-${id}`).innerHTML = '';
@@ -605,11 +615,12 @@
                         ${servicios.map(s => `
                             <div class="admin-service-card">
                                 <div class="admin-service-icon"><i class="fas fa-${escapeHTML(s.icono || 'cut')}"></i></div>
-                                <div>
+                                <div style="flex:1;">
                                     <strong>${escapeHTML(s.nombre)}</strong>
                                     <p>${escapeHTML(s.descripcion || 'Sin descripción')}</p>
                                     <span>$${Number(s.precio || 0).toFixed(2)} · ${s.duracion || 30} min</span>
                                 </div>
+                                <button onclick="eliminarServicioAdmin(${s.id},${id},'${escapeHTML(s.nombre).replace(/'/g,"\\'")}')" class="admin-danger-mini" title="Eliminar servicio"><i class="fas fa-trash"></i> Eliminar</button>
                             </div>
                         `).join('')}
                     </div>`;
