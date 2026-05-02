@@ -639,9 +639,12 @@
     .features { grid-template-columns: 1fr 1fr; gap: 14px; }
 }
 @media (max-width: 640px) {
-    .hero h1 { 
-        font-size: 30px; 
-        letter-spacing: -1px; 
+    /* El navbar en móvil es de 2 filas (~100px), el inline style de 120px no alcanza */
+    .hero { padding-top: 130px !important; }
+
+    .hero h1 {
+        font-size: 30px;
+        letter-spacing: -1px;
     }
 
     .link-box {
