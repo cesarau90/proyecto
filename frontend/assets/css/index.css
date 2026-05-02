@@ -15,7 +15,7 @@
 .hero {
     position: relative;
     overflow: hidden;
-    padding: 100px 20px 80px;
+    padding: 120px 20px 80px;
     text-align: center;
     background: var(--ink);
     isolation: isolate;
@@ -633,10 +633,78 @@
     }
 }
 
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 12, 0.96);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.navbar-inner {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 16px;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    font-size: 15px;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 22px;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.navbar-links a {
+    white-space: nowrap;
+    flex: 0 0 auto;
+    font-size: 14px;
+}
+
+.btn-tema {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
 
 /* ── RESPONSIVE ───────────────────────────────────────────── */
 @media (max-width: 900px) {
-    .features { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .features { 
+        grid-template-columns: 1fr 1fr; gap: 14px; 
+    }
+    .navbar-inner {
+        padding: 0 14px;
+    }
+
+    .navbar-links {
+        gap: 16px;
+    }
+
+    .navbar-links a {
+        font-size: 13px;
+    }
 }
 @media (max-width: 640px) {
     .hero h1 { 
@@ -644,16 +712,33 @@
         letter-spacing: -1px; 
     }
 
-    .link-box {
-        position: fixed;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 10px);
-        max-width: 300px;
+    
+
+    .navbar-inner {
+        min-height: 58px;
+        padding: 0 12px;
     }
 
-    .barb-card-nombre {
-        font-size: 10px;
+    .navbar-brand {
+        font-size: 14px;
+        gap: 6px;
+    }
+
+    .navbar-links {
+        gap: 8px;
+    }
+
+    .navbar-links a {
+        display: none;
+    }
+
+    .btn-tema {
+        width: 34px;
+        height: 34px;
+    }
+
+    .hero {
+        padding-top: 92px;
     }
 
     .form-card { 
