@@ -191,18 +191,24 @@
     min-height: 44px;
 }
 .btn-hero-primary {
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dim) 100%);
-    color: var(--ink);
+    background: linear-gradient(135deg,
+        #1a2a3c 0%,
+        #5a3d1c 48%,
+        #b8712a 100%
+    );
+    color: var(--ink);          /* letras negras en modo oscuro */
     min-height: 54px;
     font-size: 15px;
     letter-spacing: 0.02em;
-    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22);
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb), 0.22);
     transition: transform var(--t), box-shadow var(--t), filter var(--t);
 }
 .btn-hero-primary:hover {
     transform: translateY(-3px);
-    filter: brightness(1.07);
-    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26);
+    filter: brightness(1.09);
+    box-shadow:
+        0 0 0 1px rgba(var(--gold-rgb), 0.18),
+        0 22px 46px rgba(var(--gold-rgb), 0.28);
 }
 .btn-hero-ghost {
     background: rgba(255,255,255,.07);
@@ -682,16 +688,21 @@
     color: #111827;
 }
 [data-tema="claro"] .btn-hero-primary {
-    color: #111827;
-    background: linear-gradient(135deg, rgba(255,241,183,0.98) 0%, rgba(250,225,116,0.96) 50%, rgba(255,247,208,0.95) 100%);
-    border-color: rgba(249,214,74,0.16);
-    box-shadow: 0 16px 36px rgba(var(--gold-rgb),0.22);
+    color: #fff;                /* letras blancas en modo claro */
+    background: linear-gradient(135deg,
+        #1a2a3c 0%,
+        #5a3d1c 48%,
+        #b8712a 100%
+    );
+    border-color: rgba(180, 110, 40, 0.20);
+    box-shadow: 0 16px 36px rgba(var(--gold-rgb), 0.22);
 }
 [data-tema="claro"] .btn-hero-primary:hover {
     transform: translateY(-3px);
-    filter: brightness(1.07);
-    background: linear-gradient(135deg, rgba(255,247,208,0.98) 0%, rgba(250,225,116,0.96) 55%, rgba(255,241,183,0.95) 100%);
-    box-shadow: 0 0 0 1px rgba(var(--gold-rgb),0.16), 0 22px 46px rgba(var(--gold-rgb),0.26);
+    filter: brightness(1.09);
+    box-shadow:
+        0 0 0 1px rgba(var(--gold-rgb), 0.18),
+        0 22px 46px rgba(var(--gold-rgb), 0.26);
 }
 [data-tema="claro"] .sec-icon,
 [data-tema="claro"] .info-strip-icon,
