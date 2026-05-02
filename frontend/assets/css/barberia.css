@@ -849,17 +849,6 @@
     opacity: 1;
 }
 
-[data-tema="claro"] .modal-confirm-title {
-    color: white;
-}
-
-[data-tema="claro"] .modal-confirm-copy {
-    background: var(--ink);
-}
-
-[data-tema="claro"] .fas.fa-check {
-    color: white;
-}
 
 
 /* ── ANIMACIONES SUAVES ────────────────────────────────────── */
