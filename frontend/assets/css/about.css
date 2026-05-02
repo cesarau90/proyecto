@@ -11,8 +11,8 @@
     z-index: 500;
     padding: 12px 0;
     background: var(--navbar-bg);
-    -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(var(--gold-rgb),0.12);
     box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.16);
     transition: background var(--t), box-shadow var(--t);
@@ -346,25 +346,6 @@
     color: var(--gold-light);
     text-shadow: 0 0 18px rgba(var(--gold-rgb),0.26);
 }
-
-/* ── ANIMACIÓN DELAYS ───────────────────────────────────────────
-   Clases reutilizables para animaciones escalonadas en elementos
-   que aparecen al hacer scroll (intersection observer).
-   ─────────────────────────────────────────────────────────────── */
-.delay-06s { transition-delay: .06s; }
-.delay-08s { transition-delay: .08s; }
-.delay-10s { transition-delay: .10s; }
-.delay-12s { transition-delay: .12s; }
-.delay-16s { transition-delay: .16s; }
-.delay-17s { transition-delay: .17s; }
-.delay-18s { transition-delay: .18s; }
-.delay-24s { transition-delay: .24s; }
-.delay-30s { transition-delay: .30s; }
-.delay-31s { transition-delay: .31s; }
-
-/* ── UTILIDADES ───────────────────────────────────────────────── */
-.flex-center { display: flex; align-items: center; gap: 10px; }
-.text-brand { color: var(--text-2); }
 
 
 /* ── RESPONSIVE ───────────────────────────────────────────────── */

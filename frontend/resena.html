@@ -6,7 +6,6 @@
     <script>try{if(localStorage.getItem('barber-tema')==='claro')document.documentElement.setAttribute('data-tema','claro')}catch(e){}</script>
     <title>Deja tu Reseña — Barber Registro</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <link rel="stylesheet" href="assets/css/resena.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @keyframes fadeUp {
@@ -144,20 +143,20 @@
     <div class="resena-card">
 
         <!-- Cargando -->
-        <div id="estadoCargando" class="estado-center estado-loading">
-            <span class="loading"></span>
-            <p>Cargando...</p>
+        <div id="estadoCargando" style="text-align:center;padding:40px 0;">
+            <span class="loading" style="width:36px;height:36px;border-width:3px;"></span>
+            <p style="color:var(--text-3);margin-top:16px;">Cargando...</p>
         </div>
 
         <!-- Error -->
-        <div id="estadoError" class="estado-center estado-error">
+        <div id="estadoError" style="display:none;text-align:center;padding:40px 0;">
             <div class="error-icon"><i class="fas fa-times"></i></div>
-            <h2>Link inválido</h2>
-            <p>Este link de reseña no es válido o ya expiró.</p>
+            <h2 style="animation:fadeUp .4s .1s ease both;">Link inválido</h2>
+            <p style="color:var(--text-3);animation:fadeUp .4s .2s ease both;">Este link de reseña no es válido o ya expiró.</p>
         </div>
 
         <!-- Formulario -->
-        <div id="estadoForm" class="hidden">
+        <div id="estadoForm" style="display:none;">
             <div class="icono-central" id="iconoBarberia">
                 <i class="fas fa-star"></i>
             </div>
@@ -183,8 +182,9 @@
 
                 <div class="form-group campo-3">
                     <label for="comentario">Comentario *</label>
-                    <textarea id="comentario" class="form-control resena-textarea" required
-                        placeholder="Cuéntanos cómo fue tu visita..."></textarea>
+                    <textarea id="comentario" class="form-control" required
+                        placeholder="Cuéntanos cómo fue tu visita..."
+                        style="min-height:100px;resize:vertical;"></textarea>
                 </div>
 
                 <div class="campo-4">
@@ -196,15 +196,15 @@
         </div>
 
         <!-- Éxito -->
-        <div id="estadoExito" class="estado-center estado-exito">
+        <div id="estadoExito" style="display:none;text-align:center;padding:32px 0;">
             <div class="check-icon" id="checkIcon">
                 <i class="fas fa-check"></i>
             </div>
-            <h2 class="exito-texto">¡Gracias por tu reseña!</h2>
-            <p class="exito-texto">
+            <h2 class="exito-texto" style="margin-bottom:8px;">¡Gracias por tu reseña!</h2>
+            <p class="exito-texto" style="color:var(--text-3);margin-bottom:28px;">
                 Tu opinión ayuda a otros clientes a encontrarnos.
             </p>
-            <a id="linkBarberia" href="#" class="btn-barberia exito-btn">
+            <a id="linkBarberia" href="#" class="btn-barberia exito-btn" style="width:auto;padding:12px 28px;text-decoration:none;">
                 <i class="fas fa-cut"></i> Ver la Barbería
             </a>
         </div>
@@ -267,7 +267,7 @@
         if (!cal) { toast('Selecciona una calificación', 'error'); return; }
         const btn = document.getElementById('btnEnviar');
         btn.disabled = true;
-        btn.innerHTML = '<span class="loading loading-inline"></span> Enviando...';
+        btn.innerHTML = '<span class="loading" style="width:18px;height:18px;border-width:2px;border-color:currentColor transparent transparent transparent;"></span> Enviando...';
         try {
             const r = await fetch(`${config.apiURL}/barberias/${codigo}/resenas`, {
                 method: 'POST',

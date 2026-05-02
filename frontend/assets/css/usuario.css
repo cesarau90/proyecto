@@ -19,7 +19,6 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     box-shadow: 0 10px 30px rgba(0,0,0,0.18);
 }
@@ -62,33 +61,6 @@
     background: rgba(255,255,255,0.03);
 }
 
-.form-group--flush { margin: 0; }
-.grid-full { grid-column: 1 / -1; }
-.btn-compact { padding: 7px 12px; font-size: 12px; }
-.btn-wide { justify-content: center; padding: 12px 24px; }
-.btn-small { padding: 12px 14px; }
-.btn-no-wrap { white-space: nowrap; }
-.section-header-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
-.panel-title--compact { margin-bottom: 0; }
-.photo-upload-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-.flex-item-180 { flex: 1; min-width: 180px; }
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(190px,1fr)); gap: 14px; margin-top: 4px; }
-.mt-28 { margin-top: 28px; }
-.mt-24 { margin-top: 24px; }
-.mt-0 { margin-top: 0; }
-.card-wide { max-width: 720px; }
-.section-spacing { margin-top: 24px; }
-.section-spacing-large { margin-top: 28px; }
-.section-label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-2); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
-.section-help-text { font-size: 12px; color: var(--text-3); margin-bottom: 14px; margin-top: 0; }
-.theme-custom-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.label-small { font-size: 12px; color: var(--text-3); letter-spacing: 0; text-transform: none; font-weight: 500; }
-.color-input-compact { width: 38px; height: 32px; border: 1px solid var(--border-2); border-radius: 6px; background: transparent; cursor: pointer; padding: 2px; }
-.form-control--small { max-width: 110px; font-size: 13px; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.icon-gold { color: var(--gold); margin-right: 8px; }
-.modal-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 10px; }
-
 
 /* ── TABS PILL ────────────────────────────────────────────────
    Navegación entre secciones del panel.
@@ -99,7 +71,6 @@
     background: var(--ink-3);
     border-bottom: 1px solid rgba(var(--gold-rgb),0.10);
     padding: 10px 0;
-    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 .tabs {
@@ -396,14 +367,6 @@
         0 0 22px rgba(var(--gold-rgb),0.20);
     transform: scale(1.12);
 }
-.tema-color-dorado { background: #c9a847; }
-.tema-color-rojo { background: #e05252; }
-.tema-color-azul { background: #60a5fa; }
-.tema-color-verde { background: #3ecf8e; }
-.tema-color-violeta { background: #a78bfa; }
-.tema-color-naranja { background: #fb923c; }
-.tema-color-rosa { background: #f472b6; }
-.tema-color-plata { background: #94a3b8; }
 
 
 /* ── GRIDS REUTILIZABLES DE FORMULARIOS ─────────────────────── */
@@ -636,6 +599,7 @@ select.estado-sel:hover {
     }
     .tabs {
         padding: 0 16px 2px;
+        scrollbar-width: thin;
     }
     .tab {
         min-height: 38px;

@@ -26,14 +26,15 @@
         <div class="sa-topbar">
             <div class="container sa-topbar-inner">
                 <div><h1><i class="fas fa-cut"></i> Barber Registro <span class="badge-sa">ADMIN</span></h1></div>
-                <div class="sa-topbar-actions">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span id="saName" style="font-size:13px;opacity:0.7;"></span>
                     <button id="btnTema" class="btn-tema" title="Cambiar tema" aria-label="Cambiar tema"><i class="fas fa-sun" id="iconTema"></i></button>
                     <button onclick="saLogout()" class="btn-sa"><i class="fas fa-sign-out-alt"></i> Salir</button>
                 </div>
             </div>
         </div>
 
-        <div class="container admin-main">
+        <div class="container" style="margin-top:32px;padding-bottom:60px;">
 
             <!-- Stats -->
             <p class="admin-section-title"><i class="fas fa-chart-bar"></i> Resumen de la plataforma</p>
@@ -44,7 +45,7 @@
             </div>
 
             <!-- Listado de barberías -->
-            <p class="admin-section-title admin-section-title--spaced"><i class="fas fa-store"></i> Barberías registradas</p>
+            <p class="admin-section-title" style="margin-top:36px;"><i class="fas fa-store"></i> Barberías registradas</p>
             <div id="listaBarberias"></div>
         </div>
     </div>

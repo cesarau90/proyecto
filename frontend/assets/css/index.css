@@ -39,7 +39,6 @@
         linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
     background-size: 48px 48px;
-    -webkit-mask-image: radial-gradient(ellipse 72% 58% at 50% 20%, #000 0%, transparent 72%);
     mask-image: radial-gradient(ellipse 72% 58% at 50% 20%, #000 0%, transparent 72%);
     opacity: .55;
     z-index: -1;
@@ -628,81 +627,3 @@
 @media (max-width: 400px) {
     .features { grid-template-columns: 1fr; }
 }
-
-/* ── ANIMACIÓN DELAYS ─────────────────────────────────────────── */
-.delay-00s { transition-delay: .00s; }
-.delay-07s { transition-delay: .07s; }
-.delay-14s { transition-delay: .14s; }
-.delay-21s { transition-delay: .21s; }
-.delay-28s { transition-delay: .28s; }
-.delay-31s { transition-delay: .31s; }
-.delay-06s { transition-delay: .06s; }
-.delay-08s { transition-delay: .08s; }
-.delay-10s { transition-delay: .10s; }
-.delay-12s { transition-delay: .12s; }
-.delay-16s { transition-delay: .16s; }
-.delay-17s { transition-delay: .17s; }
-.delay-18s { transition-delay: .18s; }
-.delay-24s { transition-delay: .24s; }
-.delay-30s { transition-delay: .30s; }
-
-/* ── UTILIDADES ───────────────────────────────────────────────── */
-.flex-center { display: flex; align-items: center; gap: 10px; }
-.text-brand { color: var(--text-2); }
-.hero-navbar-space { padding-top: 120px; }
-
-/* ── FORMULARIO ────────────────────────────────────────────────── */
-.form-group--relative { position: relative; }
-.sugerencias-dir {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    background: var(--ink-3);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-lg);
-    max-height: 200px;
-    overflow-y: auto;
-}
-.btn-registro {
-    width: 100%;
-    margin-top: 36px;
-    padding: 17px;
-    font-size: 15px;
-    border-radius: 14px;
-    letter-spacing: 0.025em;
-}
-.form-footer {
-    text-align: center;
-    margin-top: 20px;
-    color: var(--text-3);
-    font-size: 13px;
-}
-.form-footer a {
-    color: var(--gold);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-/* ── MODAL ─────────────────────────────────────────────────────── */
-.modal-title { text-align: center; margin-bottom: 8px; }
-.modal-text {
-    text-align: center;
-    color: var(--text-3);
-    font-size: 15px;
-    margin-bottom: 28px;
-}
-.btn-modal {
-    width: 100%;
-    padding: 16px;
-    font-size: 15px;
-    border-radius: 14px;
-    margin-top: 10px;
-    letter-spacing: 0.02em;
-}
-
-/* ── ICONOS ────────────────────────────────────────────────────── */
-.icon-gold { color: var(--gold); margin-right: 10px; }
