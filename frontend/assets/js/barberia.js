@@ -464,7 +464,8 @@ window.abrirGaleria = (servicioId) => {
 
     grid.innerHTML = fotos.map(f => `
         <div class="galeria-modal-item">
-            <img src="${f.url}" alt="${f.desc}" loading="lazy" onclick="abrirLightbox(this.src,this.alt)" onerror="this.parentElement.style.display='none'">
+            <img src="${f.url}" alt="${f.desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
+            <button class="galeria-zoom-btn" onclick="abrirLightbox('${f.url}','${(f.desc||'').replace(/'/g,"\\'")}');" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>
             ${f.desc ? `<div class="galeria-modal-caption">${f.desc}</div>` : ''}
         </div>`).join('');
 

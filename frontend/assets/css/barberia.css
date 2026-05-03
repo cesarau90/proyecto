@@ -1117,5 +1117,27 @@
 }
 .lightbox-close:hover { background: rgba(255,255,255,0.24); transform: scale(1.1); }
 
-/* Cursor zoom-in en fotos de la galería modal */
-.galeria-modal-item img  { cursor: zoom-in; }
+/* Botón zoom en galería modal — mismo estilo que srv-zoom-btn */
+.galeria-zoom-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(0,0,0,0.52);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.18s, transform 0.18s, background 0.18s;
+    backdrop-filter: blur(6px);
+    z-index: 2;
+}
+.galeria-modal-item:hover .galeria-zoom-btn { opacity: 1; transform: scale(1.05); }
+.galeria-zoom-btn:hover { background: rgba(0,0,0,0.72); }
+@media (hover: none) { .galeria-zoom-btn { opacity: 1; } }
