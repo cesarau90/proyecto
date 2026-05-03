@@ -506,12 +506,14 @@ function _lbMostrar(i) {
     const f = _lbFotos[_lbIndex];
     const img = document.getElementById('lightboxImg');
     img.style.opacity = '0';
+    img.src = '';  // limpia foto anterior para que no parpadee
     setTimeout(() => {
-        img.src = f.src;
         img.alt = f.alt;
-        img.style.opacity = '1';
+        img.onload = img.onerror = () => { img.style.opacity = '1'; img.onload = img.onerror = null; };
+        img.src = f.src;
+        // Si ya está cacheada el onload no siempre se dispara
+        if (img.complete && img.naturalWidth > 0) { img.style.opacity = '1'; img.onload = img.onerror = null; }
     }, 120);
-    // Mostrar u ocultar flechas según si hay más de una foto
     const nav = document.getElementById('lightboxNav');
     if (nav) nav.style.display = _lbFotos.length > 1 ? 'flex' : 'none';
 }
