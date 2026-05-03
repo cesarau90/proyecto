@@ -227,6 +227,7 @@ async function cargarServicios() {
                     </div>
                 </div>
                 <div class="srv-card-footer">
+                    <button onclick="abrirEditarServicio(${x.id},'${x.nombre.replace(/'/g,"\\'")}',${x.precio},'${(x.descripcion||'').replace(/'/g,"\\'").replace(/\n/g,' ')}',${x.duracion||30})" class="btn btn-outline" style="flex:1;justify-content:center;padding:8px;font-size:12px;"><i class="fas fa-pen"></i> Editar</button>
                     <button onclick="eliminarServicio(${x.id})" class="btn btn-danger" style="flex:1;justify-content:center;padding:8px;font-size:12px;"><i class="fas fa-trash"></i> Eliminar</button>
                 </div>
             </div>`;
@@ -287,6 +288,46 @@ window.eliminarServicio = async id => {
         cargarServicios();
     } catch { toast('Error al eliminar', 'error'); }
 };
+
+/* ── EDITAR SERVICIO ─────────────────────────────────────────── */
+let _editServicioId = null;
+
+window.abrirEditarServicio = (id, nombre, precio, descripcion, duracion) => {
+    _editServicioId = id;
+    document.getElementById('editNombre').value = nombre;
+    document.getElementById('editPrecio').value = precio;
+    document.getElementById('editDescripcion').value = descripcion;
+    document.getElementById('editDuracion').value = duracion;
+    openModal(document.getElementById('modalEditarServicio'));
+};
+
+document.getElementById('editarServicioForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const d = {
+        nombre: document.getElementById('editNombre').value.trim(),
+        precio: parseInt(document.getElementById('editPrecio').value),
+        descripcion: document.getElementById('editDescripcion').value.trim(),
+        duracion: parseInt(document.getElementById('editDuracion').value) || 30
+    };
+    if (!d.nombre || !d.precio) { toast('Nombre y precio son requeridos', 'error'); return; }
+    const btn = e.target.querySelector('[type=submit]');
+    btn.disabled = true;
+    try {
+        const r = await fetch(`${config.apiURL}/mi-barberia/servicios/${_editServicioId}`, {
+            method: 'PATCH', headers: auth.headers(), body: JSON.stringify(d)
+        });
+        const json = await r.json();
+        if (!r.ok) throw new Error(json.error || 'Error');
+        closeModal(document.getElementById('modalEditarServicio'));
+        toast('Servicio actualizado', 'success');
+        cargarServicios();
+    } catch (err) { toast(err.message, 'error'); }
+    finally { btn.disabled = false; }
+});
+
+document.getElementById('btnCerrarEditarSrv').addEventListener('click', () => closeModal(document.getElementById('modalEditarServicio')));
+document.getElementById('btnCancelarEditarSrv').addEventListener('click', () => closeModal(document.getElementById('modalEditarServicio')));
+document.getElementById('modalEditarServicio').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(e.currentTarget); });
 
 
 /* ── MODAL DE ASIGNACIÓN DE FOTO ──────────────────────────────

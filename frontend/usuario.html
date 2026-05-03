@@ -181,6 +181,26 @@
     </div>
 </div>
 
+<!-- MODAL EDITAR SERVICIO -->
+<div id="modalEditarServicio" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalEditarSrvTitulo">
+    <div class="modal" style="max-width:440px;">
+        <div class="modal-header">
+            <h3 id="modalEditarSrvTitulo"><i class="fas fa-pen" style="color:var(--gold);margin-right:8px;"></i>Editar Servicio</h3>
+            <button class="modal-close" id="btnCerrarEditarSrv" aria-label="Cerrar">&times;</button>
+        </div>
+        <form id="editarServicioForm">
+            <div class="form-group"><label for="editNombre">Nombre *</label><input type="text" id="editNombre" class="form-control" required maxlength="100"></div>
+            <div class="form-group"><label for="editPrecio">Precio *</label><input type="number" id="editPrecio" class="form-control" required min="1" max="50000"></div>
+            <div class="form-group"><label for="editDescripcion">Descripción</label><textarea id="editDescripcion" class="form-control" maxlength="1000" style="min-height:80px;resize:vertical;"></textarea></div>
+            <div class="form-group"><label for="editDuracion">Duración (min)</label><input type="number" id="editDuracion" class="form-control" min="5" max="600"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+                <button type="button" id="btnCancelarEditarSrv" class="btn btn-outline">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script type="module" src="assets/js/usuario.js"></script>
 </body>
 </html>

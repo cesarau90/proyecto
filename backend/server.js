@@ -466,11 +466,34 @@ app.post('/api/mi-barberia/servicios', authMiddleware, async (req, res) => {
   const duracionN = enteroPositivo(duracion || 30, 5, 600);
   if (!nombre || !precioN || !duracionN) return res.status(400).json({ error: 'Nombre, precio y duracion validos son requeridos' });
   try {
-    const r = await pool.query('INSERT INTO servicios (barberia_id,nombre,descripcion,precio,duracion,icono) VALUES($1,$2,$3,$4,$5,$6) RETURNING *',
+    const r = await pool.query(
+      `INSERT INTO servicios (barberia_id,nombre,descripcion,precio,duracion,icono)
+       VALUES($1,$2,$3,$4,$5,$6)
+       ON CONFLICT (barberia_id,nombre) DO UPDATE
+         SET activo=true, descripcion=EXCLUDED.descripcion, precio=EXCLUDED.precio,
+             duracion=EXCLUDED.duracion, icono=EXCLUDED.icono
+       RETURNING *`,
       [req.user.id, normalizarTexto(nombre, 100), normalizarTexto(descripcion, 1000), precioN, duracionN, normalizarTexto(icono || 'corte', 10)]);
     res.status(201).json(r.rows[0]);
   } catch (e) {
-    if (e.code === '23505') return res.status(400).json({ error: 'Ya existe ese servicio' });
+    res.status(500).json({ error: 'Error' });
+  }
+});
+
+app.patch('/api/mi-barberia/servicios/:id', authMiddleware, async (req, res) => {
+  const { nombre, descripcion, precio, duracion } = req.body;
+  const precioN = enteroPositivo(precio, 1, 50000);
+  const duracionN = enteroPositivo(duracion || 30, 5, 600);
+  if (!nombre || !precioN || !duracionN) return res.status(400).json({ error: 'Nombre, precio y duracion validos son requeridos' });
+  try {
+    const s = await pool.query('SELECT barberia_id FROM servicios WHERE id=$1 AND activo=true', [req.params.id]);
+    if (!s.rows.length || s.rows[0].barberia_id !== req.user.id) return res.status(403).json({ error: 'Sin permiso' });
+    const r = await pool.query(
+      'UPDATE servicios SET nombre=$1,descripcion=$2,precio=$3,duracion=$4 WHERE id=$5 RETURNING *',
+      [normalizarTexto(nombre, 100), normalizarTexto(descripcion, 1000), precioN, duracionN, req.params.id]);
+    res.json(r.rows[0]);
+  } catch (e) {
+    if (e.code === '23505') return res.status(400).json({ error: 'Ya existe un servicio con ese nombre' });
     res.status(500).json({ error: 'Error' });
   }
 });
