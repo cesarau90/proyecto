@@ -590,15 +590,16 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
         // Email automático al cliente: solicitud recibida (estado pendiente)
         if (config.emailJS.templatePendiente && typeof emailjs !== 'undefined') {
             emailjs.send(config.emailJS.serviceId, config.emailJS.templatePendiente, {
-                to_email:      datos.email,
-                to_name:       datos.nombre,
-                servicio:      datos.servicio,
-                fecha:         fFmt,
-                hora:          datos.hora,
-                telefono:      datos.telefono,
-                comentarios:   datos.comentarios || 'Ninguno',
-                barberia_nombre: _barberaNombre
-            }).catch(() => {});
+                to_email:        datos.email,
+                to_name:         datos.nombre,
+                servicio:        datos.servicio,
+                fecha:           fFmt,
+                hora:            datos.hora,
+                telefono:        datos.telefono,
+                comentarios:     datos.comentarios || 'Ninguno',
+                barberia_nombre: _barberaNombre,
+                reply_to:        datos.email
+            }).catch(err => console.warn('EmailJS pendiente:', err));
         }
     } catch (e) {
         toast(e.message, 'error');

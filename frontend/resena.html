@@ -71,8 +71,8 @@
         .star-wrap {
             display: flex;
             justify-content: center;
-            gap: 6px;
-            font-size: 36px;
+            gap: 8px;
+            font-size: 52px;
             margin: 8px 0 16px;
             flex-direction: row-reverse;
         }
@@ -138,6 +138,10 @@
 <body>
 
 <div id="toastContainer" aria-live="polite"></div>
+
+<button id="btnTema" class="btn-tema" style="position:fixed;top:16px;right:16px;z-index:200;" title="Cambiar tema" aria-label="Cambiar tema">
+    <i class="fas fa-sun" id="iconTema"></i>
+</button>
 
 <div class="resena-wrap">
     <div class="resena-card">
@@ -260,6 +264,21 @@
             })
             .catch(() => show('estadoError'));
     }
+
+    // Toggle claro/oscuro
+    const _root = document.documentElement;
+    const btnTema = document.getElementById('btnTema');
+    const iconTema = document.getElementById('iconTema');
+    function aplicarTema(modo) {
+        if (modo === 'claro') { _root.setAttribute('data-tema','claro'); iconTema.className='fas fa-moon'; btnTema.setAttribute('aria-label','Cambiar a modo oscuro'); }
+        else                  { _root.removeAttribute('data-tema');       iconTema.className='fas fa-sun';  btnTema.setAttribute('aria-label','Cambiar a modo claro'); }
+    }
+    aplicarTema(localStorage.getItem('barber-tema') || 'oscuro');
+    btnTema.addEventListener('click', () => {
+        const nuevo = _root.getAttribute('data-tema') === 'claro' ? 'oscuro' : 'claro';
+        aplicarTema(nuevo);
+        localStorage.setItem('barber-tema', nuevo);
+    });
 
     document.getElementById('resenaForm').addEventListener('submit', async e => {
         e.preventDefault();
