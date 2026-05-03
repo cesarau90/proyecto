@@ -147,6 +147,7 @@
                                 <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarResenasAdmin(${b.id})"><i class="fas fa-star"></i> Reseñas</button>
                                 <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="cargarFotosAdmin(${b.id})"><i class="fas fa-images"></i> Fotos</button>
                                 <a href="barberia.html?codigo=${b.codigo_unico}" target="_blank" class="btn btn-outline" style="padding:8px 18px;font-size:13px;width:auto;text-decoration:none;"><i class="fas fa-external-link-alt"></i> Ver página pública</a>
+                                <button class="btn btn-ghost" style="padding:8px 18px;font-size:13px;width:auto;" onclick="abrirCambiarPassword(${b.id},'${b.nombre.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-key"></i> Cambiar Contraseña</button>
                                 <button class="btn btn-danger" style="padding:8px 18px;font-size:13px;width:auto;margin-left:auto;" onclick="eliminarBarberiaAdmin(${b.id},'${b.nombre.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fas fa-trash-alt"></i> Eliminar Barbería</button>
                             </div>
                             <div id="ed-msg-${b.id}" style="margin-top:8px;"></div>
@@ -629,6 +630,73 @@
                 cont.innerHTML = '<p style="color:var(--red);padding:10px;font-size:13px;">Error al cargar servicios</p>';
             }
         };
+
+        /* ── CAMBIAR CONTRASEÑA DE BARBERÍA ─────────────────── */
+
+        let _pwBarberiaId = null;
+
+        window.abrirCambiarPassword = function(id, nombre) {
+            _pwBarberiaId = id;
+            document.getElementById('pwModalTitulo').textContent = `Cambiar contraseña — ${nombre}`;
+            document.getElementById('pwNueva').value = '';
+            document.getElementById('pwConfirm').value = '';
+            document.getElementById('pwMsg').textContent = '';
+            document.getElementById('modalCambiarPw').classList.add('open');
+        };
+
+        document.getElementById('btnCerrarPwModal').addEventListener('click', () => {
+            document.getElementById('modalCambiarPw').classList.remove('open');
+        });
+        document.getElementById('modalCambiarPw').addEventListener('click', e => {
+            if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+        });
+
+        document.getElementById('formCambiarPw').addEventListener('submit', async e => {
+            e.preventDefault();
+            const nueva = document.getElementById('pwNueva').value;
+            const confirm = document.getElementById('pwConfirm').value;
+            const msg = document.getElementById('pwMsg');
+            if (nueva.length < 6) { msg.textContent = 'Mínimo 6 caracteres'; msg.style.color = 'var(--red)'; return; }
+            if (nueva !== confirm) { msg.textContent = 'Las contraseñas no coinciden'; msg.style.color = 'var(--red)'; return; }
+            const btn = e.target.querySelector('[type=submit]');
+            btn.disabled = true;
+            try {
+                const r = await fetch(`${config.apiURL}/admin/barberias/${_pwBarberiaId}/password`, {
+                    method: 'PATCH', headers: auth.headers(), body: JSON.stringify({ password: nueva })
+                });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Error');
+                msg.textContent = '¡Contraseña actualizada!';
+                msg.style.color = 'var(--green, #48bb78)';
+                setTimeout(() => document.getElementById('modalCambiarPw').classList.remove('open'), 1200);
+            } catch (err) { msg.textContent = err.message; msg.style.color = 'var(--red)'; }
+            finally { btn.disabled = false; }
+        });
     </script>
+
+<!-- MODAL CAMBIAR CONTRASEÑA -->
+<div id="modalCambiarPw" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header">
+            <h3 id="pwModalTitulo" style="font-size:15px;"><i class="fas fa-key" style="color:var(--gold);margin-right:8px;"></i>Cambiar contraseña</h3>
+            <button id="btnCerrarPwModal" class="modal-close" aria-label="Cerrar">&times;</button>
+        </div>
+        <form id="formCambiarPw" style="padding:4px 0;">
+            <div class="form-group">
+                <label for="pwNueva" style="font-size:12px;">Nueva contraseña *</label>
+                <input type="password" id="pwNueva" class="form-control" required minlength="6" placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-group">
+                <label for="pwConfirm" style="font-size:12px;">Confirmar contraseña *</label>
+                <input type="password" id="pwConfirm" class="form-control" required placeholder="Repite la contraseña">
+            </div>
+            <p id="pwMsg" style="font-size:13px;margin-bottom:12px;min-height:18px;"></p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" id="btnCancelarPw" onclick="document.getElementById('modalCambiarPw').classList.remove('open')" class="btn btn-outline">Cancelar</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

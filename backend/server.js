@@ -735,6 +735,16 @@ app.delete('/api/admin/servicios/:id', authMiddleware, adminMiddleware, async (r
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
+app.patch('/api/admin/barberias/:id/password', authMiddleware, adminMiddleware, async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const r = await pool.query('UPDATE barberias SET password_hash=$1 WHERE id=$2 RETURNING id', [hash, req.params.id]);
+    r.rows.length ? res.json({ ok: true }) : res.status(404).json({ error: 'Barbería no encontrada' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
 /* Admin elimina una barbería completa con todos sus datos */
 app.delete('/api/admin/barberias/:id', authMiddleware, adminMiddleware, async (req, res) => {
   const client = await pool.connect();
