@@ -76,6 +76,10 @@ pool.connect(async (err, client, release) => {
     await client.query(`ALTER TABLE fotos ADD COLUMN IF NOT EXISTS image_url TEXT`);
     await client.query(`ALTER TABLE fotos ADD COLUMN IF NOT EXISTS cloudinary_public_id TEXT`);
   } catch (e) { /* ignorar */ }
+  try {
+    await client.query(`ALTER TABLE barberias ADD COLUMN IF NOT EXISTS reset_token VARCHAR(6)`);
+    await client.query(`ALTER TABLE barberias ADD COLUMN IF NOT EXISTS reset_token_exp TIMESTAMP`);
+  } catch (e) { /* ignorar */ }
   release();
 });
 
@@ -251,6 +255,57 @@ app.get('/api/auth/verificar', authMiddleware, async (req, res) => {
     }
     const r = await pool.query('SELECT id, codigo_unico, nombre, dueno_nombre, dueno_email FROM barberias WHERE id = $1 AND activa = true', [req.user.id]);
     r.rows.length ? res.json({ barberia: r.rows[0], role: 'dueno' }) : res.status(401).json({ error: 'No encontrada' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+// Genera un código de 6 dígitos y lo envía por email al dueño de la barbería
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email requerido' });
+  try {
+    const r = await pool.query('SELECT id, dueno_nombre, dueno_email FROM barberias WHERE dueno_email=$1 AND activa=true', [email.trim().toLowerCase()]);
+    // Respuesta genérica para no revelar si el email existe
+    if (!r.rows.length) return res.json({ ok: true });
+    const b = r.rows[0];
+    const codigo = String(Math.floor(100000 + Math.random() * 900000));
+    const exp = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+    await pool.query('UPDATE barberias SET reset_token=$1, reset_token_exp=$2 WHERE id=$3', [codigo, exp, b.id]);
+    // Enviar email via EmailJS REST API
+    const EMAILJS_KEY  = process.env.EMAILJS_PUBLIC_KEY  || 'lMU7ga7ekXbMjLdIF';
+    const EMAILJS_SVC  = process.env.EMAILJS_SERVICE_ID  || 'service_y72bxiq';
+    const EMAILJS_TPL  = process.env.EMAILJS_RESET_TEMPLATE;
+    if (EMAILJS_TPL) {
+      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: EMAILJS_SVC,
+          template_id: EMAILJS_TPL,
+          user_id: EMAILJS_KEY,
+          template_params: { to_email: b.dueno_email, to_name: b.dueno_nombre, reset_code: codigo }
+        })
+      }).catch(e => console.warn('EmailJS error:', e.message));
+    } else {
+      console.warn(`[RESET] Código para ${b.dueno_email}: ${codigo}`);
+    }
+    res.json({ ok: true });
+  } catch { res.status(500).json({ error: 'Error' }); }
+});
+
+// Verifica el código y actualiza la contraseña
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { email, codigo, nueva_password } = req.body;
+  if (!email || !codigo || !nueva_password) return res.status(400).json({ error: 'Faltan datos' });
+  if (nueva_password.length < 6) return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+  try {
+    const r = await pool.query(
+      'SELECT id FROM barberias WHERE dueno_email=$1 AND reset_token=$2 AND reset_token_exp > NOW()',
+      [email.trim().toLowerCase(), codigo.trim()]
+    );
+    if (!r.rows.length) return res.status(400).json({ error: 'Código inválido o expirado' });
+    const hash = await bcrypt.hash(nueva_password, 10);
+    await pool.query('UPDATE barberias SET password_hash=$1, reset_token=NULL, reset_token_exp=NULL WHERE id=$2', [hash, r.rows[0].id]);
+    res.json({ ok: true });
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
