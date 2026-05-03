@@ -402,6 +402,12 @@ select.form-control {
 /* ── 8. ALERTS ────────────────────────────────────────────────
    Feedback visual con colores semánticos (éxito, error, info).
    ─────────────────────────────────────────────────────────── */
+@keyframes alertIn {
+    0%   { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    65%  { transform: translateY(3px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .alert {
     padding: 13px 16px;
     border-radius: 10px;
@@ -411,6 +417,7 @@ select.form-control {
     display: flex;
     align-items: center;
     gap: 9px;
+    animation: alertIn 0.38s cubic-bezier(.22,1,.36,1) both;
 }
 .alert-success { background: rgba(62,207,142,0.1);  color: #2d9e6b; border: 1px solid rgba(62,207,142,0.25); }
 .alert-error   { background: rgba(224,82,82,0.1);   color: #c0392b; border: 1px solid rgba(224,82,82,0.25); }
