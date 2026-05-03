@@ -136,13 +136,20 @@
 
         .exito-texto { animation: fadeUp .4s .3s ease both; }
         .exito-btn   { animation: fadeUp .4s .45s ease both; display:inline-flex; }
+
+        /* Botón tema flotante — fondo sólido para que no se confunda con la tarjeta */
+        #btnTema {
+            background: var(--surface);
+            box-shadow: 0 2px 12px rgba(0,0,0,.35);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
 <div id="toastContainer" aria-live="polite"></div>
 
-<button id="btnTema" class="btn-tema" style="position:fixed;top:16px;right:16px;z-index:200;" title="Cambiar tema" aria-label="Cambiar tema">
+<button id="btnTema" class="btn-tema" style="position:fixed;top:12px;right:12px;" title="Cambiar tema" aria-label="Cambiar tema">
     <i class="fas fa-sun" id="iconTema"></i>
 </button>
 
