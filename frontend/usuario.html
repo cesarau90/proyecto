@@ -88,7 +88,7 @@
             <p class="panel-title"><i class="fas fa-camera"></i> Galería de Fotos</p>
             <p style="color:var(--text-3);margin-bottom:16px;font-size:13px;">Sube fotos de tu barbería y cortes (JPG, PNG, WEBP — máx. 5MB). Luego asígnalas a tus servicios.</p>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-                <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="file" id="fotoInput" accept="image/jpeg,image/png,image/webp" class="form-control"></div>
+                <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="file" id="fotoInput" accept="image/jpeg,image/png,image/webp" multiple class="form-control"></div>
                 <div class="form-group" style="margin:0;flex:1;min-width:180px;"><input type="text" id="fotoDesc" class="form-control" placeholder="Descripción (opcional)"></div>
                 <button type="button" onclick="subirFoto()" id="btnFoto" class="btn btn-success" style="white-space:nowrap;"><i class="fas fa-upload"></i> Subir</button>
             </div>

@@ -807,36 +807,49 @@ function renderGaleriaPreview(fotos, servicios) {
     prev.innerHTML = html;
 }
 
-/** Sube una foto al backend via FormData (multipart) */
+/** Sube una o varias fotos al backend via FormData (multipart) */
 window.subirFoto = async () => {
     const fi = document.getElementById('fotoInput');
     const btn = document.getElementById('btnFoto');
     const msg = document.getElementById('msgFoto');
+    const desc = document.getElementById('fotoDesc').value.trim();
 
-    if (!fi.files[0]) { toast('Selecciona una imagen', 'error'); return; }
-    if (fi.files[0].size > 5 * 1024 * 1024) { toast('Máximo 5MB', 'error'); return; }
+    const archivos = Array.from(fi.files);
+    if (!archivos.length) { toast('Selecciona al menos una imagen', 'error'); return; }
+
+    const grande = archivos.find(f => f.size > 5 * 1024 * 1024);
+    if (grande) { toast(`"${grande.name}" supera 5MB`, 'error'); return; }
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="loading" style="border-top-color:var(--ink);"></span>';
     msg.innerHTML = '';
 
-    const fd = new FormData();
-    fd.append('foto', fi.files[0]);
-    fd.append('descripcion', document.getElementById('fotoDesc').value.trim());
+    let subidas = 0, errores = 0;
+    for (const archivo of archivos) {
+        btn.innerHTML = `<span class="loading" style="border-top-color:var(--ink);"></span> ${subidas + 1}/${archivos.length}`;
+        const fd = new FormData();
+        fd.append('foto', archivo);
+        fd.append('descripcion', desc);
+        try {
+            const r = await fetch(`${config.apiURL}/mi-barberia/fotos`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${auth.getToken()}` },
+                body: fd
+            });
+            if (!r.ok) { const e = await r.json(); throw new Error(e.error); }
+            subidas++;
+        } catch { errores++; }
+    }
 
-    try {
-        const r = await fetch(`${config.apiURL}/mi-barberia/fotos`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${auth.getToken()}` }, // Sin Content-Type: browser lo pone automáticamente para FormData
-            body: fd
-        });
-        if (!r.ok) { const e = await r.json(); throw new Error(e.error); }
-        fi.value = '';
-        document.getElementById('fotoDesc').value = '';
-        toast('¡Foto subida exitosamente!', 'success');
-        cargarFotos();
-    } catch (e) { toast(e.message, 'error'); }
-    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-upload"></i> Subir'; }
+    fi.value = '';
+    document.getElementById('fotoDesc').value = '';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-upload"></i> Subir';
+
+    if (errores === 0) toast(`${subidas} foto${subidas > 1 ? 's' : ''} subida${subidas > 1 ? 's' : ''} exitosamente`, 'success');
+    else if (subidas > 0) toast(`${subidas} subida${subidas > 1 ? 's' : ''}, ${errores} con error`, 'warning');
+    else toast('Error al subir las fotos', 'error');
+
+    cargarFotos();
 };
 
 window.eliminarFoto = async id => {
