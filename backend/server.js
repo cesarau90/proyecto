@@ -274,7 +274,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const EMAILJS_SVC  = process.env.EMAILJS_SERVICE_ID  || 'service_y72bxiq';
     const EMAILJS_TPL  = process.env.EMAILJS_RESET_TEMPLATE;
     if (EMAILJS_TPL) {
-      await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      const ejRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -283,9 +283,13 @@ app.post('/api/auth/forgot-password', async (req, res) => {
           user_id: EMAILJS_KEY,
           template_params: { to_email: b.dueno_email, to_name: b.dueno_nombre, reset_code: codigo }
         })
-      }).catch(e => console.warn('EmailJS error:', e.message));
+      }).catch(e => { console.error('[RESET] fetch error:', e.message); return null; });
+      if (ejRes) {
+        const ejText = await ejRes.text();
+        console.log(`[RESET] EmailJS status:${ejRes.status} body:${ejText} template:${EMAILJS_TPL} to:${b.dueno_email}`);
+      }
     } else {
-      console.warn(`[RESET] Código para ${b.dueno_email}: ${codigo}`);
+      console.warn(`[RESET] Sin template configurado. Código para ${b.dueno_email}: ${codigo}`);
     }
     res.json({ ok: true });
   } catch { res.status(500).json({ error: 'Error' }); }
