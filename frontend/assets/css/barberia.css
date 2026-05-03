@@ -1095,6 +1095,14 @@
     animation: lbImgIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
     cursor: default;
 }
+@media (max-width: 640px) {
+    .lightbox-img {
+        width: 95vw;
+        max-width: 95vw;
+        max-height: 82vh;
+        border-radius: 8px;
+    }
+}
 @keyframes lbImgIn {
     from { opacity: 0; transform: scale(0.86); }
     to   { opacity: 1; transform: scale(1); }
