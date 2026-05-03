@@ -470,10 +470,11 @@ window.abrirGaleria = (servicioId) => {
     const grid = document.getElementById('modalGaleriaGrid');
     if (!fotos.length) return;
 
-    grid.innerHTML = fotos.map(f => `
+    const fotosLb = JSON.stringify(fotos.map(f => ({ src: f.url, alt: f.desc || '' }))).replace(/'/g, "\\'");
+    grid.innerHTML = fotos.map((f, i) => `
         <div class="galeria-modal-item">
             <img src="${f.url}" alt="${f.desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
-            <button class="galeria-zoom-btn" onclick="abrirLightbox('${f.url}','${(f.desc||'').replace(/'/g,"\\'")}');" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>
+            <button class="galeria-zoom-btn" onclick="abrirLightbox('${f.url}','${(f.desc||'').replace(/'/g,"\\'")}',JSON.parse('${fotosLb}'),${i});" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>
             ${f.desc ? `<div class="galeria-modal-caption">${f.desc}</div>` : ''}
         </div>`).join('');
 
@@ -491,26 +492,47 @@ window.cerrarModalGaleria = (e) => {
 
 
 /* ── LIGHTBOX ────────────────────────────────────────────────── */
-window.abrirLightbox = (src, alt = '') => {
+let _lbFotos = [];   // array de fotos del conjunto actual
+let _lbIndex = 0;    // índice de la foto visible
+
+function _lbMostrar(i) {
+    _lbIndex = (i + _lbFotos.length) % _lbFotos.length;
+    const f = _lbFotos[_lbIndex];
+    const img = document.getElementById('lightboxImg');
+    img.style.opacity = '0';
+    setTimeout(() => {
+        img.src = f.src;
+        img.alt = f.alt;
+        img.style.opacity = '1';
+    }, 120);
+    // Mostrar u ocultar flechas según si hay más de una foto
+    const nav = document.getElementById('lightboxNav');
+    if (nav) nav.style.display = _lbFotos.length > 1 ? 'flex' : 'none';
+}
+
+window.abrirLightbox = (src, alt = '', fotos = null, idx = 0) => {
+    _lbFotos = fotos || [{ src, alt }];
     const lb = document.getElementById('lightbox');
-    document.getElementById('lightboxImg').src = src;
-    document.getElementById('lightboxImg').alt = alt;
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
+    _lbMostrar(idx);
 };
 
 window.cerrarLightbox = (e) => {
     if (e && e.target.closest && e.target.closest('.lightbox-img')) return;
-    const lb = document.getElementById('lightbox');
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
+    document.getElementById('lightbox').classList.remove('open');
+    if (!document.querySelector('.modal-overlay.open')) document.body.style.overflow = '';
 };
 
+window.lbPrev = (e) => { e.stopPropagation(); _lbMostrar(_lbIndex - 1); };
+window.lbNext = (e) => { e.stopPropagation(); _lbMostrar(_lbIndex + 1); };
+
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && document.getElementById('lightbox').classList.contains('open')) {
-        e.stopImmediatePropagation();
-        cerrarLightbox();
-    }
+    const lb = document.getElementById('lightbox');
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape') { e.stopImmediatePropagation(); cerrarLightbox(); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); _lbMostrar(_lbIndex - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); _lbMostrar(_lbIndex + 1); }
 }, true);
 
 

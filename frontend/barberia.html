@@ -214,7 +214,11 @@
 <!-- Lightbox: vista ampliada al hacer clic en una foto -->
 <div id="lightbox" class="lightbox-overlay" onclick="cerrarLightbox(event)" role="dialog" aria-modal="true" aria-label="Vista ampliada">
     <button class="lightbox-close" id="lightboxClose" onclick="cerrarLightbox()" aria-label="Cerrar"><i class="fas fa-times"></i></button>
-    <img id="lightboxImg" src="" alt="" class="lightbox-img" onclick="event.stopPropagation()">
+    <div id="lightboxNav" class="lightbox-nav" style="display:none">
+        <button class="lightbox-arrow" onclick="lbPrev(event)" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+        <button class="lightbox-arrow" onclick="lbNext(event)" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <img id="lightboxImg" src="" alt="" class="lightbox-img" onclick="event.stopPropagation()" style="transition:opacity 0.12s ease">
 </div>
 
 <!-- Botón "volver arriba" para mejorar navegación (C4) -->
