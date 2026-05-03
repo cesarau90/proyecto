@@ -110,6 +110,7 @@ export function confirmar(titulo, mensaje, btnTexto = 'Confirmar', tipo = 'dange
 export function closeModal(modal) {
     if (!modal) return;
     modal.classList.remove('open');
+    if (!document.querySelector('.modal-overlay.open')) document.body.style.overflow = '';
     const returnTo = modal.dataset.returnFocus;
     if (returnTo) {
         const el = document.getElementById(returnTo);

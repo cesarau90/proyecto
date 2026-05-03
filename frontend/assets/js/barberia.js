@@ -478,11 +478,15 @@ window.abrirGaleria = (servicioId) => {
         </div>`).join('');
 
     openModal(document.getElementById('modalGaleria'));
+    document.body.style.overflow = 'hidden';
 };
 
 window.cerrarModalGaleria = (e) => {
     const modal = document.getElementById('modalGaleria');
-    if (!e || e.target === modal) closeModal(modal);
+    if (!e || e.target === modal) {
+        closeModal(modal);
+        document.body.style.overflow = '';
+    }
 };
 
 
