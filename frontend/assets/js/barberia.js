@@ -355,7 +355,7 @@ async function cargarServicios() {
         cont.innerHTML = servicios.map((s, i) => {
             // Si el servicio tiene foto asignada, mostrarla; sino mostrar un placeholder
             const imgHTML = s.imagen_url
-                ? `<img src="${assetUrl(s.imagen_url)}" alt="${s.nombre}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
+                ? `<img src="${assetUrl(s.imagen_url)}" alt="${s.nombre}" loading="lazy" onclick="event.stopPropagation();abrirLightbox(this.src,this.alt)" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
                 : `<div class="service-img-fallback"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
             const descHTML = s.descripcion ? `<div class="service-description">${s.descripcion}</div>` : '';
             const isPopular = maxReservas > 0 && (parseInt(s.reservas_count) || 0) === maxReservas;
@@ -460,7 +460,7 @@ window.abrirGaleria = (servicioId) => {
 
     grid.innerHTML = fotos.map(f => `
         <div class="galeria-modal-item">
-            <img src="${f.url}" alt="${f.desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
+            <img src="${f.url}" alt="${f.desc}" loading="lazy" onclick="abrirLightbox(this.src,this.alt)" onerror="this.parentElement.style.display='none'">
             ${f.desc ? `<div class="galeria-modal-caption">${f.desc}</div>` : ''}
         </div>`).join('');
 
@@ -471,6 +471,29 @@ window.cerrarModalGaleria = (e) => {
     const modal = document.getElementById('modalGaleria');
     if (!e || e.target === modal) closeModal(modal);
 };
+
+
+/* ── LIGHTBOX ────────────────────────────────────────────────── */
+window.abrirLightbox = (src, alt = '') => {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightboxImg').alt = alt;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+};
+
+window.cerrarLightbox = (e) => {
+    if (e && e.target.closest && e.target.closest('.lightbox-img')) return;
+    const lb = document.getElementById('lightbox');
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+};
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('lightbox').classList.contains('open')) {
+        cerrarLightbox();
+    }
+});
 
 
 /* ── FORMULARIO DE RESERVA ────────────────────────────────────
