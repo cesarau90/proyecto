@@ -29,6 +29,9 @@ let horarios = '';
 // Nombre de la barbería — se llena en cargarTodo() para usarlo en el email de reserva pendiente.
 let _barberaNombre = '';
 
+// Fotos del modal de galería activo — se usa para navegar con flechas en el lightbox.
+let _galeriaActivaFotos = [];
+
 // Inicializar EmailJS para enviar confirmación de solicitud al cliente.
 if (typeof emailjs !== 'undefined') emailjs.init({ publicKey: config.emailJS.publicKey });
 
@@ -470,11 +473,11 @@ window.abrirGaleria = (servicioId) => {
     const grid = document.getElementById('modalGaleriaGrid');
     if (!fotos.length) return;
 
-    const fotosLb = JSON.stringify(fotos.map(f => ({ src: f.url, alt: f.desc || '' }))).replace(/'/g, "\\'");
+    _galeriaActivaFotos = fotos.map(f => ({ src: f.url, alt: f.desc || '' }));
     grid.innerHTML = fotos.map((f, i) => `
         <div class="galeria-modal-item">
-            <img src="${f.url}" alt="${f.desc}" loading="lazy" onerror="this.parentElement.style.display='none'">
-            <button class="galeria-zoom-btn" onclick="abrirLightbox('${f.url}','${(f.desc||'').replace(/'/g,"\\'")}',JSON.parse('${fotosLb}'),${i});" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>
+            <img src="${f.url}" alt="${f.desc || ''}" loading="lazy" onerror="this.parentElement.style.display='none'">
+            <button class="galeria-zoom-btn" onclick="abrirLightboxGaleria(${i})" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>
             ${f.desc ? `<div class="galeria-modal-caption">${f.desc}</div>` : ''}
         </div>`).join('');
 
@@ -492,6 +495,9 @@ window.cerrarModalGaleria = (e) => {
 
 
 /* ── LIGHTBOX ────────────────────────────────────────────────── */
+window.abrirLightboxGaleria = (idx) => {
+    abrirLightbox(_galeriaActivaFotos[idx]?.src, _galeriaActivaFotos[idx]?.alt, _galeriaActivaFotos, idx);
+};
 let _lbFotos = [];   // array de fotos del conjunto actual
 let _lbIndex = 0;    // índice de la foto visible
 
