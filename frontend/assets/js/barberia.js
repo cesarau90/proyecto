@@ -370,7 +370,7 @@ async function cargarServicios() {
                 ? `<img src="${_imgSrc}" alt="${s.nombre}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
                 : `<div class="service-img-fallback"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
             const zoomBtnHTML = s.imagen_url
-                ? `<button class="srv-zoom-btn" onclick="event.stopPropagation();abrirLightbox('${_imgSrc}','${s.nombre.replace(/'/g,"\\'")}');" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>`
+                ? `<button class="srv-zoom-btn" onclick="event.stopPropagation();abrirLightbox('${_imgSrc}','${(s.foto_descripcion||'').replace(/'/g,"\\'")}');" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>`
                 : '';
             const descHTML = s.descripcion ? `<div class="service-description">${s.descripcion}</div>` : '';
             const isPopular = maxReservas > 0 && (parseInt(s.reservas_count) || 0) === maxReservas;

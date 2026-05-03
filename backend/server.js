@@ -351,7 +351,7 @@ app.get('/api/barberias/:codigo', async (req, res) => {
 app.get('/api/barberias/:codigo/servicios', async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id,
+      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id, f.descripcion AS foto_descripcion,
              COALESCE(
                (SELECT COUNT(*) FROM reservas r
                 WHERE r.barberia_id = s.barberia_id
@@ -506,7 +506,7 @@ app.put('/api/mi-barberia', authMiddleware, async (req, res) => {
 app.get('/api/mi-barberia/servicios', authMiddleware, async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id
+      SELECT s.*, f.filename as foto_filename, f.image_url AS foto_image_url, f.barberia_id AS foto_barberia_id, f.descripcion AS foto_descripcion
       FROM servicios s
       LEFT JOIN fotos f ON s.foto_id = f.id
       WHERE s.barberia_id=$1 AND s.activo=true ORDER BY s.id`, [req.user.id]);
