@@ -505,14 +505,23 @@ function _lbMostrar(i) {
     _lbIndex = (i + _lbFotos.length) % _lbFotos.length;
     const f = _lbFotos[_lbIndex];
     const img = document.getElementById('lightboxImg');
+    const caption = document.getElementById('lightboxCaption');
     img.style.opacity = '0';
-    img.src = '';  // limpia foto anterior para que no parpadee
+    img.src = '';
+    if (caption) { caption.style.opacity = '0'; caption.textContent = ''; }
     setTimeout(() => {
         img.alt = f.alt;
-        img.onload = img.onerror = () => { img.style.opacity = '1'; img.onload = img.onerror = null; };
+        img.onload = img.onerror = () => {
+            img.style.opacity = '1';
+            if (caption) { caption.textContent = f.alt || ''; caption.style.opacity = f.alt ? '1' : '0'; }
+            img.onload = img.onerror = null;
+        };
         img.src = f.src;
-        // Si ya está cacheada el onload no siempre se dispara
-        if (img.complete && img.naturalWidth > 0) { img.style.opacity = '1'; img.onload = img.onerror = null; }
+        if (img.complete && img.naturalWidth > 0) {
+            img.style.opacity = '1';
+            if (caption) { caption.textContent = f.alt || ''; caption.style.opacity = f.alt ? '1' : '0'; }
+            img.onload = img.onerror = null;
+        }
     }, 120);
     const nav = document.getElementById('lightboxNav');
     if (nav) nav.style.display = _lbFotos.length > 1 ? 'flex' : 'none';
