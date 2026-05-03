@@ -29,7 +29,8 @@ export const config = {
         templateConfirmacion: 'template_obbf1yz',
         templateCancelacion:  'template_hp3crzm',
         templateCompletada:   'template_1m7ijws',
-        templateRegistro:     'template_obap1kr'
+        templateRegistro:     'template_obap1kr',
+        templatePendiente:    'template_af8cnqa'
     }
 };
 

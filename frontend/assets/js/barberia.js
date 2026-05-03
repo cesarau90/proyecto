@@ -26,6 +26,12 @@ const codigo = params.get('codigo');
 // Se usa en validarDia() para verificar si un día seleccionado es laborable.
 let horarios = '';
 
+// Nombre de la barbería — se llena en cargarTodo() para usarlo en el email de reserva pendiente.
+let _barberaNombre = '';
+
+// Inicializar EmailJS para enviar confirmación de solicitud al cliente.
+if (typeof emailjs !== 'undefined') emailjs.init({ publicKey: config.emailJS.publicKey });
+
 // Mapeo servicioId → array de fotos de galería asignadas a ese servicio.
 // Se puebla en cargarServicios() con los datos que ya vienen del endpoint.
 const _galeriasPorServicio = {};
@@ -138,6 +144,8 @@ async function cargarTodo() {
             document.body.style.setProperty('--card-glow',  `0 0 15px rgba(${rgb},0.4)`);
         }
         // ──────────────────────────────────────────────────────────
+
+        _barberaNombre = b.nombre;
 
         // Actualizar título de pestaña del navegador
         document.getElementById('pageTitle').textContent = b.nombre + ' — Barber Registro';
@@ -546,7 +554,19 @@ document.getElementById('reservaForm').addEventListener('submit', async e => {
         document.getElementById('modalReservaOk').classList.add('open');
         document.body.style.overflow = 'hidden';
 
-        // El email de confirmación se envía desde el panel del dueño al cambiar el estado a "Confirmada"
+        // Email automático al cliente: solicitud recibida (estado pendiente)
+        if (config.emailJS.templatePendiente && typeof emailjs !== 'undefined') {
+            emailjs.send(config.emailJS.serviceId, config.emailJS.templatePendiente, {
+                to_email:      datos.email,
+                to_name:       datos.nombre,
+                servicio:      datos.servicio,
+                fecha:         fFmt,
+                hora:          datos.hora,
+                telefono:      datos.telefono,
+                comentarios:   datos.comentarios || 'Ninguno',
+                barberia_nombre: _barberaNombre
+            }).catch(() => {});
+        }
     } catch (e) {
         toast(e.message, 'error');
     } finally {
