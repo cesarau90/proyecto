@@ -301,6 +301,10 @@ let _modalServicioId = null;
 let _modalFotoSeleccionada = null;
 
 window.abrirModalFoto = async (servicioId, fotoActualId) => {
+    if (fotoActualId) {
+        toast('Este servicio ya tiene foto de portada. Para cambiarla, primero quítala desde la pestaña Fotos.', 'warning', 4000);
+        return;
+    }
     _modalServicioId = servicioId;
     _modalFotoSeleccionada = fotoActualId;
     const grid = document.getElementById('modalFotoGrid');

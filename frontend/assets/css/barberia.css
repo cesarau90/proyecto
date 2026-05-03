@@ -429,7 +429,32 @@
     background:
         radial-gradient(circle at 50% 20%, rgba(var(--gold-rgb),0.12), transparent 55%),
         var(--ink-3);
+    position: relative;
+    overflow: hidden;
 }
+.srv-zoom-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(0,0,0,0.52);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.18s, transform 0.18s, background 0.18s;
+    backdrop-filter: blur(6px);
+    z-index: 2;
+}
+.service-img-wrapper:hover .srv-zoom-btn { opacity: 1; transform: scale(1.05); }
+.srv-zoom-btn:hover { background: rgba(0,0,0,0.72); }
+@media (hover: none) { .srv-zoom-btn { opacity: 1; } }
 .service-img-fallback {
     opacity: 1;
     background:
@@ -1092,6 +1117,5 @@
 }
 .lightbox-close:hover { background: rgba(255,255,255,0.24); transform: scale(1.1); }
 
-/* Cursor zoom-in en imágenes de servicios y galería */
-.service-img-wrapper img { cursor: zoom-in; }
+/* Cursor zoom-in en fotos de la galería modal */
 .galeria-modal-item img  { cursor: zoom-in; }

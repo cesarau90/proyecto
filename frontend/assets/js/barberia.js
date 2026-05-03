@@ -354,9 +354,13 @@ async function cargarServicios() {
 
         cont.innerHTML = servicios.map((s, i) => {
             // Si el servicio tiene foto asignada, mostrarla; sino mostrar un placeholder
+            const _imgSrc = s.imagen_url ? assetUrl(s.imagen_url) : '';
             const imgHTML = s.imagen_url
-                ? `<img src="${assetUrl(s.imagen_url)}" alt="${s.nombre}" loading="lazy" onclick="event.stopPropagation();abrirLightbox(this.src,this.alt)" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
+                ? `<img src="${_imgSrc}" alt="${s.nombre}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'service-img-fallback\\'><i class=\\'fas fa-cut\\'></i><span>Sin foto</span></div>'">`
                 : `<div class="service-img-fallback"><i class="fas fa-cut"></i><span>Sin foto</span></div>`;
+            const zoomBtnHTML = s.imagen_url
+                ? `<button class="srv-zoom-btn" onclick="event.stopPropagation();abrirLightbox('${_imgSrc}','${s.nombre.replace(/'/g,"\\'")}');" aria-label="Ver foto ampliada"><i class="fas fa-expand-alt"></i></button>`
+                : '';
             const descHTML = s.descripcion ? `<div class="service-description">${s.descripcion}</div>` : '';
             const isPopular = maxReservas > 0 && (parseInt(s.reservas_count) || 0) === maxReservas;
             const badgeHTML = isPopular ? `<div class="badge-popular">⭐ Popular</div>` : '';
@@ -368,7 +372,7 @@ async function cargarServicios() {
                 : '';
             return `
             <div class="service-card will-reveal" style="transition-delay:${i * 0.08}s" data-n="${s.nombre}" data-p="${s.precio}" tabindex="0" role="button" aria-label="Seleccionar servicio ${s.nombre} por $${s.precio}">
-                <div class="service-img-wrapper">${badgeHTML}${imgHTML}</div>
+                <div class="service-img-wrapper">${badgeHTML}${imgHTML}${zoomBtnHTML}</div>
                 <div class="service-body">
                     <div class="service-name">${s.nombre}</div>
                     ${descHTML}
