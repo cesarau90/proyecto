@@ -264,8 +264,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   if (!email) return res.status(400).json({ error: 'Email requerido' });
   try {
     const r = await pool.query('SELECT id, dueno_nombre, dueno_email FROM barberias WHERE dueno_email=$1 AND activa=true', [email.trim().toLowerCase()]);
-    // Respuesta genérica para no revelar si el email existe
-    if (!r.rows.length) return res.json({ ok: true });
+    if (!r.rows.length) return res.status(404).json({ error: 'No encontramos una cuenta con ese email' });
     const b = r.rows[0];
     const codigo = String(Math.floor(100000 + Math.random() * 900000));
     const exp = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos

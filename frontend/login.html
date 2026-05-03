@@ -209,13 +209,15 @@
             btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Enviando...';
             msg.innerHTML = '';
             try {
-                await fetch(`${config.apiURL}/auth/forgot-password`, {
+                const r = await fetch(`${config.apiURL}/auth/forgot-password`, {
                     method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email })
                 });
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.error || 'Error');
                 _recEmail = email;
                 document.getElementById('paso1').style.display = 'none';
                 document.getElementById('paso2').style.display = '';
-                msg.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Si el email existe, recibirás un código en tu correo.</div>';
+                msg.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Código enviado. Revisa tu correo.</div>';
                 document.getElementById('recCodigo').focus();
             } catch { msg.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Error al enviar. Intenta de nuevo.</div>'; }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar código'; }
