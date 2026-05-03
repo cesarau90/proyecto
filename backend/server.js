@@ -281,6 +281,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
           service_id: EMAILJS_SVC,
           template_id: EMAILJS_TPL,
           user_id: EMAILJS_KEY,
+          accessToken: process.env.EMAILJS_PRIVATE_KEY || '',
           template_params: { to_email: b.dueno_email, to_name: b.dueno_nombre, reset_code: codigo }
         })
       }).catch(e => { console.error('[RESET] fetch error:', e.message); return null; });
