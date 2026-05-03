@@ -504,9 +504,10 @@ window.cerrarLightbox = (e) => {
 
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && document.getElementById('lightbox').classList.contains('open')) {
+        e.stopImmediatePropagation();
         cerrarLightbox();
     }
-});
+}, true);
 
 
 /* ── FORMULARIO DE RESERVA ────────────────────────────────────
