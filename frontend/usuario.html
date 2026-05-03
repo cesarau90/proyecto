@@ -166,6 +166,23 @@
 
 </div>
 
+<!-- Aplica el tab guardado antes de que cargue el módulo para evitar el flash de "servicios" -->
+<script>
+(function(){
+    var tab = sessionStorage.getItem('activeTab');
+    if (!tab || tab === 'servicios') return;
+    var actTab = document.querySelector('.tab.active');
+    var actPanel = document.querySelector('.section.active');
+    var newTab = document.getElementById('tab-' + tab);
+    var newPanel = document.getElementById(tab);
+    if (!newTab || !newPanel) return;
+    if (actTab) actTab.classList.remove('active');
+    if (actPanel) actPanel.classList.remove('active');
+    newTab.classList.add('active');
+    newPanel.classList.add('active');
+})();
+</script>
+
 <!-- MODAL FOTO -->
 <div id="modalFoto" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFotoTitulo" onclick="cerrarModal(event)">
     <div class="modal">
