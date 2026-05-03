@@ -1,0 +1,132 @@
+/* ================================================================
+   resena.css — Estilos de la página de reseña pública
+   ================================================================ */
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+    0%   { opacity: 0; transform: scale(.7); }
+    70%  { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes spinIn {
+    from { opacity: 0; transform: rotate(-180deg) scale(.5); }
+    to   { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+.resena-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.resena-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,.25);
+}
+
+@media (max-width: 480px) {
+    .resena-card { padding: 28px 20px; border-radius: 16px; }
+}
+
+.icono-central {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 30px;
+    animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.resena-titulo {
+    text-align: center;
+    margin-bottom: 4px;
+    animation: fadeUp .4s .1s ease both;
+}
+.resena-sub {
+    text-align: center;
+    color: var(--text-3);
+    font-size: 14px;
+    margin-bottom: 28px;
+    animation: fadeUp .4s .15s ease both;
+}
+
+.star-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    font-size: 52px;
+    margin: 8px 0 16px;
+    flex-direction: row-reverse;
+}
+.star-wrap input { display: none; }
+.star-wrap label {
+    cursor: pointer;
+    color: var(--border);
+    transition: color .15s, transform .15s;
+    font-size: 52px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.star-wrap label:hover,
+.star-wrap label:hover ~ label,
+.star-wrap input:checked ~ label { color: var(--accent); }
+.star-wrap label:hover { transform: scale(1.2); }
+
+.campo-1 { animation: fadeUp .4s .2s ease both; }
+.campo-2 { animation: fadeUp .4s .3s ease both; }
+.campo-3 { animation: fadeUp .4s .4s ease both; }
+.campo-4 { animation: fadeUp .4s .5s ease both; }
+
+.error-icon {
+    width: 72px; height: 72px;
+    background: #e53e3e; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; font-size: 28px; color: #fff;
+    animation: popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.check-icon {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px; font-size: 34px; color: #fff;
+    animation: spinIn .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+.btn-barberia {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    width: 100%;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity .2s, transform .15s;
+}
+.btn-barberia:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+.btn-barberia:disabled { opacity: .6; cursor: not-allowed; }
+
+.exito-texto { animation: fadeUp .4s .3s ease both; }
+.exito-btn   { animation: fadeUp .4s .45s ease both; display: inline-flex; }
+
+#btnTema {
+    background: var(--surface);
+    box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    z-index: 1000;
+}
