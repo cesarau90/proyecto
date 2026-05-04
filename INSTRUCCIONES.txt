@@ -1,0 +1,166 @@
+================================================================
+  BARBER REGISTRO — INSTRUCCIONES DE USO
+================================================================
+
+ACCESO A LA PLATAFORMA
+------------------------
+La plataforma está disponible en línea, no requiere instalación.
+Abre el navegador y entra al link del proyecto (Vercel).
+
+
+================================================================
+  1. REGISTRO DE NUEVA BARBERÍA
+================================================================
+1. En la página principal (index.html) llena el formulario:
+   - Nombre de la barbería
+   - Nombre del dueño
+   - Email (será tu usuario para iniciar sesión)
+   - Teléfono
+   - Contraseña (mínimo 6 caracteres)
+   - Dirección y ciudad
+   - Horarios de atención
+
+2. Haz clic en "Registrar Barbería".
+3. Se te redirigirá automáticamente a tu panel de administración.
+
+
+================================================================
+  2. INICIAR SESIÓN
+================================================================
+1. Ve a login.html
+2. Ingresa tu email y contraseña.
+3. El sistema detecta automáticamente si eres:
+   - Dueño de barbería → te lleva a usuario.html
+   - Administrador global → te lleva a admin.html
+
+¿Olvidaste tu contraseña?
+1. Haz clic en "¿Olvidaste tu contraseña?"
+2. Ingresa tu email registrado.
+3. Recibirás un código de 6 dígitos en tu correo (válido 15 min).
+4. Ingresa el código y tu nueva contraseña.
+
+
+================================================================
+  3. PANEL DEL DUEÑO (usuario.html)
+================================================================
+
+── SERVICIOS ──────────────────────────────────────────────────
+- Agregar servicio: llena nombre, precio, duración y descripción.
+- Editar servicio: botón "Editar" en cada tarjeta de servicio.
+- Eliminar servicio: botón "Eliminar" (se puede recrear después).
+- Asignar foto de portada: clic en la imagen del servicio.
+
+── RESERVAS ───────────────────────────────────────────────────
+- Ver todas las citas agendadas por tus clientes.
+- Cambiar estado de una cita:
+    ⏳ Pendiente → ✅ Confirmada → 🎉 Completada / ❌ Cancelada
+  Al cambiar el estado, el cliente recibe un correo automático.
+- Eliminar reservas que ya no sean necesarias.
+- Exportar reservas a CSV con el botón "Exportar".
+
+── RESEÑAS ────────────────────────────────────────────────────
+- Ver todas las reseñas que dejaron tus clientes.
+- Se muestra la calificación promedio y el total de reseñas.
+
+── FOTOS ──────────────────────────────────────────────────────
+- Subir fotos: selecciona una o varias imágenes (máx. 5MB c/u).
+- Agregar descripción a cada foto haciendo clic en el ícono de edición.
+- Asignar foto como portada de un servicio desde el selector.
+- Asignar foto a la galería de un servicio.
+- Eliminar fotos que ya no necesites.
+
+── CONFIGURACIÓN ──────────────────────────────────────────────
+- Editar datos de la barbería (nombre, dirección, horarios, etc.).
+- Cambiar el color de acento de tu página pública.
+- Copiar el link público de tu barbería para compartirlo.
+
+
+================================================================
+  4. PÁGINA PÚBLICA DE LA BARBERÍA (barberia.html?codigo=XXXX)
+================================================================
+Esta es la página que ven tus clientes. Contiene:
+- Información general y horarios de la barbería.
+- Catálogo de servicios con precios y fotos.
+- Galería de fotos.
+- Sección de reseñas de clientes.
+- Formulario de reserva de cita.
+
+Para compartirla: copia el link desde tu panel en la pestaña
+"Configuración" o copia la URL directamente del navegador.
+
+
+================================================================
+  5. HACER UNA RESERVA (como cliente)
+================================================================
+1. Entra a la página pública de la barbería.
+2. Selecciona un servicio.
+3. Elige fecha y hora disponible.
+4. Llena tus datos: nombre, email, teléfono y comentarios.
+5. Haz clic en "Agendar Cita".
+6. Recibirás un correo cuando el dueño confirme tu cita.
+
+
+================================================================
+  6. DEJAR UNA RESEÑA (como cliente)
+================================================================
+1. El dueño puede compartirte el link de reseña directamente,
+   o aparece automáticamente al completar tu cita.
+2. Ingresa tu nombre, selecciona estrellas (1-5) y escribe
+   tu comentario.
+3. Haz clic en "Enviar Reseña".
+
+
+================================================================
+  7. PANEL DE ADMINISTRADOR GLOBAL (admin.html)
+================================================================
+Acceso exclusivo para el administrador del sistema.
+
+- Ver todas las barberías registradas con sus estadísticas.
+- Activar o desactivar barberías.
+- Editar datos de cualquier barbería.
+- Ver historial de reservas de cada barbería.
+- Ver y eliminar reseñas.
+- Ver fotos de cada barbería.
+- Cambiar la contraseña de cualquier dueño.
+- Eliminar barberías completas del sistema.
+
+
+================================================================
+  8. ROLES DEL SISTEMA
+================================================================
+  ADMINISTRADOR GLOBAL
+  - Accede con credenciales de admin.
+  - Gestiona todas las barberías del sistema.
+
+  DUEÑO DE BARBERÍA
+  - Accede con su email y contraseña de registro.
+  - Solo gestiona su propia barbería.
+
+  CLIENTE
+  - No requiere cuenta.
+  - Accede a la página pública y hace reservas directamente.
+
+
+================================================================
+  9. CORREOS AUTOMÁTICOS
+================================================================
+El sistema envía correos automáticos en estos casos:
+  - Cita CONFIRMADA por el dueño
+  - Cita CANCELADA por el dueño
+  - Cita COMPLETADA por el dueño
+  - Código de recuperación de contraseña
+
+
+================================================================
+  SOPORTE TÉCNICO
+================================================================
+Stack tecnológico:
+  - Frontend: HTML5, CSS3, JavaScript (ES Modules)
+  - Backend:  Node.js + Express
+  - Base de datos: PostgreSQL (Railway)
+  - Imágenes: Cloudinary
+  - Correos: EmailJS
+  - Deploy frontend: Vercel
+  - Deploy backend: Railway
+
+================================================================
