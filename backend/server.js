@@ -729,7 +729,44 @@ app.patch('/api/admin/reservas/:id/estado', authMiddleware, adminMiddleware, asy
   if (!validos.includes(req.body.estado)) return res.status(400).json({ error: 'Estado invalido' });
   try {
     const r = await pool.query('UPDATE reservas SET estado=$1 WHERE id=$2 RETURNING *', [req.body.estado, req.params.id]);
-    r.rows.length ? res.json(r.rows[0]) : res.status(404).json({ error: 'Reserva no encontrada' });
+    if (!r.rows.length) return res.status(404).json({ error: 'Reserva no encontrada' });
+    res.json(r.rows[0]);
+
+    // Enviar correo de notificación (fire-and-forget, no bloquea la respuesta)
+    const estado = req.body.estado;
+    const templates = { confirmada: 'template_obbf1yz', cancelada: 'template_hp3crzm', completada: 'template_1m7ijws' };
+    const templateId = templates[estado];
+    if (templateId) {
+      try {
+        const rv = r.rows[0];
+        const b = await pool.query('SELECT nombre, codigo_unico FROM barberias WHERE id=$1', [rv.barberia_id]);
+        if (b.rows.length) {
+          const barberia = b.rows[0];
+          const fecha = rv.fecha ? new Date(rv.fecha).toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric', timeZone:'UTC' }) : '';
+          const frontendBase = process.env.FRONTEND_URL || req.headers.origin || '';
+          const linkResena = frontendBase ? `${frontendBase}/resena.html?codigo=${barberia.codigo_unico}&nombre=${encodeURIComponent(rv.nombre)}` : '';
+          const EMAILJS_KEY = process.env.EMAILJS_PUBLIC_KEY || 'lMU7ga7ekXbMjLdIF';
+          const EMAILJS_SVC = process.env.EMAILJS_SERVICE_ID || 'service_y72bxiq';
+          await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              service_id: EMAILJS_SVC, template_id: templateId, user_id: EMAILJS_KEY,
+              accessToken: process.env.EMAILJS_PRIVATE_KEY || '',
+              template_params: {
+                to_email: rv.email, to_name: rv.nombre,
+                servicio: rv.servicio, fecha,
+                hora: (rv.hora || '').substring(0, 5),
+                telefono: rv.telefono,
+                comentarios: rv.comentarios || 'Ninguno',
+                barberia_nombre: barberia.nombre,
+                link_resena: linkResena
+              }
+            })
+          });
+        }
+      } catch(e) { console.error('[ADMIN-ESTADO] Error enviando correo:', e.message); }
+    }
   } catch { res.status(500).json({ error: 'Error' }); }
 });
 
