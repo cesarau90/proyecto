@@ -5,7 +5,9 @@
 ACCESO A LA PLATAFORMA
 ------------------------
 La plataforma está disponible en línea, no requiere instalación.
-Abre el navegador y entra al link del proyecto (Vercel).
+Abre el navegador y entra al siguiente link:
+
+  https://proyecto-three-gray.vercel.app
 
 
 ================================================================
