@@ -152,6 +152,35 @@ El sistema envía correos automáticos en estos casos:
 
 
 ================================================================
+  10. BASE DE DATOS
+================================================================
+Motor: PostgreSQL, alojado en Railway.
+
+Tablas del sistema:
+  - admins       → Cuentas de administradores globales.
+  - barberias    → Datos de cada barbería registrada (dueño,
+                   dirección, horarios, color, tokens de reset).
+  - servicios    → Servicios de cada barbería (nombre, precio,
+                   duración, foto de portada).
+  - fotos        → Imágenes subidas (Cloudinary o local),
+                   vinculadas a servicios como portada o galería.
+  - reservas     → Citas agendadas por clientes (fecha, hora,
+                   servicio, estado, datos de contacto).
+  - resenas      → Reseñas y calificaciones de clientes.
+
+Características de la base de datos:
+  - Contraseñas almacenadas con cifrado bcrypt (nunca en texto plano).
+  - Tokens JWT para autenticación de sesiones.
+  - Código de recuperación de contraseña con expiración de 15 min.
+  - Relaciones entre tablas con claves foráneas y CASCADE.
+  - Vista "estadisticas_barberias" para el panel de administrador.
+  - Trigger automático que genera un código único por barbería.
+
+El esquema completo está documentado en el archivo database.sql
+incluido en el repositorio del proyecto.
+
+
+================================================================
   SOPORTE TÉCNICO
 ================================================================
 Stack tecnológico:
