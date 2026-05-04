@@ -795,9 +795,12 @@ app.delete('/api/admin/resenas/:id', authMiddleware, adminMiddleware, async (req
 app.get('/api/admin/barberias/:id/fotos', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const r = await pool.query(`
-      SELECT f.*, s.nombre AS servicio_nombre
+      SELECT f.*,
+        sg.nombre AS servicio_galeria_nombre,
+        sp.nombre AS servicio_portada_nombre
       FROM fotos f
-      LEFT JOIN servicios s ON f.servicio_galeria_id = s.id
+      LEFT JOIN servicios sg ON f.servicio_galeria_id = sg.id
+      LEFT JOIN servicios sp ON sp.foto_id = f.id AND sp.barberia_id = f.barberia_id
       WHERE f.barberia_id=$1
       ORDER BY f.created_at DESC`, [req.params.id]);
     res.json(r.rows.map(f => ({ ...f, url: fotoUrl(f) })));
