@@ -179,6 +179,26 @@ Características de la base de datos:
 El esquema completo está documentado en el archivo database.sql
 incluido en el repositorio del proyecto.
 
+IMPORTANTE — Ejecución local del database.sql:
+  El archivo database.sql NO funcionará directamente en una
+  instalación local de PostgreSQL sin antes cambiar la cadena
+  de conexión. La base de datos real está alojada en Railway
+  y se conecta mediante una URL privada (DATABASE_URL) definida
+  en las variables de entorno del servidor.
+
+  Si se quisiera correr el proyecto de forma local se necesitaría:
+  1. Tener PostgreSQL instalado localmente.
+  2. Crear una base de datos: CREATE DATABASE barber_registro;
+  3. Ejecutar: psql -U postgres -d barber_registro -f database.sql
+  4. Cambiar la variable DATABASE_URL en el .env del backend
+     para que apunte al servidor local (ej: localhost:5432)
+     en lugar de la URL de Railway.
+
+  Para revisar el esquema sin instalación local, el archivo
+  database.sql puede abrirse directamente como documento de
+  referencia, ya que contiene toda la estructura de tablas,
+  relaciones, índices y funciones del sistema.
+
 
 ================================================================
   SOPORTE TÉCNICO
