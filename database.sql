@@ -1,94 +1,106 @@
 -- BARBER REGISTRO - Sistema Multi-Barberia con Admin
--- psql -U postgres -c "CREATE DATABASE barber_registro;"
--- psql -U postgres -d barber_registro -f database.sql
+-- Para crear desde cero:
+--   psql -U postgres -c "CREATE DATABASE barber_registro;"
+--   psql -U postgres -d barber_registro -f database.sql
+
+-- ══════════════════════════════════════════════════════════
+--  TABLAS
+-- ══════════════════════════════════════════════════════════
 
 CREATE TABLE IF NOT EXISTS admins (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    id            SERIAL PRIMARY KEY,
+    email         VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    nombre        VARCHAR(100) NOT NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS barberias (
-    id SERIAL PRIMARY KEY,
-    codigo_unico VARCHAR(20) UNIQUE NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    dueno_nombre VARCHAR(100) NOT NULL,
-    dueno_email VARCHAR(100) UNIQUE NOT NULL,
-    dueno_telefono VARCHAR(20),
-    password_hash VARCHAR(255) NOT NULL,
-    direccion TEXT NOT NULL,
-    ciudad VARCHAR(100),
-    horarios TEXT NOT NULL,
-    activa BOOLEAN DEFAULT true,
-    tema_color VARCHAR(20) DEFAULT '#d4aa42',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id              SERIAL PRIMARY KEY,
+    codigo_unico    VARCHAR(20) UNIQUE NOT NULL,
+    nombre          VARCHAR(100) NOT NULL,
+    dueno_nombre    VARCHAR(100) NOT NULL,
+    dueno_email     VARCHAR(100) UNIQUE NOT NULL,
+    dueno_telefono  VARCHAR(20),
+    password_hash   VARCHAR(255) NOT NULL,
+    direccion       TEXT NOT NULL,
+    ciudad          VARCHAR(100),
+    horarios        TEXT NOT NULL,
+    activa          BOOLEAN DEFAULT true,
+    tema_color      VARCHAR(20) DEFAULT '#c9a847',
+    reset_token     VARCHAR(6),
+    reset_token_exp TIMESTAMP,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Agregar tema_color si la tabla ya existe (migracion segura)
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='barberias' AND column_name='tema_color') THEN
-        ALTER TABLE barberias ADD COLUMN tema_color VARCHAR(20) DEFAULT '#d4aa42';
-    END IF;
-END $$;
-
 CREATE INDEX IF NOT EXISTS idx_barberias_codigo ON barberias(codigo_unico);
-CREATE INDEX IF NOT EXISTS idx_barberias_email ON barberias(dueno_email);
+CREATE INDEX IF NOT EXISTS idx_barberias_email  ON barberias(dueno_email);
 
 CREATE TABLE IF NOT EXISTS servicios (
-    id SERIAL PRIMARY KEY,
+    id          SERIAL PRIMARY KEY,
     barberia_id INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
-    nombre VARCHAR(100) NOT NULL,
+    nombre      VARCHAR(100) NOT NULL,
     descripcion TEXT DEFAULT '',
-    precio INTEGER NOT NULL,
-    duracion INTEGER DEFAULT 30,
-    icono VARCHAR(10) DEFAULT 'corte',
-    activo BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    precio      INTEGER NOT NULL,
+    duracion    INTEGER DEFAULT 30,
+    icono       VARCHAR(10) DEFAULT 'corte',
+    foto_id     INTEGER,  -- referencia a fotos(id), FK añadida después
+    activo      BOOLEAN DEFAULT true,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(barberia_id, nombre)
 );
 
+CREATE TABLE IF NOT EXISTS fotos (
+    id                   SERIAL PRIMARY KEY,
+    barberia_id          INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
+    filename             VARCHAR(255) NOT NULL,
+    descripcion          TEXT DEFAULT '',
+    servicio_galeria_id  INTEGER REFERENCES servicios(id) ON DELETE SET NULL,
+    image_url            TEXT,
+    cloudinary_public_id TEXT,
+    created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- FK cruzada: servicios.foto_id → fotos(id)
+ALTER TABLE servicios
+    ADD CONSTRAINT fk_servicios_foto
+    FOREIGN KEY (foto_id) REFERENCES fotos(id) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS reservas (
-    id SERIAL PRIMARY KEY,
-    barberia_id INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
-    nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    telefono VARCHAR(20) NOT NULL,
-    fecha DATE NOT NULL,
-    hora TIME NOT NULL,
-    servicio VARCHAR(200) NOT NULL,
-    comentarios TEXT DEFAULT '',
+    id                    SERIAL PRIMARY KEY,
+    barberia_id           INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
+    nombre                VARCHAR(100) NOT NULL,
+    email                 VARCHAR(100) NOT NULL,
+    telefono              VARCHAR(20)  NOT NULL,
+    fecha                 DATE NOT NULL,
+    hora                  TIME NOT NULL,
+    servicio              VARCHAR(200) NOT NULL,
+    comentarios           TEXT DEFAULT '',
     es_cliente_recurrente BOOLEAN DEFAULT false,
-    estado VARCHAR(20) DEFAULT 'pendiente',
-    notificacion_enviada BOOLEAN DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    estado                VARCHAR(20) DEFAULT 'pendiente',
+    notificacion_enviada  BOOLEAN DEFAULT false,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservas_barberia ON reservas(barberia_id);
-CREATE INDEX IF NOT EXISTS idx_reservas_fecha ON reservas(fecha);
+CREATE INDEX IF NOT EXISTS idx_reservas_fecha    ON reservas(fecha);
 
 CREATE TABLE IF NOT EXISTS resenas (
-    id SERIAL PRIMARY KEY,
-    barberia_id INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
-    reserva_id INTEGER REFERENCES reservas(id) ON DELETE SET NULL,
+    id             SERIAL PRIMARY KEY,
+    barberia_id    INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
+    reserva_id     INTEGER REFERENCES reservas(id) ON DELETE SET NULL,
     cliente_nombre VARCHAR(100) NOT NULL,
-    comentario TEXT NOT NULL,
-    calificacion INTEGER CHECK (calificacion >= 1 AND calificacion <= 5),
-    visible BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    comentario     TEXT NOT NULL,
+    calificacion   INTEGER CHECK (calificacion >= 1 AND calificacion <= 5),
+    visible        BOOLEAN DEFAULT true,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS fotos (
-    id SERIAL PRIMARY KEY,
-    barberia_id INTEGER REFERENCES barberias(id) ON DELETE CASCADE,
-    filename VARCHAR(255) NOT NULL,
-    descripcion TEXT DEFAULT '',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- ══════════════════════════════════════════════════════════
+--  FUNCIÓN Y TRIGGER: código único por barbería
+-- ══════════════════════════════════════════════════════════
 
--- Funcion codigo unico
 CREATE OR REPLACE FUNCTION generar_codigo_unico() RETURNS TEXT AS $$
 DECLARE
     codigo TEXT;
@@ -113,18 +125,25 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trigger_set_codigo_unico ON barberias;
 CREATE TRIGGER trigger_set_codigo_unico
-    BEFORE INSERT ON barberias FOR EACH ROW EXECUTE FUNCTION set_codigo_unico();
+    BEFORE INSERT ON barberias
+    FOR EACH ROW EXECUTE FUNCTION set_codigo_unico();
+
+-- ══════════════════════════════════════════════════════════
+--  VISTA: estadísticas por barbería (usada en panel admin)
+-- ══════════════════════════════════════════════════════════
 
 CREATE OR REPLACE VIEW estadisticas_barberias AS
-SELECT b.id, b.nombre, b.codigo_unico, b.dueno_nombre, b.dueno_email,
-    b.dueno_telefono, b.direccion, b.ciudad, b.activa, b.created_at, b.horarios,
-    COUNT(DISTINCT r.id) as total_reservas,
-    COUNT(DISTINCT CASE WHEN r.estado = 'completada' THEN r.id END) as reservas_completadas,
-    COUNT(DISTINCT s.id) as total_servicios,
-    COALESCE(ROUND(AVG(re.calificacion)::numeric, 1), 0) as calificacion_promedio,
-    COUNT(DISTINCT re.id) as total_resenas
+SELECT
+    b.id, b.nombre, b.codigo_unico, b.dueno_nombre, b.dueno_email,
+    b.dueno_telefono, b.direccion, b.ciudad, b.activa, b.tema_color,
+    b.created_at, b.horarios,
+    COUNT(DISTINCT r.id)                                              AS total_reservas,
+    COUNT(DISTINCT CASE WHEN r.estado = 'completada' THEN r.id END)  AS reservas_completadas,
+    COUNT(DISTINCT s.id)                                              AS total_servicios,
+    COALESCE(ROUND(AVG(re.calificacion)::numeric, 1), 0)             AS calificacion_promedio,
+    COUNT(DISTINCT re.id)                                             AS total_resenas
 FROM barberias b
-LEFT JOIN reservas r ON b.id = r.barberia_id
+LEFT JOIN reservas r  ON b.id = r.barberia_id
 LEFT JOIN servicios s ON b.id = s.barberia_id AND s.activo = true
-LEFT JOIN resenas re ON b.id = re.barberia_id AND re.visible = true
+LEFT JOIN resenas re  ON b.id = re.barberia_id AND re.visible = true
 GROUP BY b.id;
